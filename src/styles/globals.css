@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
+  --background: oklch(0.9791 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --radius: 0.625rem;
   --card: oklch(1 0 0);
@@ -79,10 +79,23 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* Application colors */
+@theme {
+  --color-dark-green: #3A7817;
+  --color-green: #72BF01;
+  --color-light-green: #DEFFD9;
+  --color-dark-cyan: #00312D;
+  --color-white-pure: #FFFFFF;
+  --color-white-bg: #F8F8F8;
+  --color-gray: #ADADAD;
+  --color-gray-dark: #7C7A7B;
+  --color-red: #BF2A01;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #F8F8F8;
   }
 }
 
@@ -94,7 +107,7 @@ body {
 
 .dark {
   --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.985 0 0);
+  --foreground: oklch(0.9791 0 0);
   --card: oklch(0.21 0.006 285.885);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
