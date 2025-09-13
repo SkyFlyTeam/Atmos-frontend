@@ -6,10 +6,10 @@
 
 :root {
   --background: oklch(0.9791 0 0);
-  --foreground: oklch(0.141 0.005 285.823);
+  --foreground: #00312D;
   --radius: 0.625rem;
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.141 0.005 285.823);
+  --card-foreground: #00312D;
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
   --primary: oklch(0.21 0.006 285.885);
@@ -83,6 +83,7 @@
 @theme {
   --color-dark-green: #3A7817;
   --color-green: #72BF01;
+  --color-active-green: #91E613;
   --color-light-green: #DEFFD9;
   --color-dark-cyan: #00312D;
   --color-white-pure: #FFFFFF;
@@ -94,15 +95,19 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #F8F8F8;
+    --background: #F8F8F8;
+    --foreground: #00312D;
   }
+}
+
+*, html {
+  font-family: "Lato", sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Lato", sans-serif;
 }
 
 .dark {
@@ -146,4 +151,10 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+h1 {
+  color: var(--color-dark-cyan);
+  font-size: 3rem;
+  font-family: "Londrina Solid", sans-serif;
 }
