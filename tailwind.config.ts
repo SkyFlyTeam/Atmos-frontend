@@ -5,6 +5,10 @@ export default {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   theme: { 
     extend: {
+      fontFamily: {
+        'londrina': ['Londrina Solid', 'cursive'],
+        'sans': ['Londrina Solid', 'system-ui', 'sans-serif'],
+      },
       colors: {
         'dark-green': 'var(--dark-green)',
         green: 'oklch(0.7259 0.2028 132.47)',
