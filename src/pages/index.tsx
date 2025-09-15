@@ -1,7 +1,6 @@
 import Image from "next/image";
-
+import Link from "next/link";
 import { Button } from "@/components/ui/button"
-
 
 export default function Home() {
   return (
@@ -15,7 +14,14 @@ export default function Home() {
           height={38}
           priority
         />
-        <Button variant="secondary">Secondary</Button>
+        <div className="flex gap-4">
+          <Button variant="secondary">Secondary</Button>
+          <Link href="/usuarios">
+            <Button className="bg-green text-white-pure hover:bg-green/90">
+              Gerenciar Usuários
+            </Button>
+          </Link>
+        </div>
         <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
           <li className="mb-2 tracking-[-.01em]" style={{color: "var(--dark-green)"}}>
             Get started by editing{" "}
