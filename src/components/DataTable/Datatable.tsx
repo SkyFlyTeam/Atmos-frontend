@@ -23,6 +23,7 @@ import Image from 'next/image';
 import { DataTableSearch } from "./DatatableSearch";
 import DatatablePagination from "./DatatablePagination";
 import { Card } from "../ui/card";
+import { Londrina_Solid } from "next/font/google";
 
 type MetaPermissions<TData> = {
   actions: {
@@ -112,13 +113,16 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="p-4 h-24 text-center">
-                  <Image
-                    src="/sem-dados.png"  
-                    alt="Imagem sem dados"               
-                    width={400}                         
-                    height={300}   
-                    style={{margin: "0 auto"}}                      
-                  />
+                  <div className="flex flex-col gap-3 justify-center">
+                    <Image
+                      src="/sem-dados.svg"    
+                      alt="Imagem sem dados"               
+                      width={400}                         
+                      height={300}   
+                      style={{margin: "0 auto"}}                      
+                    />
+                    <span style={{fontFamily: "Londrina Solid"}} className="text-2xl">Oops! Parece que não tem dados aqui!</span>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
@@ -144,13 +148,16 @@ export function DataTable<TData, TValue>({
           ))
         ) : (
           <div className="p-4">
-              <Image
-                src="/sem-dados.png"  
-                alt="Imagem sem dados"               
-                width={400}                         
-                height={300}   
-                style={{margin: "0 auto"}}                      
-              />
+              <div className="flex flex-col gap-3 justify-center">
+                <Image
+                  src="/sem-dados.svg"    
+                  alt="Imagem sem dados"               
+                  width={400}                         
+                  height={300}   
+                  style={{margin: "0 auto"}}                      
+                />
+                <span style={{fontFamily: "Londrina Solid"}} className="text-2xl">Oops! Parece que não tem dados aqui!</span>
+              </div>
           </div>
         )}
       </div>
