@@ -12,11 +12,11 @@ type ModalProps = {
 const Modal: React.FC<ModalProps> = ({ open, onClose, title, content, buttons }) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className='text-base'>
+      <DialogContent className='text-base max-w-[calc(100%-2rem)] rounded-md w-fit max-h-[calc(100%-4rem)] h-fit [&>button]:cursor-pointer'>
         <DialogHeader>
           <DialogTitle className='text-2xl'>{title}</DialogTitle>
         </DialogHeader>
-        {content}
+          {content}
         <DialogFooter>
             {buttons}
         </DialogFooter>
