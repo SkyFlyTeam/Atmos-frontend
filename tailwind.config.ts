@@ -16,6 +16,12 @@ export default {
         'gray-dark': 'var(--gray-dark)',
         red: 'var(--red)',
       },
+      fontFamily: {
+        'sans': ['ui-sans-serif', 'system-ui', 'sans-serif'],
+        'serif': ['ui-serif', 'Georgia', 'serif'],
+        'mono': ['ui-monospace', 'SFMono-Regular', 'monospace'],
+        'custom': ['"londrina-solid"', 'sans-serif'],
+      },
     } 
   },
   plugins: [],

@@ -7,11 +7,13 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const lato = Lato({
-  weight: ['100', '300', '400', '700', '900']
+  weight: ['100', '300', '400', '700', '900'],
+  subsets: ['latin']
 })
 
 const londrina = Londrina_Solid({
-  weight: ['100', '300', '400', '900']
+  weight: ['100', '300', '400', '900'],
+  subsets: ['latin']
 })
 
 function MyApp({ Component, pageProps }: AppProps) {

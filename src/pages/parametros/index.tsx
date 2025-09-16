@@ -72,7 +72,7 @@ const ParametrosPage = () => {
             
             {showConfirmDelete && paramSelecionado && (
                 <Modal 
-                    title="Alerta!"
+                    title="Atenção!"
                     content={
                         <div>
                             <span>{`Tem certeza que deseja apagar o paramêtro ${paramSelecionado?.nome}?`}</span>
