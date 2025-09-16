@@ -52,7 +52,7 @@ const ParametrosPage = () => {
             <div className="flex gap-3 flex-col">
                 <h1>Paramêtros</h1>
 
-                <Card className="flex flex-col gap-3 p-6 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none">
+                <Card className="flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none">
                     <DataTable 
                         columns={columns} 
                         data={ParametrosData}

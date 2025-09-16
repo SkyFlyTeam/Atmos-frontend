@@ -70,7 +70,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <div className="w-full flex justify-between items-center flex-wrap gap-4">
+      <div className="w-full flex justify-between md:items-center items-end flex-wrap gap-4 md:flex-row flex-col-reverse">
         <DataTableSearch table={table} placeholder="Buscar..." className="md:w-sm w-full" />
         {actionButton}
       </div>
@@ -161,7 +161,7 @@ export function DataTable<TData, TValue>({
           </div>
         )}
       </div>
-      <div className="w-full flex items-center justify-between flex-wrap">
+      <div className="w-full flex items-center justify-between flex-wrap gap-y-2">
         <span className="text-gray">{table.getFilteredRowModel().rows.length} registros</span>
         <DatatablePagination table={table} />
       </div>
