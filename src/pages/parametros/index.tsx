@@ -12,6 +12,7 @@ import SideDrawer from "@/components/SideDrawer/SideDrawer"
 import FormParametro from "./components/FormParametro"
 import { DataTable } from "@/components/DataTable/Datatable"
 import { Card } from "@/components/ui/card"
+import SkeletonTable from "@/components/DataTable/DatatableSkeleton"
 
 import { FaPlus } from "react-icons/fa"
 
@@ -31,8 +32,8 @@ const ParametrosPage = () => {
             const parametros = await parametroServices.getAllParametros();
             setParametros(parametros as Parametro[]);
         } catch {
-            console.log("Erro ao buscar parametros");
-            toast.error("Erro ao buscar paramêtros");
+            console.log("Erro ao buscar parâmetros");
+            toast.error("Erro ao buscar parâmetros");
             setParametros([]);
         } finally{
             setIsLoading(false);
@@ -61,11 +62,11 @@ const ParametrosPage = () => {
         if (!paramSelecionado) { return }
         try {
             parametroServices.deleteParametro(paramSelecionado.pk);
-            console.log("Paramêtro deletado com sucesso!")
-            toast.success("Paramêtro deletado!");
+            console.log("parâmetro deletado com sucesso!")
+            toast.success("parâmetro deletado!");
             fetchAllParametros();
         } catch {
-            toast.error("Erro ao deletar paramêtro.")
+            toast.error("Erro ao deletar parâmetro.")
         }
         setShowConfimDelete(false);
     }
@@ -79,12 +80,12 @@ const ParametrosPage = () => {
     return (
         <>
             <div className="flex gap-3 flex-col">
-                <h1>Paramêtros</h1>
+                <h1>Parâmetros</h1>
                 
-                {isLoading ? (
-                    <span>Carregando</span>
-                ) : (
-                    <Card className="flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none">
+                <Card className="flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none">
+                    {isLoading ? (
+                        <SkeletonTable />
+                    ) : (
                         <DataTable 
                             columns={columns} 
                             data={parametros}
@@ -93,14 +94,14 @@ const ParametrosPage = () => {
                             }}
                             actionButton={
                                 <ButtonIconRight 
-                                    label="Novo Paramêtro"
+                                    label="Novo Parâmetro"
                                     onClick={onAddParameter} 
                                     icon={<FaPlus className="!w-3 !h-3" />} 
                                 />
                             }
                         />
-                    </Card>
-                )}
+                    )}
+                </Card>
             </div>
             
             {showConfirmDelete && paramSelecionado && (
@@ -108,7 +109,7 @@ const ParametrosPage = () => {
                     title="Atenção!"
                     content={
                         <div>
-                            <span>{`Tem certeza que deseja apagar o paramêtro ${paramSelecionado?.nome}?`}</span>
+                            <span>{`Tem certeza que deseja apagar o parâmetro ${paramSelecionado?.nome}?`}</span>
                         </div>
                     }
                     open={showConfirmDelete}
@@ -125,7 +126,7 @@ const ParametrosPage = () => {
             {showSideDrawer && 
                 <SideDrawer 
                     onClose={() => closeSideDrawer()}
-                    title="Cadastrar Paramêtro"
+                    title="Cadastrar Parâmetro"
                     content={<FormParametro onClose={(success) => closeSideDrawer(success)} paramData={paramSelecionado ? paramSelecionado : undefined}/>}
                 />
             }
