@@ -18,7 +18,7 @@ type FormParametroProps = {
 type FormData = z.infer<typeof formSchema>;
 
 const formSchema = z.object({
-  json_id: z.string("Json_id é obrigatório"),
+  json_id: z.string("Chave Json é obrigatório"),
   nome: z.string("Nome é obrigatório").min(4, "Npme deve conter mais de 4 caracteres"),
   unidade: z.string("Unidade é obrigatória"),
   tipo: z.string("Tipo é obrigatório").min(4, "Tipo deve conter mais de 4 caracteres"),
@@ -54,7 +54,7 @@ const FormParametro = ({ paramData, onClose }: FormParametroProps) => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 flex flex-col items-end md:w-md w-full">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="json_id" className="text-sm md:text-base">Json_id</label>
+          <label htmlFor="json_id" className="text-sm md:text-base">Chave Json</label>
           <Controller
             name="json_id"
             control={control}
