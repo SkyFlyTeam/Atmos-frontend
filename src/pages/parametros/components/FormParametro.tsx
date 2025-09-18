@@ -36,16 +36,16 @@ const FormParametro = ({ paramData, onClose }: FormParametroProps) => {
   const onSubmit = async (values: FormData) => {
 
     if(paramData){
-        // TODO: Edição de paramêtro 
+        // TODO: Edição de parâmetro 
         return
     }else{
         try {
             const response = await parametroServices.createParametro(values as Parametro)
-            toast.success("Paramêtro cadastrado com sucesso!")
+            toast.success("Parâmetro cadastrado com sucesso!")
             onClose(true);
         } catch (error) {
             console.error('Erro ao enviar dados:', error);
-            toast.error("Erro ao tentar cadastrar paramêtro.");
+            toast.error("Erro ao tentar cadastrar parâmetro.");
         }
     }
   };
