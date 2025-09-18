@@ -158,3 +158,9 @@ h1 {
   font-size: 3rem;
   font-family: "Londrina Solid", sans-serif;
 }
+
+@media (max-width: 640px) {
+  h1{
+    font-size: 2rem;
+  }
+}
