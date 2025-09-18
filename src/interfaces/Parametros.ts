@@ -5,7 +5,7 @@ export interface Parametro {
     tipo: string,
     offset: number,
     fator: number,
-    poliminio?: string, 
+    polinomio?: string, 
     unidade: string,
     alarme?: number
 }
