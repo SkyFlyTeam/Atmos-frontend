@@ -19,7 +19,7 @@ type FormData = z.infer<typeof formSchema>;
 
 const formSchema = z.object({
   json_id: z.string("Chave Json é obrigatório"),
-  nome: z.string("Nome é obrigatório").min(4, "Npme deve conter mais de 4 caracteres"),
+  nome: z.string("Nome é obrigatório").min(4, "Nome deve conter mais de 4 caracteres"),
   unidade: z.string("Unidade é obrigatória"),
   tipo: z.string("Tipo é obrigatório").min(4, "Tipo deve conter mais de 4 caracteres"),
   offset: z.coerce.number("Offset é obrigatório").min(0, "Offset não pode ser negativo"),
