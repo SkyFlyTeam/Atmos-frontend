@@ -4,6 +4,25 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Adicionando a classe da fonte Londrina Solid */
+.font-londrina {
+  font-family: 'Londrina Solid', sans-serif;
+}
+
+/* Estilos para campos de formulário */
+input:disabled:not(:placeholder-shown),
+textarea:disabled:not(:placeholder-shown) {
+  color: #000 !important;
+  -webkit-text-fill-color: #000 !important;
+  opacity: 1 !important;
+}
+
+/* Garante que placeholders tenham cor cinza clara */
+::placeholder {
+  color: #d1d5db !important;
+  opacity: 1 !important;
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
