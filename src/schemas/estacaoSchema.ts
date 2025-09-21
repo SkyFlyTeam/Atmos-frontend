@@ -15,7 +15,7 @@ export const estacaoFormSchema = z.object({
   long: z.string().min(1, 'Longitude é obrigatória'),
   endereco: z.string().min(1, 'Endereço é obrigatório'),
   imagemUrl: z.string().nullable().optional(),
-  parametros: z.array(z.string()),
+  parametros: z.array(z.string()).min(1, "Selecione pelo menos um parâmetro"),
 });
 
 // Schema para validação final (converte status para boolean)

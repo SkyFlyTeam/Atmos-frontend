@@ -72,6 +72,7 @@ export default function EstacaoSidebar({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
+    
     if (!open) return;
     if (estacao) {
       reset({
@@ -110,13 +111,13 @@ export default function EstacaoSidebar({
       ? parametrosSelecionados
       : [...parametrosSelecionados, value];
     setParametrosSelecionados(novosParametros);
-    setValue("parametros", novosParametros);
+    setValue("parametros", novosParametros, { shouldValidate: true });
   }
 
   function handleRemoveParametro(value: string) {
     const novosParametros = parametrosSelecionados.filter((p) => p !== value);
     setParametrosSelecionados(novosParametros);
-    setValue("parametros", novosParametros);
+    setValue("parametros", novosParametros, { shouldValidate: true });
   }
 
   function handleChooseImage() {
@@ -214,7 +215,7 @@ export default function EstacaoSidebar({
                     type="radio"
                     {...register("status")}
                     value="true"
-                    className={ `accent-[#00312D] `}
+                    className={ `accent-[#00312D]  `}
                     disabled={isReadOnly}
                   />
                   Ativo
@@ -328,6 +329,8 @@ export default function EstacaoSidebar({
             {!isReadOnly && (
               <div className="flex items-center gap-3 mb-4">
                 <label className="text-sm text-[#00312D]">Adicionar parâmetros</label>
+
+                
                 {parametros.length > 0 ? (
                   <select
                     className="h-9 rounded-md border border-input bg-white text-gray-900 px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
@@ -353,10 +356,17 @@ export default function EstacaoSidebar({
                   <span className="text-sm text-gray-500 italic">
                     Nenhum parâmetro cadastrado no sistema
                   </span>
+
+                  
                 )}
               </div>
+              
             )}
 
+            {errors.parametros && (
+              <p className="text-red-500 text-xs mt-1">{errors.parametros.message}</p>
+            )}
+            
             <div className="flex flex-wrap gap-2">
               {parametrosSelecionados.map((p) => (
                 <span
