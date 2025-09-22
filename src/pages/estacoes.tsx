@@ -48,7 +48,6 @@ export default function Estacoes() {
       setSidebarOpen(false);
     } catch (error) {
       console.error('Erro ao salvar estação:', error);
-      // Aqui você pode adicionar um toast ou modal de erro
     }
   };
 
@@ -133,7 +132,7 @@ export default function Estacoes() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Card para nova estação (somente admin) */}
           {userRole === 'admin' && (
-            <div 
+            <div
               className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center min-h-[300px] hover:border-green-500 hover:bg-green-50 transition-colors cursor-pointer"
               onClick={handleNovaEstacao}
             >
@@ -150,9 +149,17 @@ export default function Estacoes() {
             <div key={index} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
               {/* Imagem da estação */}
               <div className="relative h-48 bg-gray-100">
-                <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                  <span className="text-gray-400 font-medium">SEM IMAGEM</span>
-                </div>
+                {estacao.imagemBase64 ? (
+                  <img
+                    src={estacao.imagemBase64}
+                    alt={estacao.nome}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <span className="text-gray-400 font-medium">SEM IMAGEM</span>
+                  </div>
+                )}
               </div>
 
               {/* Conteúdo do card */}
@@ -161,7 +168,7 @@ export default function Estacoes() {
                 <p className="text-sm text-gray-600 mb-2">UUID: {estacao.uuid}</p>
                 <p className="text-sm text-gray-600 mb-2">Status: {estacao.status ? 'Ativo' : 'Inativo'}</p>
                 <p className="text-sm text-gray-600 mb-3">{estacao.endereco}</p>
-                
+
                 {estacao.parametros && estacao.parametros.length > 0 && (
                   <div className="mb-4">
                     <p className="text-sm text-gray-500 mb-1">Parâmetros:</p>
@@ -169,7 +176,7 @@ export default function Estacoes() {
                   </div>
                 )}
 
-                <button 
+                <button
                   onClick={() => handleAbrirDetalhes(estacao.pk)}
                   className="flex items-center text-green-600 hover:text-green-700 text-sm font-medium"
                 >
@@ -183,7 +190,7 @@ export default function Estacoes() {
 
         {/* Paginação */}
         <div className="flex justify-center items-center space-x-2">
-          <button 
+          <button
             onClick={() => handleMudarPagina(paginacao.paginaAtual - 1)}
             disabled={paginacao.paginaAtual === 1}
             className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -195,17 +202,16 @@ export default function Estacoes() {
             <button
               key={pagina}
               onClick={() => handleMudarPagina(pagina)}
-              className={`w-10 h-10 rounded-lg font-medium transition-colors ${
-                pagina === paginacao.paginaAtual
+              className={`w-10 h-10 rounded-lg font-medium transition-colors ${pagina === paginacao.paginaAtual
                   ? 'bg-green-600 text-white'
                   : 'text-gray-600 hover:bg-gray-100'
-              }`}
+                }`}
             >
               {pagina}
             </button>
           ))}
 
-          <button 
+          <button
             onClick={() => handleMudarPagina(paginacao.paginaAtual + 1)}
             disabled={paginacao.paginaAtual === paginacao.totalPaginas}
             className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
