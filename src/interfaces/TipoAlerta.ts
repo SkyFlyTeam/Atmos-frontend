@@ -5,5 +5,5 @@ export interface TipoAlerta {
     publica: boolean,
     tipo_alarme: number,
     p1: number,
-    p2: number
+    p2?: number
 }
