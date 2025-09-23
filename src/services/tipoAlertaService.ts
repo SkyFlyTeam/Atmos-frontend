@@ -30,8 +30,16 @@ const createTipoAlerta = async (parametro: TipoAlerta): Promise<TipoAlerta[] | A
     }
 };
 
-const updateTipoAlerta = async (tipoAlerta: TipoAlerta) => {
-    return
+const updateTipoAlerta = async (tipoAlerta: TipoAlerta): Promise<TipoAlerta | ApiException> => {
+    try{
+        const { data } = await Api.put(`/tipo-alerta/${tipoAlerta.pk}`, tipoAlerta)
+        return data as TipoAlerta
+    } catch (error) {
+        if (error instanceof Error) {
+            return new ApiException(error.message || "Erro ao atualizar tipo de alerta");
+        }
+        return new ApiException("Erro desconhecido.");
+    }
 };
 
 const deleteTipoAlerta = async (param_id: number): Promise<any | ApiException> => {
