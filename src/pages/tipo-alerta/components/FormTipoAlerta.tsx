@@ -42,6 +42,18 @@ const FormTipoAlerta = ({ paramData, onClose, onDelete }: FormTipoAlertaProps) =
   const selectedCriteria = watch("criterios");
 
   const onSubmit = async (values: any) => {
+    // Validação manual para intervalo entre
+    if (values.criterios === 1) {
+      if (values.segunda_referencia === null || values.segunda_referencia === undefined) {
+        toast.error("Segunda referência é obrigatória para critério 'Intervalo entre'");
+        return;
+      }
+      if (values.valor_referencia > values.segunda_referencia) {
+        toast.error("Segunda referência não pode ser menor que referência principal");
+        return;
+      }
+    }
+
     const processedData = {
       ...values,
       tipo_alarme: Number(values.criterios),
@@ -86,7 +98,6 @@ const FormTipoAlerta = ({ paramData, onClose, onDelete }: FormTipoAlertaProps) =
                 <Input {...field} placeholder="Índice UV" />
               )}
             />
-            {errors.tipo && <span className="text-red-500">{errors.tipo?.message}</span>}
           </div>
 
           <div>
@@ -98,7 +109,6 @@ const FormTipoAlerta = ({ paramData, onClose, onDelete }: FormTipoAlertaProps) =
                 <Input {...field} placeholder="Força de raios ultravioleta" />
               )}
             />
-            {errors.descricao && <span className="text-red-500">{errors.descricao?.message}</span>}
           </div>
         </div>
 
@@ -126,7 +136,6 @@ const FormTipoAlerta = ({ paramData, onClose, onDelete }: FormTipoAlertaProps) =
                 </select>
               )}
             />
-            {errors.criterios && <span className="text-red-500">{errors.criterios?.message}</span>}
           </div>
 
           <div>
@@ -144,7 +153,6 @@ const FormTipoAlerta = ({ paramData, onClose, onDelete }: FormTipoAlertaProps) =
                 />
               )}
             />
-            {errors.valor_referencia && <span className="text-red-500">{errors.valor_referencia?.message}</span>}
           </div>
 
           <div>
@@ -175,7 +183,6 @@ const FormTipoAlerta = ({ paramData, onClose, onDelete }: FormTipoAlertaProps) =
               />
               )}
             />
-            {errors.segunda_referencia && <span className="text-red-500">{errors.segunda_referencia?.message}</span>}
           </div>
         </div>
 
