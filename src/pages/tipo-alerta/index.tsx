@@ -139,7 +139,7 @@ const TipoAlertasPage = () => {
                         onClose={(success) => closeSideDrawer(success)} 
                         paramData={tipoAlertaSelecionado ? tipoAlertaSelecionado : undefined}
                         onDelete={tipoAlertaSelecionado ? () => {
-                            closeSideDrawer(true);
+                            setShowConfimDelete(true);
                         } : undefined}
                     />}
                 />
