@@ -30,7 +30,19 @@ export const columns: ColumnDef<TipoAlerta>[] = [
   },
   {
     accessorKey: "p1",
-    header: "Valor de referência ",
+    header: "Valor de referência",
+    cell: ({ getValue }) => {
+      const rawValue = getValue();
+      if (rawValue === null || rawValue === undefined) return '-';
+      
+      const value = Number(rawValue);
+      if (isNaN(value)) return '-';
+      
+      // Se é um número inteiro, mostra sem casas decimais
+      if (value % 1 === 0) return value.toString();
+      // Se tem casas decimais, mostra com 2 casas e troca ponto por vírgula
+      return value.toFixed(2).replace('.', ',');
+    },
   },
   {
     id: "Ações",

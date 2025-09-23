@@ -30,8 +30,7 @@ const TipoAlertasPage = () => {
             const tipoAlertass = await tipoAlertaServices.getAllTipoAlertas();
             setTipoAlertas(tipoAlertass as TipoAlerta[]);
         } catch {
-            console.log("Erro ao buscar parâmetros");
-            toast.error("Erro ao buscar parâmetros");
+            toast.error("Erro ao buscar tipos de alerta");
             setTipoAlertas([]);
         } finally{
             setIsLoading(false);
@@ -56,13 +55,20 @@ const TipoAlertasPage = () => {
         setShowSideDrawer(true);
     }
 
-    const handleDeleteParam = () => {
-        if (!tipoAlertaSelecionado) { return }
+    const handleDeleteParam = async () => {
+        if (!tipoAlertaSelecionado || !tipoAlertaSelecionado.pk) { 
+            toast.error("Erro: Tipo de alerta não encontrado.");
+            return;
+        }
         try {
-            tipoAlertaServices.deleteTipoAlerta(tipoAlertaSelecionado.pk);
+            await tipoAlertaServices.deleteTipoAlerta(tipoAlertaSelecionado.pk);
             console.log("tipo de alerta deletado com sucesso!")
             toast.success("tipo de alerta deletado!");
-            fetchAllTipoAlertas();
+            
+            // Atualizar a lista imediatamente removendo o item deletado
+            setTipoAlertas(prevTipoAlertas => 
+                prevTipoAlertas.filter(item => item.pk !== tipoAlertaSelecionado.pk)
+            );
         } catch {
             toast.error("Erro ao deletar tipo de alerta.")
         }
