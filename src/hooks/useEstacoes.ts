@@ -8,7 +8,7 @@ export interface UseEstacoesReturn {
   estacoes: Estacao[];
   loading: boolean;
   error: string | null;
-  createEstacao: (data: Estacao) => Promise<void>;
+  createEstacao: (data: Omit<Estacao, 'pk'>) => Promise<void>;
   updateEstacao: (pk: number, data: Estacao) => Promise<void>;
   deleteEstacao: (pk: number) => Promise<void>;
   refreshEstacoes: () => Promise<void>;
@@ -32,6 +32,10 @@ export function useEstacoes(): UseEstacoesReturn {
         // carregar parâmetros de cada estação
         const estacoesComParametros = await Promise.all(
           result.map(async (estacao) => {
+            if (!estacao.pk) {
+              return { ...estacao, parametros: [] };
+            }
+
             const relacoes = await estacaoServices.getEstacaoParametros(estacao.pk);
 
             if (relacoes instanceof ApiException) {
@@ -57,7 +61,7 @@ export function useEstacoes(): UseEstacoesReturn {
   }, []);
 
   const createEstacao = useCallback(
-    async (data: Estacao) => {
+    async (data: Omit<Estacao, 'pk'>) => {
       setLoading(true);
       setError(null);
 
@@ -79,7 +83,7 @@ export function useEstacoes(): UseEstacoesReturn {
               .filter((p) => parametros.includes(p.nome))
               .map((p) => p.pk);
 
-            if (parametrosIds.length > 0) {
+            if (parametrosIds.length > 0 && result.pk) {
               await estacaoServices.createEstacaoParametros(result.pk, parametrosIds);
             }
           }
@@ -112,7 +116,7 @@ export function useEstacoes(): UseEstacoesReturn {
         }
 
         // atualizar parâmetros
-        if (parametros) {
+        if (parametros && pk > 0) {
           const relacoesAtuais = await estacaoServices.getEstacaoParametros(pk);
           if (!(relacoesAtuais instanceof ApiException)) {
             const atuaisIds = relacoesAtuais.map((r) => r.tipo_parametro_pk);

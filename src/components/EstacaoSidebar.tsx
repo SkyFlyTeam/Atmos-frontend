@@ -40,7 +40,7 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   estacao?: Estacao | null;
   mode?: "create" | "edit";
-  onSave?: (data: Estacao) => void;
+  onSave?: (data: Omit<Estacao, 'pk'>) => void;
   userRole?: "admin" | "user";
 };
 
@@ -161,8 +161,7 @@ export default function EstacaoSidebar({
 
   function onSubmit(data: EstacaoFormSchema) {
     // Converter para Estacao
-    const estacaoData: Estacao = {
-      pk: estacao?.pk || 0,
+    const estacaoData: Omit<Estacao, 'pk'> = {
       uuid: data.uuid,
       nome: data.nome,
       descricao: data.descricao,

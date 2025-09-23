@@ -29,7 +29,7 @@ const getEstacaoById = async (
 };
 
 const createEstacao = async (
-  estacao: Estacao
+  estacao: Omit<Estacao, 'pk'>
 ): Promise<Estacao | ApiException> => {
   try {
     const { data } = await Api.post("/estacao", estacao);
@@ -92,7 +92,7 @@ const createEstacaoParametros = async (
 ): Promise<EstacaoParametroRelacao[] | ApiException> => {
   try {
     const { data } = await Api.post("/estacao-tipo-parametro", {
-      estacao_est_pk: estacao_pk,
+      estacao_est_pk: [estacao_pk],
       tipo_parametro_pk: parametros_pk,
     });
     return data;
