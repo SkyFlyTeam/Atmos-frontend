@@ -10,7 +10,7 @@ import { BiSolidEditAlt } from "react-icons/bi";
 enum criteriosEnum {
   "Menor que",
   "Intervalo entre",
-  "Maior Que",
+  "Maior que",
   "Diferente de",
   "Igual a"
 }

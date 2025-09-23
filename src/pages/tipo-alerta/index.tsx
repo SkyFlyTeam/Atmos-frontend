@@ -8,6 +8,8 @@ import ButtonIconRight from "@/components/Buttons/ButtonIconRight"
 import Modal from "@/components/Modal/Modal"
 import { toast } from "react-toastify"
 import { tipoAlertaServices } from "@/services/tipoAlertaService"
+import SideDrawer from "@/components/SideDrawer/SideDrawer"
+import FormTipoAlerta from "./components/FormTipoAlerta"
 import { DataTable } from "@/components/DataTable/Datatable"
 import { Card } from "@/components/ui/card"
 import SkeletonTable from "@/components/DataTable/DatatableSkeleton"
@@ -126,6 +128,14 @@ const TipoAlertasPage = () => {
                     }
                 />
             )}
+
+            {showSideDrawer && 
+                <SideDrawer 
+                    onClose={() => closeSideDrawer()}
+                    title={tipoAlertaSelecionado ? "Editar tipo de alerta" : "Criar tipo de alerta"}
+                    content={<FormTipoAlerta onClose={(success) => closeSideDrawer(success)} paramData={tipoAlertaSelecionado ? tipoAlertaSelecionado : undefined}/>}
+                />
+            }
         </>
     )
 }
