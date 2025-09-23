@@ -284,6 +284,7 @@ export default function EstacaoSidebar({
             <div>
               <label className="block text-sm font-medium text-[#00312D] mb-1">Latitude</label>
               <Input
+                type="number"
                 placeholder="-23.18976"
                 {...register("lat")}
                 disabled={isReadOnly}
@@ -298,6 +299,7 @@ export default function EstacaoSidebar({
             <div>
               <label className="block text-sm font-medium text-[#00312D] mb-1">Longitude</label>
               <Input
+                type="number"
                 placeholder="-45.87654"
                 {...register("long")}
                 disabled={isReadOnly}
