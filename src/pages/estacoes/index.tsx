@@ -218,7 +218,7 @@ export default function Estacoes() {
         open={sidebarOpen}
         onOpenChange={setSidebarOpen}
         estacao={selecionada}
-        mode={sidebarMode}
+        mode={sidebarMode} 
         userRole={userRole} // Passa o papel do usuário para o sidebar
         onSave={handleSalvarEstacao}
       />
