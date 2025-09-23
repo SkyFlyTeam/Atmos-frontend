@@ -31,13 +31,34 @@ export const columns: ColumnDef<TipoAlerta>[] = [
   {
     accessorKey: "p1",
     header: "Valor de referência",
-    cell: ({ getValue }) => {
+    cell: ({ getValue, row }) => {
       const rawValue = getValue();
-      if (rawValue === null || rawValue === undefined) return '-';
+      const tipoAlarme = row.original.tipo_alarme;
       
+      // Se for "Intervalo entre", mostrar p1 à p2
+      if (tipoAlarme === 1) {
+        const p1 = row.original.p1;
+        const p2 = row.original.p2;
+        
+        if (p1 !== null && p1 !== undefined && p2 !== null && p2 !== undefined) {
+          // Formatar números (inteiros sem decimais, decimais com vírgula)
+          const formatNumber = (num: any) => {
+            const numberValue = Number(num);
+            if (isNaN(numberValue)) return '-';
+            if (numberValue % 1 === 0) return numberValue.toString();
+            return numberValue.toFixed(2).replace('.', ',');
+          }
+          
+          return `${formatNumber(p1)} à ${formatNumber(p2)}`;
+        }
+      }
+      
+      // Comportamento padrão para outros critérios
+      if (rawValue === null || rawValue === undefined) return '-';
+
       const value = Number(rawValue);
       if (isNaN(value)) return '-';
-      
+
       // Se é um número inteiro, mostra sem casas decimais
       if (value % 1 === 0) return value.toString();
       // Se tem casas decimais, mostra com 2 casas e troca ponto por vírgula
