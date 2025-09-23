@@ -32,6 +32,7 @@ const TipoAlertasPage = () => {
             const tipoAlertass = await tipoAlertaServices.getAllTipoAlertas();
             setTipoAlertas(tipoAlertass as TipoAlerta[]);
         } catch {
+            console.log("Erro ao buscar tipos de alerta");
             toast.error("Erro ao buscar tipos de alerta");
             setTipoAlertas([]);
         } finally{
