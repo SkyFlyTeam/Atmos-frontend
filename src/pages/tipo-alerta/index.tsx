@@ -133,7 +133,14 @@ const TipoAlertasPage = () => {
                 <SideDrawer 
                     onClose={() => closeSideDrawer()}
                     title={tipoAlertaSelecionado ? "Editar tipo de alerta" : "Criar tipo de alerta"}
-                    content={<FormTipoAlerta onClose={(success) => closeSideDrawer(success)} paramData={tipoAlertaSelecionado ? tipoAlertaSelecionado : undefined}/>}
+                    content={<FormTipoAlerta 
+                        onClose={(success) => closeSideDrawer(success)} 
+                        paramData={tipoAlertaSelecionado ? tipoAlertaSelecionado : undefined}
+                        onDelete={tipoAlertaSelecionado ? () => {
+                            setShowSideDrawer(false);
+                            setShowConfimDelete(true);
+                        } : undefined}
+                    />}
                 />
             }
         </>
