@@ -2,5 +2,6 @@ import axios from "axios";
 
 // Retorna uma instância do Axios
 export const Api = axios.create({
-  baseURL: 'http://localhost:5000'
+  // Backend exposto na porta 3000
+  baseURL: 'http://localhost:3000',
 });
