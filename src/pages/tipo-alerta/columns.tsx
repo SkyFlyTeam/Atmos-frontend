@@ -49,7 +49,7 @@ export const columns: ColumnDef<TipoAlerta>[] = [
             return numberValue.toFixed(2).replace('.', ',');
           }
           
-          return `${formatNumber(p1)} à ${formatNumber(p2)}`;
+          return `${formatNumber(p1)} e ${formatNumber(p2)}`;
         }
       }
       
