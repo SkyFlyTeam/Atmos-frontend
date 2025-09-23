@@ -14,9 +14,13 @@ type FormTipoAlertaProps = {
   paramData?: TipoAlerta;
   onClose: (success: boolean) => void;
 <<<<<<< HEAD
+<<<<<<< HEAD
   onDelete?: () => void;
 =======
 >>>>>>> cd44923 (AT-25 feat: adicionar cadastro e edição de tipo-alerta)
+=======
+  onDelete?: () => void;
+>>>>>>> 69656fd (AT-25 fix: aplicar responsividade no formulário)
 };
 
 type FormData = z.infer<typeof formSchema>;
@@ -60,8 +64,12 @@ const FormTipoAlerta = ({ paramData, onClose, onDelete }: FormTipoAlertaProps) =
   publica: z.boolean().optional()
 })
 
+<<<<<<< HEAD
 const FormTipoAlerta = ({ paramData, onClose }: FormTipoAlertaProps) => {
 >>>>>>> cd44923 (AT-25 feat: adicionar cadastro e edição de tipo-alerta)
+=======
+const FormTipoAlerta = ({ paramData, onClose, onDelete }: FormTipoAlertaProps) => {
+>>>>>>> 69656fd (AT-25 fix: aplicar responsividade no formulário)
   const { control, handleSubmit, setValue, watch, formState: { errors, isSubmitSuccessful } } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: paramData ? {
@@ -120,6 +128,7 @@ const FormTipoAlerta = ({ paramData, onClose }: FormTipoAlertaProps) => {
   };
 
   return (
+<<<<<<< HEAD
 <<<<<<< HEAD
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 flex flex-col items-end w-full">
       <div className="w-full space-y-4">
@@ -230,8 +239,11 @@ const FormTipoAlerta = ({ paramData, onClose }: FormTipoAlertaProps) => {
            </div>
 =======
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 flex flex-col items-end w-full min-w-[600px]">
+=======
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 flex flex-col items-end w-full">
+>>>>>>> 69656fd (AT-25 fix: aplicar responsividade no formulário)
       <div className="w-full space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="tipo" className="text-sm md:text-base">Nome</label>
             <Controller
@@ -257,7 +269,7 @@ const FormTipoAlerta = ({ paramData, onClose }: FormTipoAlertaProps) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <div>
             <label htmlFor="criterios" className="text-sm md:text-base whitespace-nowrap">Critérios</label>
             <Controller
@@ -342,6 +354,9 @@ const FormTipoAlerta = ({ paramData, onClose }: FormTipoAlertaProps) => {
        
       </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 69656fd (AT-25 fix: aplicar responsividade no formulário)
       <div className="flex gap-2 justify-end w-full">
         {paramData && onDelete && (
           <Button 
@@ -354,9 +369,12 @@ const FormTipoAlerta = ({ paramData, onClose }: FormTipoAlertaProps) => {
         )}
         <Button type="submit">Salvar</Button>
       </div>
+<<<<<<< HEAD
 =======
       <Button type="submit">Salvar</Button>
 >>>>>>> cd44923 (AT-25 feat: adicionar cadastro e edição de tipo-alerta)
+=======
+>>>>>>> 69656fd (AT-25 fix: aplicar responsividade no formulário)
     </form>
   );
 };
