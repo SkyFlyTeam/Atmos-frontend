@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 type FormTipoAlertaProps = {
   paramData?: TipoAlerta;
   onClose: (success: boolean) => void;
+  onDelete?: () => void;
 };
 
 type FormData = z.infer<typeof formSchema>;
@@ -27,7 +28,7 @@ const formSchema = z.object({
   publica: z.boolean().optional()
 })
 
-const FormTipoAlerta = ({ paramData, onClose }: FormTipoAlertaProps) => {
+const FormTipoAlerta = ({ paramData, onClose, onDelete }: FormTipoAlertaProps) => {
   const { control, handleSubmit, setValue, watch, formState: { errors, isSubmitSuccessful } } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: paramData ? {
@@ -73,9 +74,9 @@ const FormTipoAlerta = ({ paramData, onClose }: FormTipoAlertaProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 flex flex-col items-end w-full min-w-[600px]">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 flex flex-col items-end w-full">
       <div className="w-full space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="tipo" className="text-sm md:text-base">Nome</label>
             <Controller
@@ -101,7 +102,7 @@ const FormTipoAlerta = ({ paramData, onClose }: FormTipoAlertaProps) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <div>
             <label htmlFor="criterios" className="text-sm md:text-base whitespace-nowrap">Critérios</label>
             <Controller
@@ -184,7 +185,18 @@ const FormTipoAlerta = ({ paramData, onClose }: FormTipoAlertaProps) => {
 
        
       </div>
-      <Button type="submit">Salvar</Button>
+      <div className="flex gap-2 justify-end w-full">
+        {paramData && onDelete && (
+          <Button 
+            type="button" 
+            variant="destructive" 
+            onClick={onDelete}
+          >
+            Excluir tipo de alerta
+          </Button>
+        )}
+        <Button type="submit">Salvar</Button>
+      </div>
     </form>
   );
 };
