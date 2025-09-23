@@ -2,12 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { Estacao } from '@/interfaces/Estacoes';
 import { estacaoServices } from '@/services/estacaoServices';
 import { ApiException } from '@/config/apiException';
+import { EstacaoParametroRelacao } from '@/interfaces/ParametroEstacao';
 
 export interface UseEstacoesReturn {
   estacoes: Estacao[];
   loading: boolean;
   error: string | null;
-  createEstacao: (data: Estacao) => Promise<void>;
+  createEstacao: (data: Omit<Estacao, 'pk'>) => Promise<void>;
   updateEstacao: (pk: number, data: Estacao) => Promise<void>;
   deleteEstacao: (pk: number) => Promise<void>;
   refreshEstacoes: () => Promise<void>;
@@ -27,29 +28,24 @@ export function useEstacoes(): UseEstacoesReturn {
 
       if (result instanceof ApiException) {
         setError(result.message);
-        console.error('Erro ao buscar estações:', result.message);
       } else {
-        // Buscar parâmetros para cada estação
+        // carregar parâmetros de cada estação
         const estacoesComParametros = await Promise.all(
           result.map(async (estacao) => {
-            try {
-              const parametros = await estacaoServices.getParametrosByEstacao(estacao.pk);
-              if (parametros instanceof ApiException) {
-                console.warn(
-                  `Erro ao buscar parâmetros da estação ${estacao.pk}:`,
-                  parametros.message
-                );
-                return { ...estacao, parametros: [] };
-              }
-
-              // Converter para array de nomes
-              const nomesParametros = parametros.map((p) => p.nome).filter(Boolean);
-
-              return { ...estacao, parametros: nomesParametros };
-            } catch (err) {
-              console.warn(`Erro ao buscar parâmetros da estação ${estacao.pk}:`, err);
+            if (!estacao.pk) {
               return { ...estacao, parametros: [] };
             }
+
+            const relacoes = await estacaoServices.getEstacaoParametros(estacao.pk);
+
+            if (relacoes instanceof ApiException) {
+              return { ...estacao, parametros: [] };
+            }
+
+            const nomesParametros = relacoes.map(
+              (rel: EstacaoParametroRelacao) => rel.tipoParametro.nome
+            );
+            return { ...estacao, parametros: nomesParametros };
           })
         );
 
@@ -59,45 +55,41 @@ export function useEstacoes(): UseEstacoesReturn {
       const errorMessage =
         err instanceof Error ? err.message : 'Erro ao carregar estações';
       setError(errorMessage);
-      console.error('Erro ao buscar estações:', err);
     } finally {
       setLoading(false);
     }
   }, []);
 
   const createEstacao = useCallback(
-    async (estacao: Estacao) => {
+    async (data: Omit<Estacao, 'pk'>) => {
       setLoading(true);
       setError(null);
 
       try {
-        const result = await estacaoServices.createEstacao(estacao);
+        const { parametros, ...estacaoData } = data;
 
+        const result = await estacaoServices.createEstacao(estacaoData);
         if (result instanceof ApiException) {
-          setError(result.message);
           throw new Error(result.message);
-        } else {
-          // Processar parâmetros se enviados
-          if (estacao.parametros && estacao.parametros.length > 0) {
-            try {
-              const { parametroServices } = await import('@/services/parametroServices');
-              const todosParametros = await parametroServices.getAllParametros();
+        }
 
-              if (!(todosParametros instanceof ApiException)) {
-                for (const nomeParametro of estacao.parametros) {
-                  const parametro = todosParametros.find((p) => p.nome === nomeParametro);
-                  if (parametro) {
-                    await estacaoServices.addParametroToEstacao(result.pk, parametro.pk);
-                  }
-                }
-              }
-            } catch (e) {
-              console.warn('Erro ao processar parâmetros:', e);
+        // criar relações se houver parâmetros selecionados
+        if (parametros && parametros.length > 0) {
+          const { parametroServices } = await import('@/services/parametroServices');
+          const todosParametros = await parametroServices.getAllParametros();
+
+          if (!(todosParametros instanceof ApiException)) {
+            const parametrosIds = todosParametros
+              .filter((p) => parametros.includes(p.nome))
+              .map((p) => p.pk);
+
+            if (parametrosIds.length > 0 && result.pk) {
+              await estacaoServices.createEstacaoParametros(result.pk, parametrosIds);
             }
           }
-
-          await fetchEstacoes();
         }
+
+        await fetchEstacoes();
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Erro ao criar estação';
@@ -111,47 +103,49 @@ export function useEstacoes(): UseEstacoesReturn {
   );
 
   const updateEstacao = useCallback(
-    async (pk: number, estacao: Estacao) => {
+    async (pk: number, data: Estacao) => {
       setLoading(true);
       setError(null);
 
       try {
-        const result = await estacaoServices.updateEstacao(pk, estacao);
+        const { parametros, ...estacaoData } = data;
 
+        const result = await estacaoServices.updateEstacao(pk, estacaoData);
         if (result instanceof ApiException) {
-          setError(result.message);
           throw new Error(result.message);
-        } else {
-          // Processar parâmetros se enviados
-          if (estacao.parametros) {
-            try {
-              const { parametroServices } = await import('@/services/parametroServices');
-              const todosParametros = await parametroServices.getAllParametros();
+        }
 
-              if (!(todosParametros instanceof ApiException)) {
-                // Remover parâmetros existentes
-                const parametrosExistentes = await estacaoServices.getParametrosByEstacao(pk);
-                if (!(parametrosExistentes instanceof ApiException)) {
-                  for (const parametroExistente of parametrosExistentes) {
-                    await estacaoServices.removeParametroFromEstacao(pk, parametroExistente.pk);
-                  }
-                }
+        // atualizar parâmetros
+        if (parametros && pk > 0) {
+          const relacoesAtuais = await estacaoServices.getEstacaoParametros(pk);
+          if (!(relacoesAtuais instanceof ApiException)) {
+            const atuaisIds = relacoesAtuais.map((r) => r.tipo_parametro_pk);
 
-                // Adicionar novos parâmetros
-                for (const nomeParametro of estacao.parametros) {
-                  const parametro = todosParametros.find((p) => p.nome === nomeParametro);
-                  if (parametro) {
-                    await estacaoServices.addParametroToEstacao(pk, parametro.pk);
-                  }
+            const { parametroServices } = await import('@/services/parametroServices');
+            const todosParametros = await parametroServices.getAllParametros();
+
+            if (!(todosParametros instanceof ApiException)) {
+              const novosIds = parametros
+                .map((nome) => todosParametros.find((p) => p.nome === nome)?.pk)
+                .filter((id): id is number => !!id);
+
+              // remover os que não estão mais
+              for (const id of atuaisIds) {
+                if (!novosIds.includes(id)) {
+                  await estacaoServices.removeParametroFromEstacao(pk, id);
                 }
               }
-            } catch (e) {
-              console.warn('Erro ao processar parâmetros:', e);
+
+              // adicionar novos
+              const idsParaCriar = novosIds.filter((id) => !atuaisIds.includes(id));
+              if (idsParaCriar.length > 0) {
+                await estacaoServices.createEstacaoParametros(pk, idsParaCriar);
+              }
             }
           }
-
-          await fetchEstacoes();
         }
+
+        await fetchEstacoes();
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Erro ao atualizar estação';
@@ -172,17 +166,14 @@ export function useEstacoes(): UseEstacoesReturn {
       const result = await estacaoServices.deleteEstacao(pk);
 
       if (result instanceof ApiException) {
-        setError(result.message);
-        console.error('Erro ao deletar estação:', result.message);
         throw new Error(result.message);
-      } else {
-        setEstacoes((prev) => prev.filter((estacao) => estacao.pk !== pk));
       }
+
+      setEstacoes((prev) => prev.filter((estacao) => estacao.pk !== pk));
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Erro ao deletar estação';
       setError(errorMessage);
-      console.error('Erro ao deletar estação:', err);
       throw err;
     } finally {
       setLoading(false);

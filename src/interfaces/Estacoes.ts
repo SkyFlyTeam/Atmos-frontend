@@ -1,5 +1,5 @@
 export interface Estacao {
-    pk: number,
+    pk?: number,
     uuid: string,
     nome: string,
     descricao: string,

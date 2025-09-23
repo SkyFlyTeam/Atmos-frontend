@@ -38,12 +38,12 @@ export default function Estacoes() {
     console.log('Mudar para página:', novaPagina);
   };
 
-  const handleSalvarEstacao = async (dados: Estacao) => {
+  const handleSalvarEstacao = async (dados: Omit<Estacao, 'pk'>) => {
     try {
       if (sidebarMode === 'create') {
         await createEstacao(dados);
-      } else if (selecionada) {
-        await updateEstacao(selecionada.pk, dados);
+      } else if (selecionada && selecionada.pk && selecionada.pk > 0) {
+        await updateEstacao(selecionada.pk, { ...dados, pk: selecionada.pk });
       }
       setSidebarOpen(false);
     } catch (error) {
@@ -224,7 +224,7 @@ export default function Estacoes() {
         open={sidebarOpen}
         onOpenChange={setSidebarOpen}
         estacao={selecionada}
-        mode={sidebarMode}
+        mode={sidebarMode} 
         userRole={userRole} // Passa o papel do usuário para o sidebar
         onSave={handleSalvarEstacao}
       />

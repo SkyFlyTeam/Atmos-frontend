@@ -12,17 +12,35 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Estacao } from "@/interfaces/Estacoes";
 import { useParametros } from "@/hooks/useParametros";
-import { estacaoFormSchema, EstacaoFormSchema } from "@/schemas/estacaoSchema";
+import { estacaoFormSchema, EstacaoFormSchema } from "@/pages/estacoes/components/estacaoSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { TbXboxXFilled } from "react-icons/tb";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Check, ChevronsUpDown } from "lucide-react"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { cn } from "@/lib/utils";
+import { Textarea } from "./ui/textarea";
+import { toast } from "react-toastify";
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   estacao?: Estacao | null;
   mode?: "create" | "edit";
-  onSave?: (data: Estacao) => void; // 👈 volta para Estacao
+  onSave?: (data: Omit<Estacao, 'pk'>) => void;
   userRole?: "admin" | "user";
 };
 
@@ -39,13 +57,17 @@ export default function EstacaoSidebar({
 
   const titulo = useMemo(() => {
     if (userRole === "user") return "Visualizar estação";
+
+    if (mode === "create") return "Criar estação";
+    if (mode === "edit") return "Editar estação";
     return "Gerenciar estação";
-  }, [userRole]);
+  }, [userRole, mode]);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
     reset,
     setValue,
   } = useForm<EstacaoFormSchema>({
@@ -54,7 +76,7 @@ export default function EstacaoSidebar({
       uuid: "",
       nome: "",
       descricao: "",
-      status: "",
+      status: "true",
       lat: "",
       long: "",
       endereco: "",
@@ -69,6 +91,7 @@ export default function EstacaoSidebar({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
+
     if (!open) return;
 
     if (estacao) {
@@ -90,7 +113,7 @@ export default function EstacaoSidebar({
         uuid: "",
         nome: "",
         descricao: "",
-        status: "",
+        status: "true",
         lat: "",
         long: "",
         endereco: "",
@@ -121,6 +144,7 @@ export default function EstacaoSidebar({
     setValue("parametros", novosParametros, { shouldValidate: true });
   }
 
+
   function handleChooseImage() {
     fileInputRef.current?.click();
   }
@@ -144,8 +168,8 @@ export default function EstacaoSidebar({
   }
 
   function onSubmit(data: EstacaoFormSchema) {
-    const estacaoData: Estacao = {
-      pk: estacao?.pk || 0,
+    // Converter para Estacao
+    const estacaoData: Omit<Estacao, 'pk'> = {
       uuid: data.uuid,
       nome: data.nome,
       descricao: data.descricao,
@@ -156,22 +180,32 @@ export default function EstacaoSidebar({
       parametros: data.parametros || [],
       imagemBase64: imagemRemovida ? null : imagemUrl // Se foi removida, envia null
     };
-
-    onSave?.(estacaoData);
-    onOpenChange(false);
+    try {
+      if (mode === "create") {
+        onSave?.(estacaoData);
+        toast.success("Estação criada com sucesso!");
+      } else if (estacao) {
+        onSave?.(estacaoData);
+        toast.success("Estação atualizada com sucesso!");
+      }
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Erro ao salvar estação:", error);
+      toast.error("Erro ao salvar estação. Tente novamente.");
+    }
   }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-xl p-6 overflow-y-auto bg-white">
+      <SheetContent side="right" className="w-full sm:max-w-xl p-9  overflow-y-auto bg-white">
         <SheetHeader>
           <SheetTitle className="text-[48px] font-medium text-[#00312D] font-londrina">{titulo}</SheetTitle>
         </SheetHeader>
 
         <form id="estacao-form" onSubmit={handleSubmit(onSubmit)} className="mt-2 space-y-5">
           {/* Linha UUID e Nome */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-1">
               <label className="block text-sm font-medium text-[#00312D] mb-1">UUID</label>
               <Input
                 placeholder="CEN1234"
@@ -183,7 +217,7 @@ export default function EstacaoSidebar({
                 <p className="text-red-500 text-xs mt-1">{errors.uuid.message}</p>
               )}
             </div>
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-[#00312D] mb-1">Nome</label>
               <Input
                 placeholder="Estação CEN1234"
@@ -200,11 +234,11 @@ export default function EstacaoSidebar({
           {/* Descrição */}
           <div>
             <label className="block text-sm font-medium text-[#00312D] mb-1">Descrição</label>
-            <textarea
+            <Textarea
               placeholder="Estação de coleta de dados de chuva para São José dos Campos"
               {...register("descricao")}
               disabled={isReadOnly}
-              className={`file:text-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input min-h-[80px] w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] text-black placeholder:text-gray-300 ${isReadOnly ? 'text-black' : ''} ${errors.descricao ? 'border-red-500' : ''}`}
+              className={` text-black border-gray placeholder:text-gray-300 ${isReadOnly ? 'text-black' : ''} ${errors.nome ? 'border-red-500' : ''}`}
             />
             {errors.descricao && (
               <p className="text-red-500 text-xs mt-1">{errors.descricao.message}</p>
@@ -214,39 +248,52 @@ export default function EstacaoSidebar({
           {/* Status e coordenadas */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
             {/* Status */}
-            <fieldset className="w-max">
-              <legend className="block text-sm font-medium text-[#00312D] mb-1">Status</legend>
-              <div className="flex flex-col text-sm">
-                <label className="flex items-center gap-2 text-[#00312D]">
-                  <input
-                    type="radio"
-                    {...register("status")}
-                    value="true"
-                    className={ `accent-[#00312D]  `}
+            <div className="w-max">
+              <label className="block text-sm font-medium text-[#00312D] mb-1">Status</label>
+              <div className="flex flex-col items-start gap-2">
+                <div className="flex items-center gap-2 mt-0.5">
+                  <Checkbox
+                    id="status-ativo"
+                    checked={watch("status") === "true"}
+                    onCheckedChange={() =>
+                      setValue("status", "true", { shouldValidate: true })
+                    }
                     disabled={isReadOnly}
                   />
-                  Ativo
-                </label>
-                <label className="flex items-center gap-2 text-[#00312D]">
-                  <input
-                    type="radio"
-                    {...register("status")}
-                    value="false"
-                    className={ `accent-[#00312D]`}
+                  <label
+                    htmlFor="status-ativo"
+                    className="text-sm font-medium leading-none text-[#00312D]"
+                  >
+                    Ativo
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="status-inativo"
+                    checked={watch("status") === "false"}
+                    onCheckedChange={() =>
+                      setValue("status", "false", { shouldValidate: true })
+                    }
                     disabled={isReadOnly}
                   />
-                  Inativo
-                </label>
+                  <label
+                    htmlFor="status-inativo"
+                    className="text-sm font-medium leading-none text-[#00312D]"
+                  >
+                    Inativo
+                  </label>
+                </div>
               </div>
               {errors.status && (
                 <p className="text-red-500 text-xs mt-1">{errors.status.message}</p>
               )}
-            </fieldset>
+            </div>
 
             {/* Latitude */}
             <div>
               <label className="block text-sm font-medium text-[#00312D] mb-1">Latitude</label>
               <Input
+                type="number"
                 placeholder="-23.18976"
                 {...register("lat")}
                 disabled={isReadOnly}
@@ -261,6 +308,7 @@ export default function EstacaoSidebar({
             <div>
               <label className="block text-sm font-medium text-[#00312D] mb-1">Longitude</label>
               <Input
+                type="number"
                 placeholder="-45.87654"
                 {...register("long")}
                 disabled={isReadOnly}
@@ -342,43 +390,68 @@ export default function EstacaoSidebar({
               <div className="flex items-center gap-3 mb-4">
                 <label className="text-sm text-[#00312D]">Adicionar parâmetros</label>
 
-                
                 {parametros.length > 0 ? (
-                  <select
-                    className="h-9 rounded-md border border-input bg-white text-gray-900 px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                    defaultValue=""
-                    onChange={(e) => {
-                      handleAddParametro(e.target.value);
-                      // reset to placeholder
-                      e.currentTarget.selectedIndex = 0;
-                    }}
-                  >
-                    <option className="text-gray-500" value="" disabled>
-                      Selecionar
-                    </option>
-                    {parametros
-                      .filter(p => p.nome && !parametrosSelecionados.includes(p.nome))
-                      .map((p) => (
-                        <option key={p.pk} value={p.nome} className="text-black">
-                          {p.nome} {p.unidade ? `(${p.unidade})` : ''}
-                        </option>
-                      ))}
-                  </select>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className="w-[200px] justify-between bg-white rounded-xl!"
+                      >
+                        Selecionar...
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[240px] p-0">
+                      <Command>
+                        <CommandInput
+                          placeholder="Buscar parâmetro..."
+                          className="h-9"
+                        />
+                        <CommandList>
+                          <CommandEmpty>Nenhum parâmetro encontrado.</CommandEmpty>
+                          <CommandGroup>
+                            {parametros
+                              .filter(
+                                (p) => p.nome && !parametrosSelecionados.includes(p.nome)
+                              )
+                              .map((p) => (
+                                <CommandItem
+                                  key={p.pk}
+                                  value={p.nome}
+                                  onSelect={(val) => {
+                                    handleAddParametro(val)
+                                  }}
+                                >
+                                  {p.nome} {p.unidade ? `(${p.unidade})` : ""}
+                                  <Check
+                                    className={cn(
+                                      "ml-auto",
+                                      parametrosSelecionados.includes(p.nome)
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                </CommandItem>
+                              ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 ) : (
                   <span className="text-sm text-gray-500 italic">
                     Nenhum parâmetro cadastrado no sistema
                   </span>
-
-                  
                 )}
               </div>
-              
+
             )}
 
             {errors.parametros && (
               <p className="text-red-500 text-xs mt-1">{errors.parametros.message}</p>
             )}
-            
+
             <div className="flex flex-wrap gap-2">
               {parametrosSelecionados.map((p) => (
                 <span
@@ -393,7 +466,7 @@ export default function EstacaoSidebar({
                       onClick={() => handleRemoveParametro(p)}
                       aria-label={`Remover ${p}`}
                     >
-                      <TbXboxXFilled className="w-5 h-5 text-[#00312D] hover:text-[#72BF01]" />
+                      <TbXboxXFilled className="w-5 h-5 text-[#00312D] hover:text-[#72BF01] cursor-pointer" />
                     </button>
                   )}
                 </span>
@@ -405,9 +478,6 @@ export default function EstacaoSidebar({
         {!isReadOnly && (
           <SheetFooter className="mt-6 p-0">
             <div className="flex gap-2 justify-end w-full">
-              <Button type="button" className="bg-red-700 hover:bg-red-800 rounded-xl" onClick={() => onOpenChange(false)}>
-                Cancelar
-              </Button>
               <Button type="submit" form="estacao-form" className="bg-[#72BF01] hover:bg-[#5a9901] rounded-xl">Salvar</Button>
             </div>
           </SheetFooter>
