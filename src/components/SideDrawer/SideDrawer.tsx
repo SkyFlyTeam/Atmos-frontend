@@ -1,20 +1,20 @@
-import { ReactNode } from "react"
+import { ReactNode } from "react";
 import { CgClose } from "react-icons/cg";
 
 type SideDrawerProps = {
-  onClose: () => void,
-  title: string,
-  content: ReactNode
-}
+  onClose: () => void;
+  title: string;
+  content: ReactNode;
+};
 
 const SideDrawer = ({ onClose, title, content }: SideDrawerProps) => {
   return (
     <>
-      <div className="fixed bottom-0 left-0 w-full h-full bg-black/80"></div>
+      <div className="fixed bottom-0 left-0 w-full h-full bg-black/80 z-40"></div>
+      
       <div
         className="
-          fixed bottom-0 right-0 h-full bg-white-pure p-3 flex flex-col
-          w-full md:w-fit
+          fixed bottom-0 right-0 h-full bg-white-pure p-3 flex flex-col w-full md:w-fit z-50
         "
       >
         <div className="w-full">
