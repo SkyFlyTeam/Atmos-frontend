@@ -12,9 +12,9 @@ import { Usuario } from "@/interfaces/Usuarios";
 import SideDrawer from "@/components/SideDrawer/SideDrawer";
 
 const formSchema = z.object({
-  nome: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
-  email: z.string().email("E-mail inválido"),
-  senha: z.string().min(6, "Senha deve ter pelo menos 6 caracteres").optional(),
+  nome: z.string().min(1, "Nome é obrigatório"), 
+  email: z.string().email("E-mail inválido"), 
+  senha: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -43,7 +43,7 @@ const Perfil: React.FC<PerfilProps> = ({ usuarioId, open, onClose }) => {
       try {
         const data = await usuarioServices.getUsuarioById(usuarioId);
         setUsuario(data);
-        reset({ nome: data.nome, email: data.email, senha: "" });
+        reset({ nome: data.nome, email: data.email, senha: "" }); // senha não vem preenchida
       } catch (error) {
         toast.error("Não foi possível carregar seu perfil.");
       }
@@ -60,7 +60,7 @@ const Perfil: React.FC<PerfilProps> = ({ usuarioId, open, onClose }) => {
         ...usuario,
         nome: values.nome,
         email: values.email,
-        senha: values.senha || usuario.senha,
+        senha: values.senha || usuario.senha, // Mantém a senha antiga se não trocar
       };
 
       await usuarioServices.updateUsuario(payload);
@@ -75,7 +75,7 @@ const Perfil: React.FC<PerfilProps> = ({ usuarioId, open, onClose }) => {
   return (
     <>
       {open && usuario && (
-        <SideDrawer onClose={onClose} title="Meu Perfil" content={
+        <SideDrawer onClose={onClose} title="Meu perfil" content={
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 flex flex-col items-end md:w-96 w-full">
             <div className="w-full">
               <label htmlFor="nome" className="text-sm">Nome</label>
