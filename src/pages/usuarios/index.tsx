@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { toast } from 'react-toastify';
 
 const UsuariosPage = () => {
   const [showModal, setShowModal] = useState(false);
@@ -146,9 +147,6 @@ const UsuariosPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white-bg w-full overflow-x-hidden">
-        <main className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex">
             <div className="flex-1 pr-0 md:pr-8 w-full">
               <h1 className="text-4xl font-bold text-dark-green mb-8 font-londrina">Usuários</h1>
               <Card className="flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none">
@@ -187,19 +185,13 @@ const UsuariosPage = () => {
                 </div>
               </Card>
             </div>
-          </div>
-        </main>
-      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white-bg w-full overflow-x-hidden">
-      {/* Conteúdo Principal */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex">
+    <>
           {/* Área Principal - Lista de Usuários */}
-          <div className="flex-1 pr-8">
+          <div className="flex gap-3 flex-col">
             <h1 className="text-4xl font-bold text-dark-green mb-8 font-londrina">Usuários</h1>
             
             <Card className="flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none">
@@ -404,9 +396,7 @@ const UsuariosPage = () => {
               }
             />
           )}
-        </div>
-      </main>
-    </div>
+        </>
   );
 };
 

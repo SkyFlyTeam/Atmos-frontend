@@ -27,7 +27,7 @@ const SidePanel: React.FC<SidePanelProps> = ({ open, onClose, title, children })
             <button
               onClick={onClose}
               aria-label="Fechar"
-              className="text-gray-500 text-2xl font-bold w-8 h-8 flex items-center justify-start rounded-full"
+              className="text-gray-500 text-2xl font-bold w-8 h-8 flex items-center justify-start rounded-full hover:cursor-pointer hover:text-red"
             >
               ×
             </button>
