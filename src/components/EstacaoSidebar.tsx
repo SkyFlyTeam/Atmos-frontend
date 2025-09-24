@@ -44,6 +44,7 @@ type Props = {
   userRole?: "admin" | "user";
 };
 
+// Parâmetros serão carregados do backend via hook
 export default function EstacaoSidebar({
   open,
   onOpenChange,
@@ -93,7 +94,6 @@ export default function EstacaoSidebar({
   useEffect(() => {
 
     if (!open) return;
-
     if (estacao) {
       reset({
         uuid: estacao.uuid ?? "",
@@ -123,7 +123,7 @@ export default function EstacaoSidebar({
       setImagemUrl(null);
       setParametrosSelecionados([]);
     }
-    
+
     // Resetar estados de imagem
     setImagemUrl(null);
     setImagemRemovida(false);

@@ -168,7 +168,6 @@ export default function Estacoes() {
                 <p className="text-sm text-gray-600 mb-2">UUID: {estacao.uuid}</p>
                 <p className="text-sm text-gray-600 mb-2">Status: {estacao.status ? 'Ativo' : 'Inativo'}</p>
                 <p className="text-sm text-gray-600 mb-3">{estacao.endereco}</p>
-
                 {estacao.parametros && estacao.parametros.length > 0 && (
                   <div className="mb-4">
                     <p className="text-sm text-gray-500 mb-1">Parâmetros:</p>
