@@ -18,7 +18,7 @@ const Pagination: React.FC<PaginationProps> = ({
   // Gerar array de páginas para exibir
   const getVisiblePages = () => {
     const pages = [];
-    const maxVisible = 7; // Máximo de páginas visíveis
+    const maxVisible = 4; // Máximo de páginas visíveis
     
     if (totalPages <= maxVisible) {
       // Se total de páginas é menor que o máximo, mostra todas
@@ -59,7 +59,7 @@ const Pagination: React.FC<PaginationProps> = ({
   const visiblePages = getVisiblePages();
 
   return (
-    <div className={`flex justify-end items-center space-x-2 ${className}`}>
+    <div className={` ${className} flex items-center p-2 w-full md:w-fit justify-center rounded-[18px] space-x-2 bg-white shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)]`}>
       {/* Botão Anterior */}
       <Button
         variant="ghost"
@@ -72,18 +72,19 @@ const Pagination: React.FC<PaginationProps> = ({
       </Button>
 
       {/* Números das páginas */}
+      <div className="flex items-center space-x-2">
       {visiblePages.map((page, index) => (
         <React.Fragment key={index}>
           {page === '...' ? (
-            <span className="text-gray-dark font-londrina px-2">...</span>
+            <span className="text-gray-dark font-londrina">...</span>
           ) : (
             <Button
               size="sm"
               onClick={() => onPageChange(page as number)}
               className={
                 currentPage === page
-                  ? "bg-green text-white-pure w-8 h-8 !rounded-full p-0 font-londrina hover:!bg-transparent hover:!text-dark-cyan hover:!rounded-none hover:!font-normal"
-                  : "bg-transparent text-dark-cyan !rounded-none hover:!bg-transparent hover:!text-dark-cyan focus:!bg-transparent active:!bg-transparent !font-normal font-londrina"
+                  ? 'bg-green text-white !rounded-full w-8 h-8 p-0'
+                  : 'bg-transparent text-dark-cyan !rounded-none hover:bg-transparent hover:text-dark-cyan hover:font-normal focus:bg-transparent focus-visible:ring-0 active:bg-transparent'
               }
             >
               {page}
@@ -91,6 +92,7 @@ const Pagination: React.FC<PaginationProps> = ({
           )}
         </React.Fragment>
       ))}
+      </div>
 
       {/* Botão Próximo */}
       <Button
