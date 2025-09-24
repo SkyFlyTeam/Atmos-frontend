@@ -1,6 +1,8 @@
 import type { AppProps } from 'next/app';
 import { Lato, Londrina_Solid } from 'next/font/google';
 
+import Navbar from '@/components/Navbar/Navbar';
+
 import "../styles/globals.css";
 
 import { ToastContainer } from 'react-toastify';
@@ -19,6 +21,7 @@ const londrina = Londrina_Solid({
 function MyApp({ Component, pageProps }: AppProps) {
   return (
       <main className={`flex flex-1 flex-col gap-4 md:px-12 px-4 py-0 ${londrina.className} ${lato.className}`}>
+        <Navbar />
         <Component {...pageProps} />
         <ToastContainer position="bottom-right" autoClose={2000} />
       </main>
