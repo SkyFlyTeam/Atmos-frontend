@@ -53,4 +53,4 @@ export const parametroServices = {
     updateParametro,
     deleteParametro
 };
-  
+
