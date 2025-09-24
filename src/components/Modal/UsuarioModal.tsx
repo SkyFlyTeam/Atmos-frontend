@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Usuario } from '@/interfaces/Usuarios';
 import { usuarioServices } from '@/services/usuarioServices';
+import { toast } from 'react-toastify';
 
 type UsuarioModalProps = {
   open: boolean;
@@ -86,9 +87,11 @@ const UsuarioModal: React.FC<UsuarioModalProps> = ({
           ...(formData.senha && { senha: formData.senha }) // Só inclui senha se foi preenchida
         };
         await usuarioServices.updateUsuario(updateData);
+        toast.success("Usuário editado com sucesso!")
       } else {
         // Criar novo usuário
         await usuarioServices.createUsuario(formData);
+        toast.success("Usuário criado com sucesso!")
       }
 
       onSuccess?.();
@@ -169,9 +172,9 @@ const UsuarioModal: React.FC<UsuarioModalProps> = ({
               <div className="flex justify-end pt-2 gap-2">
                 {isEditing && (
                   <Button 
+                    variant={'destructive'}
                     onClick={handleDelete} 
                     disabled={loading}
-                    className="bg-red text-white hover:bg-red-600 w-[83px] h-[47px] rounded-[18px] font-londrina"
                   >
                     Excluir
                   </Button>
@@ -179,7 +182,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = ({
                 <Button 
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="bg-green text-white hover:bg-green/90 w-[83px] h-[47px] rounded-[18px] font-londrina"
+                  type='submit'
                 >
                   {loading ? 'Salvando...' : 'Salvar'}
                 </Button>
