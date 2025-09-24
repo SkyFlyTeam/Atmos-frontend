@@ -69,6 +69,7 @@ const ParametrosPage = () => {
             toast.error("Erro ao deletar parâmetro.")
         }
         setShowConfimDelete(false);
+        closeSideDrawer(true);
     }
 
     const closeSideDrawer = (success: boolean = false) => {
@@ -113,10 +114,10 @@ const ParametrosPage = () => {
                         </div>
                     }
                     open={showConfirmDelete}
-                    onClose={() => setShowConfimDelete(false)}
+                    onClose={() => closeSideDrawer()}
                     buttons={
                         <div className="flex items-center gap-2">
-                            <Button variant="secondary" onClick={() => setShowConfimDelete(false)}>Cancelar</Button>
+                            <Button variant="secondary" onClick={() => closeSideDrawer(true)}>Cancelar</Button>
                             <Button variant="destructive" onClick={() => handleDeleteParam()}>Deletar</Button>
                         </div>
                     }

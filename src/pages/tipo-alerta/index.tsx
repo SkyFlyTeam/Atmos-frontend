@@ -75,6 +75,7 @@ const TipoAlertasPage = () => {
             toast.error("Erro ao deletar tipo de alerta.")
         }
         setShowConfimDelete(false);
+        closeSideDrawer(true);
     }
 
     const closeSideDrawer = (success: boolean = false) => {
@@ -119,7 +120,7 @@ const TipoAlertasPage = () => {
                         </div>
                     }
                     open={showConfirmDelete}
-                    onClose={() => setShowConfimDelete(false)}
+                    onClose={() => closeSideDrawer()}
                     buttons={
                         <div className="flex items-center gap-2">
                             <Button variant="secondary" onClick={() => setShowConfimDelete(false)}>Cancelar</Button>
@@ -137,8 +138,7 @@ const TipoAlertasPage = () => {
                         onClose={(success) => closeSideDrawer(success)} 
                         paramData={tipoAlertaSelecionado ? tipoAlertaSelecionado : undefined}
                         onDelete={tipoAlertaSelecionado ? () => {
-                            setShowSideDrawer(false);
-                            setShowConfimDelete(true);
+                            closeSideDrawer(true);
                         } : undefined}
                     />}
                 />
