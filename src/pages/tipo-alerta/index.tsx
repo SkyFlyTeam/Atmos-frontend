@@ -139,7 +139,11 @@ const TipoAlertasPage = () => {
                         onClose={(success) => closeSideDrawer(success)} 
                         paramData={tipoAlertaSelecionado ? tipoAlertaSelecionado : undefined}
                         onDelete={tipoAlertaSelecionado ? () => {
+<<<<<<< HEAD
                             setShowConfimDelete(true);
+=======
+                            closeSideDrawer(true);
+>>>>>>> 313c01e (AT-25 fix: ajustado o onclose dos modais/sidebar)
                         } : undefined}
                     />}
                 />
