@@ -4,6 +4,67 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Adicionando a classe da fonte Londrina Solid */
+.font-londrina {
+  font-family: 'Londrina Solid', sans-serif;
+}
+
+/* Estilos para campos de formulário */
+input:disabled:not(:placeholder-shown),
+textarea:disabled:not(:placeholder-shown) {
+  color: #000 !important;
+  -webkit-text-fill-color: #000 !important;
+  opacity: 1 !important;
+}
+
+/* Reset do radio */
+input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #ADADAD; /* anel verde escuro */
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  background-color: transparent; /* fundo branco/transparente */
+}
+
+/* Círculo interno quando marcado */
+input[type="radio"]:checked::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;   /* tamanho da bolinha interna */
+  height: 10px;
+  border: 1px solid #00312D; 
+  background-color: #cccccc; /* cinza (pode trocar) */
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+input[type="radio"]:hover::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;   /* bolinha maior */
+  height: 10px;
+  border: 1px solid #00312D;
+  background-color: rgba(2, 2, 2, 0.5); /* cinza claro semi-transparente */
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1; /* fica atrás do círculo interno */
+}
+
+/* Garante que placeholders tenham cor cinza clara */
+::placeholder {
+  color: #d1d5db !important;
+  opacity: 1 !important;
+}
+
 :root {
   --background: oklch(0.9791 0 0);
   --foreground: #00312D;
