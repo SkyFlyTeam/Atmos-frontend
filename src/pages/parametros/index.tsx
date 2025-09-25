@@ -28,14 +28,14 @@ const ParametrosPage = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const fetchAllParametros = async () => {
-        try{
+        try {
             const parametros = await parametroServices.getAllParametros();
             setParametros(parametros as Parametro[]);
         } catch {
             console.log("Erro ao buscar parâmetros");
             toast.error("Erro ao buscar parâmetros");
             setParametros([]);
-        } finally{
+        } finally {
             setIsLoading(false);
         }
     }
@@ -51,26 +51,27 @@ const ParametrosPage = () => {
     const onDelete = async (row: Parametro) => {
         setParamSelecionado(row);
         setShowConfimDelete(true);
-        fetchAllParametros();
     };
 
     const onAddParameter = () => {
         setShowSideDrawer(true);
     }
 
-    const handleDeleteParam = () => {
-        if (!paramSelecionado) { return }
-        try {
-            parametroServices.deleteParametro(paramSelecionado.pk);
-            console.log("parâmetro deletado com sucesso!")
-            toast.success("parâmetro deletado!");
+    const handleDeleteParam = async () => {
+        if (!paramSelecionado) {
+            return;
+        } try {
+            await parametroServices.deleteParametro(paramSelecionado.pk);
+            toast.success("Parâmetro excluído com sucesso!");
             fetchAllParametros();
-        } catch {
-            toast.error("Erro ao deletar parâmetro.")
+
+        } catch (error) {
+            toast.error("Erro ao deletar parâmetro.");
         }
         setShowConfimDelete(false);
-        closeSideDrawer(true);
-    }
+    };
+
+
 
     const closeSideDrawer = (success: boolean = false) => {
         if (success) { fetchAllParametros(); }
@@ -82,31 +83,31 @@ const ParametrosPage = () => {
         <>
             <div className="flex gap-3 flex-col">
                 <h1>Parâmetros</h1>
-                
+
                 <Card className="flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none">
                     {isLoading ? (
                         <SkeletonTable />
                     ) : (
-                        <DataTable 
-                            columns={columns} 
+                        <DataTable
+                            columns={columns}
                             data={parametros}
                             meta={{
                                 actions: { onEdit, onDelete },
                             }}
                             actionButton={
-                                <ButtonIconRight 
+                                <ButtonIconRight
                                     label="Novo Parâmetro"
-                                    onClick={onAddParameter} 
-                                    icon={<FaPlus className="!w-3 !h-3" />} 
+                                    onClick={onAddParameter}
+                                    icon={<FaPlus className="!w-3 !h-3" />}
                                 />
                             }
                         />
                     )}
                 </Card>
             </div>
-            
+
             {showConfirmDelete && paramSelecionado && (
-                <Modal 
+                <Modal
                     title="Atenção!"
                     content={
                         <div>
@@ -124,12 +125,13 @@ const ParametrosPage = () => {
                 />
             )}
 
-            {showSideDrawer && 
-                <SideDrawer 
+            {showSideDrawer &&
+                <SideDrawer
                     onClose={() => closeSideDrawer()}
-                    title="Cadastrar Parâmetro"
-                    content={<FormParametro onClose={(success) => closeSideDrawer(success)} paramData={paramSelecionado ? paramSelecionado : undefined}/>}
+                    title={paramSelecionado ? "Editar Parâmetro" : "Cadastrar Parâmetro"}
+                    content={<FormParametro onClose={(success) => closeSideDrawer(success)} onDelete={handleDeleteParam} paramData={paramSelecionado ? paramSelecionado : undefined} />}
                 />
+
             }
         </>
     )
