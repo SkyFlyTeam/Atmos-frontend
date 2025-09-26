@@ -1,3 +1,4 @@
+import AtmosIcon from "@/components/AtmosIcon/AtmosIcon";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -28,17 +29,14 @@ const LoginPage = () => {
     const loginLogoAtmos = (sizeRem: number, className?: string) => {
         return (
             <div className={`${className ? className : ""}`}>
-                <img className={`mx-auto w-[${sizeRem}rem]`} src="/logo.svg" />
-                <p className={`text-center text-[${sizeRem/10}rem] text-nowrap`}>Bem vindo a <span className={`text-green ${londrina}`}>Atmos</span>!</p>
+                <AtmosIcon className={`mx-auto w-[${sizeRem}rem]`} />
+                <p className={`text-center text-[${sizeRem / 10}rem] text-nowrap`}>Bem vindo a <span className={`text-green ${londrina}`}>Atmos</span>!</p>
             </div>
         )
     }
 
 
     return (
-        // <div className="absolute w-screen h-full top-0 left-0">
-        // <div className="w-screen h-screen flex flex-row gap-0">
-
         <Form>
             <div className="absolute text-[#00312D] w-screen min-h-full top-0 left-0 flex flex-row gap-0 z-[-1]">
                 <div className="text-wrap flex flex-col justify-center content-center invisible w-0 md:visible md:w-[50%]" >
@@ -47,7 +45,7 @@ const LoginPage = () => {
                 <div className="bg-[#DEFFD9] align-bottom w-full md:w-[50%] flex flex-col justify-center">
                     <div className="mx-auto mt-32 mb-10 bg-white rounded-[18] px-8 py-20 md:py-30 min-w-[400px] md:min-w-[350px] w-[67%] min-h-[690px] md:min-h-[540px] shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] flex flex-col justify-center">
 
-                        {loginLogoAtmos(20, "visible w-full mb-12 md:invisible md:w-0 md:h-0 md:mb-0")}
+                        {loginLogoAtmos(20, "visible  mb-12 md:invisible md:w-0 md:h-0 md:mb-0")}
                         
 
                         <div className="flex flex-col justify-center gap-12">
