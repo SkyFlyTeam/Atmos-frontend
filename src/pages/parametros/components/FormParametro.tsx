@@ -6,9 +6,10 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { parametroServices } from "@/services/parametroServices";
 import { toast } from "react-toastify";
+import Modal from "@/components/Modal/Modal";
 
 type FormParametroProps = {
   paramData?: Parametro;
@@ -33,6 +34,8 @@ const FormParametro = ({ paramData, onClose }: FormParametroProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: paramData || {},
   });
+
+  const [showConfirmDelete, setShowConfimDelete] = useState<boolean>(false);
 
   useEffect(() => {
     if (paramData) {
@@ -68,18 +71,23 @@ const FormParametro = ({ paramData, onClose }: FormParametroProps) => {
     }
   };
 
-const handleDelete = async () => {
-  if (paramData) {
-    try {
-      await parametroServices.deleteParametro(paramData.pk); 
-      toast.success("Parâmetro excluído com sucesso!");
-      onClose(true);
-    } catch (error) {
-      console.error("Erro ao deletar parâmetro:", error);
-      toast.error("Erro ao tentar excluir parâmetro.");
+  const handleDelete = () => {
+    setShowConfimDelete(true); // Exibe o modal de confirmação
+  };
+
+  const handleConfirmDelete = async () => {
+    if (paramData) {
+      try {
+        await parametroServices.deleteParametro(paramData.pk);
+        toast.success("Parâmetro excluído com sucesso!");
+        onClose(true); // Fechar com sucesso
+      } catch (error) {
+        console.error("Erro ao deletar parâmetro:", error);
+        toast.error("Erro ao tentar excluir parâmetro.");
+      }
     }
-  }
-};
+    setShowConfimDelete(false); // Fechar o modal
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 flex flex-col items-end md:w-md w-full">
@@ -178,6 +186,25 @@ const handleDelete = async () => {
         )}
         <Button type="submit">Salvar</Button>
       </div>
+
+      {showConfirmDelete && (
+        <Modal
+          title="Atenção!"
+          content={<span>{`Tem certeza que deseja excluir o parâmetro ${paramData?.nome}?`}</span>}
+          open={showConfirmDelete}
+          onClose={() => setShowConfimDelete(false)}
+          buttons={
+            <div className="flex items-center gap-2">
+              <Button variant="secondary" onClick={() => setShowConfimDelete(false)}>
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={handleConfirmDelete}>
+                Deletar
+              </Button>
+            </div>
+          }
+        />
+      )}
     </form>
   );
 };
