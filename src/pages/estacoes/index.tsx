@@ -100,21 +100,48 @@ export default function EstacoesPage() {
     return (
       <div className="flex flex-col gap-3">
         <div className="w-full max-w-[1264px] mx-auto">
-          <div className="flex items-end justify-between mb-2">
-            <h1>Estações</h1>
-            <div className="flex items-center gap-2">
-              <div className="relative w-[270px] bg-white">
+          {/* Mobile header (md and below): title + button constrained to 304px, search below aligned with cards */}
+          <div className="flex flex-col gap-2 mb-2 md:hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 justify-items-center">
+              <div className="w-[304px] flex items-center justify-between">
+                <h1>Estações</h1>
+                <ButtonIconRight
+                  label="Criar Estação"
+                  onClick={onAddStation}
+                  icon={<FaPlus className="!w-3 !h-3" />}
+                  className="w-[154px] h-[47px]"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 justify-items-center">
+              <div className="relative w-[304px] bg-white">
                 <SearchIcon className="absolute left-2 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Pesquisar estações..."
-                  aria-label="Pesquisar estações"
+                  placeholder="Buscar"
+                  aria-label="Buscar"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="pl-8 h-[45px]"
+                />
+              </div>
+            </div>
+          </div>
+          {/* Desktop/Tablet header (md and up): title left, search + button on the right in the same row */}
+          <div className="hidden md:flex items-center justify-between mb-2">
+            <h1>Estações</h1>
+            <div className="flex items-center gap-2">
+              <div className="relative w-[304px] bg-white">
+                <SearchIcon className="absolute left-2 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Buscar"
+                  aria-label="Buscar"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   className="pl-8 h-[45px]"
                 />
               </div>
               <ButtonIconRight
-                label="Nova Estação"
+                label="Criar Estação"
                 onClick={onAddStation}
                 icon={<FaPlus className="!w-3 !h-3" />}
                 className="w-[154px] h-[47px]"
@@ -138,21 +165,48 @@ export default function EstacoesPage() {
   return (
     <div className="flex flex-col gap-3">
       <div className="w-full max-w-[1264px] mx-auto">
-        <div className="flex items-end justify-between mb-2">
-          <h1>Estações</h1>
-          <div className="flex items-center gap-2">
-            <div className="relative w-[270px] bg-white">
+        {/* Mobile header (md and below): title + button constrained to 304px, search below aligned with cards */}
+        <div className="flex flex-col gap-2 mb-2 md:hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 justify-items-center">
+            <div className="w-[304px] flex items-center justify-between">
+              <h1>Estações</h1>
+              <ButtonIconRight
+                label="Criar Estação"
+                onClick={onAddStation}
+                icon={<FaPlus className="!w-3 !h-3" />}
+                className="w-[154px] h-[47px]"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 justify-items-center">
+            <div className="relative w-[304px] bg-white">
               <SearchIcon className="absolute left-2 top-3 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Pesquisar estações..."
-                aria-label="Pesquisar estações"
+                placeholder="Buscar"
+                aria-label="Buscar"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="pl-8 h-[45px]"
+              />
+            </div>
+          </div>
+        </div>
+        {/* Desktop/Tablet header (md and up): title left, search + button on the right in the same row */}
+        <div className="hidden md:flex items-center justify-between mb-2">
+          <h1>Estações</h1>
+          <div className="flex items-center gap-2">
+            <div className="relative w-[304px] bg-white">
+              <SearchIcon className="absolute left-2 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Buscar"
+                aria-label="Buscar"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="pl-8 h-[45px]"
               />
             </div>
             <ButtonIconRight
-              label=" Criar Estação"
+              label="Criar Estação"
               onClick={onAddStation}
               icon={<FaPlus className="!w-3 !h-3" />}
               className="w-[154px] h-[47px]"
