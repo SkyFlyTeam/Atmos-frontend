@@ -15,10 +15,10 @@ type UsuarioModalProps = {
   onDelete?: (usuario: Usuario) => void; // Callback para deletar usuário
 };
 
-const UsuarioModal: React.FC<UsuarioModalProps> = ({ 
-  open, 
-  onClose, 
-  usuario, 
+const UsuarioModal: React.FC<UsuarioModalProps> = ({
+  open,
+  onClose,
+  usuario,
   onSuccess,
   onDelete
 }) => {
@@ -28,7 +28,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = ({
     senha: ''
   });
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const isEditing = !!usuario;
 
@@ -53,7 +53,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = ({
   }, [open, usuario]);
 
   const validateForm = () => {
-    const newErrors: {[key: string]: string} = {};
+    const newErrors: { [key: string]: string } = {};
 
     if (!formData.nome.trim()) {
       newErrors.nome = 'Nome é obrigatório';
@@ -157,29 +157,31 @@ const UsuarioModal: React.FC<UsuarioModalProps> = ({
 
             <div className="space-y-2">
               <Label htmlFor="senha" className="text-dark-cyan font-medium">
-                Senha {isEditing && <span className="text-gray-500 text-sm"></span>}
+                {isEditing ? 'Trocar Senha' : 'Senha'}
+                {isEditing && <span className="text-gray-500 text-sm"></span>}
               </Label>
+
               <Input
                 id="senha"
                 type="password"
                 value={formData.senha}
                 onChange={(e) => handleInputChange('senha', e.target.value)}
-                placeholder={isEditing ? "Senha@123 (opcional)" : "Senha@123"}
+                placeholder={isEditing ? "********" : "Senha@123"}
                 className={`w-full px-4 py-3 rounded-lg border ${errors.senha ? 'border-red-500' : 'border-gray-300'} focus:border-green focus:ring-1 focus:ring-green font-londrina`}
               />
               {errors.senha && <span className="text-red-500 text-sm">{errors.senha}</span>}
               {/* Botões de ação abaixo da senha, alinhados à direita */}
               <div className="flex justify-end pt-2 gap-2">
                 {isEditing && (
-                  <Button 
+                  <Button
                     variant={'destructive'}
-                    onClick={handleDelete} 
+                    onClick={handleDelete}
                     disabled={loading}
                   >
                     Excluir
                   </Button>
                 )}
-                <Button 
+                <Button
                   onClick={handleSubmit}
                   disabled={loading}
                   type='submit'
