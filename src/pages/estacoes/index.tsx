@@ -215,9 +215,11 @@ export default function EstacoesPage() {
         </div>
 
         {estacoes.length === 0 ? (
-          <Card className="p-6 w-[304px]">
-            <div className="text-muted-foreground">Nenhuma estação encontrada.</div>
-          </Card>
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 justify-items-center mt-4">
+            <div className="w-[304px] flex justify-center">
+              <img src="/sem-dados.svg" alt="Sem dados" className="w-[304px] h-auto" />
+            </div>
+          </div>
         ) : (
           <>
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 justify-items-center mt-4">
