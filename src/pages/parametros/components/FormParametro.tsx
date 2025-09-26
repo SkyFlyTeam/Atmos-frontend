@@ -19,9 +19,9 @@ type FormParametroProps = {
 type FormData = z.infer<typeof formSchema>;
 
 const formSchema = z.object({
-  json_id: z.string().nonempty("Chave Json é obrigatório"),
+  json_id: z.string("Chave Json é obrigatório").nonempty("Chave Json é obrigatório"),
   nome: z.string("Nome é obrigatório").min(4, "Nome deve conter mais de 4 caracteres"),
-  unidade: z.string().nonempty("Unidade é obrigatória"),
+  unidade: z.string("Unidade é obrigatória").nonempty("Unidade é obrigatória"),
   tipo: z.string("Tipo é obrigatório").min(4, "Tipo deve conter mais de 4 caracteres"),
   offset: z.coerce.number("Offset é obrigatório").min(0, "Offset não pode ser negativo"),
   fator: z.coerce.number("Fator deve ser um número").optional(),
@@ -72,7 +72,8 @@ const handleDelete = async () => {
   if (paramData) {
     try {
       await parametroServices.deleteParametro(paramData.pk); 
-      onClose(false);
+      toast.success("Parâmetro excluído com sucesso!");
+      onClose(true);
     } catch (error) {
       console.error("Erro ao deletar parâmetro:", error);
       toast.error("Erro ao tentar excluir parâmetro.");
@@ -173,7 +174,7 @@ const handleDelete = async () => {
       </div>
       <div className="flex gap-3">
         {paramData && (
-          <Button variant="destructive" onClick={handleDelete}>Excluir Parâmetro</Button>
+          <Button type="button" variant="destructive" onClick={() => handleDelete()}>Excluir Parâmetro</Button>
         )}
         <Button type="submit">Salvar</Button>
       </div>
