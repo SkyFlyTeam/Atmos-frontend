@@ -1,5 +1,4 @@
 import type { AppProps } from 'next/app';
-import { Lato, Londrina_Solid } from 'next/font/google';
 
 import Navbar from '@/components/Navbar/Navbar';
 
@@ -7,16 +6,9 @@ import "../styles/globals.css";
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { lato, londrina } from '@/lib/fonts';
 
-const lato = Lato({
-  weight: ['100', '300', '400', '700', '900'],
-  subsets: ['latin']
-})
 
-const londrina = Londrina_Solid({
-  weight: ['100', '300', '400', '900'],
-  subsets: ['latin']
-})
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
