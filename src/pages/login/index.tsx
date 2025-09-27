@@ -18,9 +18,7 @@ const LoginPage = () => {
     }
 
     const [loginData, setLoginData] = useState<Login>(blankLogin);
-    const [loginReturn, setLoginReturn] = useState<Login>({ email: "Not Logged In" } as Login);
     const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
-    const [loginErr, setLoginErr] = useState<{}>({});
 
 
     const delayLogin = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -30,20 +28,8 @@ const LoginPage = () => {
     }
     const fetchLogin = async () => {
         const login = await loginServices.setLogin(loginData);
-        setLoginReturn(login as Login)
 
         return login;
-    }
-
-    const getToken = () =>{
-        if(typeof window == 'undefined' || !window.localStorage)
-            return "";
-
-        const tester = localStorage.getItem('token');
-
-        if(tester)
-            return tester;
-        return "";
     }
 
     const saveLogin = async (token: string) => {
@@ -87,20 +73,6 @@ const LoginPage = () => {
         setIsLoggingIn(false);
     }
 
-
-    const loginDebug = () => {
-        return (
-            <>
-                {JSON.stringify(loginData)}
-                <br />
-                {JSON.stringify(loginReturn)}
-                <br />
-                {(loginReturn as any).status}
-                <br />
-                {getToken()}
-            </>
-        )
-    }
 
     return (
         <form onSubmit={handleSubmitLogin}>
@@ -153,7 +125,6 @@ const LoginPage = () => {
                     </div>
                 </div>
             </div>
-            {loginDebug()}
         </form>
     )
 }
