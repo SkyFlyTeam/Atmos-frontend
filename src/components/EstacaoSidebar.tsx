@@ -153,11 +153,27 @@ export default function EstacaoSidebar({
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
+    // Validação de tamanho (20MB = 20 * 1024 * 1024 bytes)
+    const maxSize = 20 * 1024 * 1024; // 20MB em bytes
+    // alert(selectedFile.size + "\n" + maxSize)
+
+    if (selectedFile.size > maxSize) {
+        toast.error('A imagem deve ter no máximo 20MB');
+        
+        setTimeout(() => {
+          if (e.target) e.target.value = ''; 
+        }, 0 ) // Limpa o input
+        return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const base64 = event.target?.result as string;
       setImagemUrl(base64);
       setImagemRemovida(false); // Resetar flag de remoção
+    };
+    reader.onerror = () => {
+        toast.error('Erro ao processar imagem');
     };
     reader.readAsDataURL(selectedFile);
   }
