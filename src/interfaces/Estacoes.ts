@@ -7,5 +7,6 @@ export interface Estacao {
     lat?: string | null,
     long?: string | null,
     endereco?: string | null,
-    parametros?: string[]
+    parametros?: string[],
+    imagemBase64?: string | null
 }

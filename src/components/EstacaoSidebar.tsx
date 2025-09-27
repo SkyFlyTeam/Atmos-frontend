@@ -44,8 +44,6 @@ type Props = {
   userRole?: "admin" | "user";
 };
 
-// Parâmetros serão carregados do backend via hook
-
 export default function EstacaoSidebar({
   open,
   onOpenChange,
@@ -55,7 +53,7 @@ export default function EstacaoSidebar({
   userRole = "admin",
 }: Props) {
   const isReadOnly = userRole === "user";
-  const { parametros, loading: parametrosLoading } = useParametros();
+  const { parametros } = useParametros();
 
   const titulo = useMemo(() => {
     if (userRole === "user") return "Visualizar estação";
@@ -69,8 +67,8 @@ export default function EstacaoSidebar({
     register,
     handleSubmit,
     formState: { errors },
-    reset,
     watch,
+    reset,
     setValue,
   } = useForm<EstacaoFormSchema>({
     resolver: zodResolver(estacaoFormSchema),
@@ -88,8 +86,8 @@ export default function EstacaoSidebar({
   });
 
   const [imagemUrl, setImagemUrl] = useState<string | null>(null);
+  const [imagemRemovida, setImagemRemovida] = useState(false); // Flag para indicar remoção
   const [parametrosSelecionados, setParametrosSelecionados] = useState<string[]>([]);
-
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -104,10 +102,10 @@ export default function EstacaoSidebar({
         lat: estacao.lat ?? "",
         long: estacao.long ?? "",
         endereco: estacao.endereco ?? "",
-        imagemUrl: null,
+        imagemUrl: null, // não vem em Base64 agora
         parametros: estacao.parametros ?? [],
       });
-      setImagemUrl(null);
+      setImagemUrl(estacao.imagemBase64 ?? null);
       setParametrosSelecionados(estacao.parametros ?? []);
     } else {
       reset({
@@ -124,6 +122,10 @@ export default function EstacaoSidebar({
       setImagemUrl(null);
       setParametrosSelecionados([]);
     }
+    
+    // Resetar estados de imagem
+    setImagemUrl(null);
+    setImagemRemovida(false);
   }, [open, estacao, reset]);
 
   function handleAddParametro(value: string) {
@@ -147,16 +149,37 @@ export default function EstacaoSidebar({
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    setImagemUrl(url);
-    setValue("imagemUrl", url);
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    // Validação de tamanho (20MB = 20 * 1024 * 1024 bytes)
+    const maxSize = 20 * 1024 * 1024; // 20MB em bytes
+    // alert(selectedFile.size + "\n" + maxSize)
+
+    if (selectedFile.size > maxSize) {
+        toast.error('A imagem deve ter no máximo 20MB');
+        
+        setTimeout(() => {
+          if (e.target) e.target.value = ''; 
+        }, 0 ) // Limpa o input
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      setImagemUrl(base64);
+      setImagemRemovida(false); // Resetar flag de remoção
+    };
+    reader.onerror = () => {
+        toast.error('Erro ao processar imagem');
+    };
+    reader.readAsDataURL(selectedFile);
   }
 
   function handleRemoveImage() {
     setImagemUrl(null);
-    setValue("imagemUrl", null);
+    setImagemRemovida(true); // Marcar como removida
   }
 
   function onSubmit(data: EstacaoFormSchema) {
@@ -165,11 +188,12 @@ export default function EstacaoSidebar({
       uuid: data.uuid,
       nome: data.nome,
       descricao: data.descricao,
-      status: data.status === "true", // Converter string para boolean
+      status: data.status === "true",
       lat: data.lat || null,
       long: data.long || null,
       endereco: data.endereco || null,
-      parametros: data.parametros,
+      parametros: data.parametros || [],
+      imagemBase64: imagemRemovida ? null : imagemUrl // Se foi removida, envia null
     };
     try {
       if (mode === "create") {
@@ -327,12 +351,17 @@ export default function EstacaoSidebar({
 
           {/* Imagem */}
           <div className="flex gap-4 items-start">
-            {/* Caixa da imagem */}
             <div className="border-2 border-[#72BF01] rounded-3xl h-58 w-100 flex items-center justify-center overflow-hidden bg-gray-200">
               {imagemUrl ? (
                 <img
                   src={imagemUrl}
                   alt="Pré-visualização"
+                  className="h-full w-full object-cover"
+                />
+              ) : !imagemRemovida && estacao?.imagemBase64 ? (
+                <img
+                  src={estacao.imagemBase64}
+                  alt={estacao.nome}
                   className="h-full w-full object-cover"
                 />
               ) : (
@@ -346,7 +375,7 @@ export default function EstacaoSidebar({
                 type="button"
                 className="bg-transparent text-[#72BF01] rounded-2xl font-semibold border-[#72BF01] border-[2px] hover:text-[#5a9901] hover:bg-transparent "
                 onClick={handleRemoveImage}
-                disabled={isReadOnly || !imagemUrl}
+                disabled={isReadOnly || (!imagemUrl && !estacao?.imagemBase64)}
               >
                 Remover foto
               </Button>

@@ -55,18 +55,19 @@ const updateEstacao = async (
   }
 };
 
-const deleteEstacao = async (
-  estacao_id: number
-): Promise<any | ApiException> => {
-  try {
-    const { data } = await Api.delete(`/estacao/${estacao_id}`);
-    return data;
-  } catch (error) {
-    if (error instanceof Error)
-      return new ApiException(error.message || "Erro ao deletar estação.");
-    return new ApiException("Erro desconhecido.");
-  }
-};
+  const deleteEstacao = async (
+    estacao_id: number
+  ): Promise<any | ApiException> => {
+    try {
+      const { data } = await Api.delete(`/estacao/${estacao_id}`);
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        return new ApiException(error.message || "Erro ao deletar estação.");
+      }
+      return new ApiException("Erro desconhecido.");
+    }
+  };
 
 const getEstacaoParametros = async (
   estacao_pk: number
