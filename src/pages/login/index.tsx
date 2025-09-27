@@ -7,8 +7,10 @@ import { ApiException } from "@/config/apiException";
 import { Login } from "@/interfaces/Login";
 import { londrina } from "@/lib/fonts";
 import { loginServices } from "@/services/loginServices"
+import { error } from "console";
 import { LogIn } from "lucide-react";
 import { ChangeEvent, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 
 const LoginPage = () => {
@@ -36,6 +38,8 @@ const LoginPage = () => {
         localStorage.setItem('token', token);
 
         resetFormLogin();
+
+        toast.success("Sucesso.")
     }
 
     const loginLogoAtmos = (sizeRem: number, className?: string) => {
@@ -66,10 +70,11 @@ const LoginPage = () => {
 
         await delayLogin(1200);
 
-        if ((login as Login).email)
-            if (login.token)
-                saveLogin(login.token)
-
+        if ((login as Login).email && login.token)
+            saveLogin(login.token)
+        else        
+            toast.error(login.message)
+        
         setIsLoggingIn(false);
     }
 
@@ -121,7 +126,6 @@ const LoginPage = () => {
                                 disabled={isLoggingIn}
                             >Entrar</Button>
                         </div>
-                        {/* <span className="text-wrap">{JSON.stringify(loginReturn)}</span> */}
                     </div>
                 </div>
             </div>
