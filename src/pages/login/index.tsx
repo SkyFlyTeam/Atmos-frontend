@@ -86,7 +86,7 @@ const LoginPage = () => {
                     {loginLogoAtmos(28)}
                 </div>
                 <div className="bg-[#DEFFD9] align-bottom w-full md:w-[50%] flex flex-col justify-center">
-                    <div className="mx-auto mt-32 mb-10 bg-white rounded-[18] px-8 py-20 md:py-30 min-w-[400px] md:min-w-[350px] w-[67%] min-h-[690px] md:min-h-[540px] shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] flex flex-col justify-center">
+                    <div className="mx-auto mt-32 mb-10 bg-white rounded-[18] px-8 py-20 md:py-30 min-w-[320px] w-[67%] min-h-[690px] md:min-h-[540px] shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] flex flex-col justify-center">
 
                         {loginLogoAtmos(20, "visible  mb-12 md:invisible md:w-0 md:h-0 md:mb-0")}
 
