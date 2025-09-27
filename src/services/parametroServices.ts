@@ -30,9 +30,19 @@ const createParametro = async (parametro: Parametro): Promise<Parametro[] | ApiE
     }
 };
 
-const updateParametro = async (parametro: Parametro) => {
-    return
+const updateParametro = async (parametro: Parametro): Promise<Parametro | ApiException> => {
+  try {
+    const { data } = await Api.put(`/tipo-parametro/${parametro.pk}`, parametro);
+    console.log("Resposta da atualização:", data);
+    return data as Parametro;
+  } catch (error) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao atualizar parâmetro.");
+    }
+    return new ApiException("Erro desconhecido.");
+  }
 };
+
 
 const deleteParametro = async (param_id: number): Promise<any | ApiException> => {
     try{

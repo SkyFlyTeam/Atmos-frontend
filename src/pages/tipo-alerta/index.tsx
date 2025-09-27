@@ -8,6 +8,8 @@ import ButtonIconRight from "@/components/Buttons/ButtonIconRight"
 import Modal from "@/components/Modal/Modal"
 import { toast } from "react-toastify"
 import { tipoAlertaServices } from "@/services/tipoAlertaService"
+import SideDrawer from "@/components/SideDrawer/SideDrawer"
+import FormTipoAlerta from "./components/FormTipoAlerta"
 import { DataTable } from "@/components/DataTable/Datatable"
 import { Card } from "@/components/ui/card"
 import SkeletonTable from "@/components/DataTable/DatatableSkeleton"
@@ -30,6 +32,7 @@ const TipoAlertasPage = () => {
             const tipoAlertass = await tipoAlertaServices.getAllTipoAlertas();
             setTipoAlertas(tipoAlertass as TipoAlerta[]);
         } catch {
+            console.log("Erro ao buscar tipos de alerta");
             toast.error("Erro ao buscar tipos de alerta");
             setTipoAlertas([]);
         } finally{
@@ -73,6 +76,7 @@ const TipoAlertasPage = () => {
             toast.error("Erro ao deletar tipo de alerta.")
         }
         setShowConfimDelete(false);
+        closeSideDrawer(true);
     }
 
     const closeSideDrawer = (success: boolean = false) => {
@@ -117,7 +121,7 @@ const TipoAlertasPage = () => {
                         </div>
                     }
                     open={showConfirmDelete}
-                    onClose={() => setShowConfimDelete(false)}
+                    onClose={() => closeSideDrawer()}
                     buttons={
                         <div className="flex items-center gap-2">
                             <Button variant="secondary" onClick={() => setShowConfimDelete(false)}>Cancelar</Button>
@@ -126,6 +130,20 @@ const TipoAlertasPage = () => {
                     }
                 />
             )}
+
+            {showSideDrawer && 
+                <SideDrawer 
+                    onClose={() => closeSideDrawer()}
+                    title={tipoAlertaSelecionado ? "Editar tipo de alerta" : "Criar tipo de alerta"}
+                    content={<FormTipoAlerta 
+                        onClose={(success) => closeSideDrawer(success)} 
+                        paramData={tipoAlertaSelecionado ? tipoAlertaSelecionado : undefined}
+                        onDelete={tipoAlertaSelecionado ? () => {
+                            setShowConfimDelete(true);
+                        } : undefined}
+                    />}
+                />
+            }
         </>
     )
 }

@@ -93,7 +93,6 @@ export default function EstacaoSidebar({
   useEffect(() => {
 
     if (!open) return;
-
     if (estacao) {
       reset({
         uuid: estacao.uuid ?? "",
