@@ -4,27 +4,53 @@ import { CircleUserRound } from 'lucide-react';
 import React, { useState } from 'react';
 import { useRouter, usePathname } from "next/navigation";
 
+// Abas comentadas conforme solicitado
 const abas = [
-    {nome: "Início", rota: "/", necessarioLogin: false},
-    {nome: "Guia Educativo", rota: "/guia-educativo", necessarioLogin: false},
-    {nome: "Dashboard", rota: "/dashboard", necessarioLogin: false},
+    // {nome: "Início", rota: "/", necessarioLogin: false},
+    // {nome: "Guia Educativo", rota: "/guia-educativo", necessarioLogin: false},
+    // {nome: "Dashboard", rota: "/dashboard", necessarioLogin: false},
     {nome: "Estações", rota: "/estacoes", necessarioLogin: false},
     {nome: "Parâmetros", rota: "/parametros", necessarioLogin: true},
-    {nome: "Alertas", rota: "/alertas", necessarioLogin: false},
+    {nome: "Alertas", rota: "/tipo-alerta", necessarioLogin: false}, // Corrigido para /tipo-alerta
     {nome: "Usuários", rota: "/usuarios", necessarioLogin: true},
 ]
 
-const Navbar: React.FC = () => {
-    const [estaLogado, setEstaLogado] = useState<boolean>(false)
 
+const Navbar: React.FC = () => {
+    const [estaLogado, setEstaLogado] = useState<boolean>(false);
     const router = useRouter();
     const pathname = usePathname();
+
+    // Checa token no localStorage para manter login ao recarregar
+    React.useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const token = localStorage.getItem('token');
+            setEstaLogado(!!token);
+            // Ouve evento customizado para atualizar estado ao logar
+            const onUsuarioLogado = () => setEstaLogado(true);
+            window.addEventListener('usuarioLogado', onUsuarioLogado);
+            return () => window.removeEventListener('usuarioLogado', onUsuarioLogado);
+        }
+    }, []);
 
     const abaSelecionada = abas.find((aba) => aba.rota === pathname)?.nome || "";
 
     const handleTrocaDeAba = (aba: typeof abas[number]) => {
         if (pathname !== aba.rota) {
             router.push(aba.rota);
+        }
+    };
+
+    // Função para login/logout
+    const handleLoginLogout = () => {
+        if (estaLogado) {
+            // Logout
+            localStorage.removeItem('token');
+            setEstaLogado(false);
+            router.push('/');
+        } else {
+            // Login
+            router.push('/login');
         }
     };
 
@@ -78,16 +104,16 @@ const Navbar: React.FC = () => {
                         />
                     )}
 
-                        <button
-                            onClick={() => setEstaLogado(!estaLogado)}
-                            className={`px-6 py-2 rounded-full text-sm font-medium transition-colors hover:bg-green-700 text-white ${estaLogado ? 'bg-red-600 hover:bg-red-700' : ''}`}
-                            style={{
-                                cursor: "pointer",
-                                ...( !estaLogado ? { backgroundColor: 'var(--color-green)' } : {} )
-                              }}
-                        >
-                            {estaLogado ? 'Sair' : 'Login'}
-                        </button>
+                    <button
+                        onClick={handleLoginLogout}
+                        className={`px-6 py-2 rounded-full text-sm font-medium transition-colors hover:bg-green-700 text-white ${estaLogado ? 'bg-red-600 hover:bg-red-700' : ''}`}
+                        style={{
+                            cursor: "pointer",
+                            ...( !estaLogado ? { backgroundColor: 'var(--color-green)' } : {} )
+                        }}
+                    >
+                        {estaLogado ? 'Sair' : 'Login'}
+                    </button>
 
                     </div>
 

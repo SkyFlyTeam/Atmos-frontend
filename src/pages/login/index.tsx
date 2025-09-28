@@ -36,10 +36,12 @@ const LoginPage = () => {
 
     const saveLogin = async (token: string) => {
         localStorage.setItem('token', token);
-
         resetFormLogin();
-
-        toast.success("Sucesso.")
+        toast.success("Sucesso.");
+        // Dispara evento customizado para Navbar atualizar estado
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('usuarioLogado'));
+        }
     }
 
     const loginLogoAtmos = (sizeRem: number, className?: string) => {
