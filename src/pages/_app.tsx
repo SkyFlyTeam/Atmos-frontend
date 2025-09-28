@@ -12,11 +12,14 @@ import { lato, londrina } from '@/lib/fonts';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
+    <>
+      <Navbar />
       <main className={`flex flex-1 flex-col gap-4 md:px-12 px-4 py-0 ${londrina.className} ${lato.className}`}>
-        <Navbar />
         <Component {...pageProps} />
         <ToastContainer position="bottom-right" autoClose={2000} />
       </main>
+    </>
+      
   );
 }
 
