@@ -137,7 +137,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = ({
                 value={formData.nome}
                 onChange={(e) => handleInputChange('nome', e.target.value)}
                 placeholder="Vinicius Alves Nunes da Silva"
-                className={`w-full px-4 py-3 rounded-lg border ${errors.nome ? 'border-red-500' : 'border-gray-300'} focus:border-green focus:ring-1 focus:ring-green font-londrina`}
+                className={`w-full px-4 py-3 rounded-lg border ${errors.nome ? 'border-red-500' : 'border-gray-300'} focus:border-green focus:ring-1 focus:ring-green font-lato`}
               />
               {errors.nome && <span className="text-red-500 text-sm">{errors.nome}</span>}
             </div>
@@ -150,7 +150,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = ({
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 placeholder="vinny@gmail.com"
-                className={`w-full px-4 py-3 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:border-green focus:ring-1 focus:ring-green font-londrina`}
+                className={`w-full px-4 py-3 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:border-green focus:ring-1 focus:ring-green font-lato`}
               />
               {errors.email && <span className="text-red-500 text-sm">{errors.email}</span>}
             </div>
@@ -167,7 +167,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = ({
                 value={formData.senha}
                 onChange={(e) => handleInputChange('senha', e.target.value)}
                 placeholder={isEditing ? "********" : "Senha@123"}
-                className={`w-full px-4 py-3 rounded-lg border ${errors.senha ? 'border-red-500' : 'border-gray-300'} focus:border-green focus:ring-1 focus:ring-green font-londrina`}
+                className={`w-full px-4 py-3 rounded-lg border ${errors.senha ? 'border-red-500' : 'border-gray-300'} focus:border-green focus:ring-1 focus:ring-green font-lato`}
               />
               {errors.senha && <span className="text-red-500 text-sm">{errors.senha}</span>}
               {/* Botões de ação abaixo da senha, alinhados à direita */}

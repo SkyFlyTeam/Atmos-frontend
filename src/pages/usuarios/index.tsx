@@ -148,7 +148,7 @@ const UsuariosPage = () => {
   if (loading) {
     return (
             <div className="flex-1 pr-0 md:pr-8 w-full">
-              <h1 className="text-4xl font-bold text-dark-green mb-8 font-londrina">Usuários</h1>
+              <h1 className="text-4xl font-bold text-dark-green mb-8 font-lato">Usuários</h1>
               <Card className="flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none">
                 <div className="w-full flex justify-between md:items-center items-end flex-wrap gap-4 md:flex-row flex-col-reverse mb-6">
                   <div className="relative bg-white md:w-sm w-full animate-pulse">
@@ -192,7 +192,7 @@ const UsuariosPage = () => {
     <>
           {/* Área Principal - Lista de Usuários */}
           <div className="flex gap-3 flex-col">
-            <h1 className="text-4xl font-bold text-dark-green mb-8 font-londrina">Usuários</h1>
+            <h1 className="text-4xl font-bold text-dark-green mb-8 font-lato">Usuários</h1>
             
             <Card className="flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none">
               <div className="w-full flex justify-between md:items-center items-end flex-wrap gap-4 md:flex-row flex-col-reverse mb-6">
@@ -221,13 +221,13 @@ const UsuariosPage = () => {
                     </colgroup>
                     <TableHeader>
                       <TableRow className="bg-gray/10 hover:bg-gray/10 border-b-2 border-gray/30">
-                        <TableHead className="font-semibold text-dark-cyan font-londrina text-lg h-12">
+                        <TableHead className="font-semibold text-dark-cyan font-lato text-lg h-12 px-6">
                           Nome
                         </TableHead>
-                        <TableHead className="font-semibold text-dark-cyan font-londrina text-lg h-12">
+                        <TableHead className="font-semibold text-dark-cyan font-lato text-lg h-12 px-6">
                           Email
                         </TableHead>
-                        <TableHead className="font-semibold text-dark-cyan font-londrina text-lg h-12 text-right">
+                        <TableHead className="font-semibold text-dark-cyan font-lato text-lg h-12 text-right px-6">
                           Ações
                         </TableHead>
                       </TableRow>
@@ -274,13 +274,13 @@ const UsuariosPage = () => {
                       )}
                       {!error && paginatedUsers.map((usuario) => (
                         <TableRow key={usuario.pk} className="hover:bg-gray/5 border-b border-gray/20">
-                          <TableCell className="text-dark-cyan font-londrina text-base py-3">
+                          <TableCell className="text-dark-cyan font-lato text-base py-3 px-6">
                             {usuario.nome}
                           </TableCell>
-                          <TableCell className="text-dark-cyan font-londrina text-base py-3">
+                          <TableCell className="text-dark-cyan font-lato text-base py-3 px-6">
                             {usuario.email}
                           </TableCell>
-                          <TableCell className="text-right py-3">
+                          <TableCell className="text-right py-3 px-6">
                             <div className="flex justify-end gap-2">
                               <ActionButtons
                                 onEdit={() => handleEditUser(usuario)}
@@ -326,7 +326,7 @@ const UsuariosPage = () => {
                           width={400}
                           height={300}
                         />
-                        <span style={{fontFamily: "Londrina Solid"}} className="text-2xl text-dark-cyan">Oops! Parece que não tem dados aqui!</span>
+                              <span style={{fontFamily: "Lato"}} className="text-2xl text-dark-cyan">Oops! Parece que não tem dados aqui!</span>
                       </div>
                     </div>
                   ) : (
@@ -334,11 +334,11 @@ const UsuariosPage = () => {
                       <Card key={usuario.pk} className="w-full p-4 shadow">
                         <div className="flex justify-between text-sm py-2">
                           <strong className="text-gray-600">Nome:</strong>
-                          <span className="text-dark-cyan font-londrina">{usuario.nome}</span>
+                          <span className="text-dark-cyan font-lato">{usuario.nome}</span>
                         </div>
                         <div className="flex justify-between text-sm py-2">
                           <strong className="text-gray-600">Email:</strong>
-                          <span className="text-dark-cyan font-londrina">{usuario.email}</span>
+                          <span className="text-dark-cyan font-lato">{usuario.email}</span>
                         </div>
                         <div className="flex justify-between text-sm py-2">
                           <strong className="text-gray-600">Ações:</strong>
