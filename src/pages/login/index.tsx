@@ -32,11 +32,11 @@ const LoginPage = () => {
                 const auth = await loginServices.getAuth();
                 done = auth;
             }
-            catch (error) {}
+            catch (error) { }
             finally {
-                if(done)
+                if (done)
                     router.push("/");
-                if(done === undefined)
+                if (done === undefined)
                     setNeedLogin(true)
             }
         }
@@ -55,26 +55,15 @@ const LoginPage = () => {
         return login;
     }
 
-<<<<<<< HEAD
-    const saveLogin = async (token: string) => {
-        localStorage.setItem('token', token);
-        resetFormLogin();
-        toast.success("Sucesso.");
-        // Dispara evento customizado para Navbar atualizar estado
-        if (typeof window !== 'undefined') {
-            window.dispatchEvent(new Event('usuarioLogado'));
-        }
-=======
     const successLogin = async () => {
         resetFormLogin();
 
         setNeedLogin(false);
 
         router.push("/");
-         if (typeof window !== 'undefined') {
+
+        if (typeof window !== 'undefined')
             window.dispatchEvent(new Event('usuarioLogado'));
-        }
->>>>>>> 7c9a5ad (AT-20 feat: verificador de credencial)
     }
 
     const loginLogoAtmos = (sizeRem: number, className?: string) => {
@@ -101,7 +90,7 @@ const LoginPage = () => {
 
         setIsLoggingIn(true);
 
-        const login = await fetchLogin(); 
+        const login = await fetchLogin();
 
         if ((login as Usuario).email && (login as Usuario).token)
             successLogin()
