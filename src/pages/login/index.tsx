@@ -91,7 +91,6 @@ const LoginPage = () => {
         setIsLoggingIn(true);
 
         const login = await fetchLogin();
-
         if ((login as Usuario).email && (login as Usuario).token)
             successLogin()
         else
@@ -99,7 +98,6 @@ const LoginPage = () => {
 
 
         setIsLoggingIn(false);
-
     }
 
 
