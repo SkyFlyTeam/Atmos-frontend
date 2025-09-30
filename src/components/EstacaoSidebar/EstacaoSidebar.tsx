@@ -32,8 +32,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils";
-import { Textarea } from "./ui/textarea";
+import { Textarea } from "../ui/textarea";
 import { toast } from "react-toastify";
+
+import styles from './style.module.css'
 
 type Props = {
   open: boolean;
@@ -263,7 +265,7 @@ export default function EstacaoSidebar({
           {/* Status e coordenadas */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
             {/* Status */}
-            <div className="w-max">
+            <div className={styles.container}>
               <label className="block text-sm font-medium text-[#00312D] mb-1">Status</label>
               <div className="flex flex-col items-start gap-2">
                 <div className="flex items-center gap-2 mt-0.5">

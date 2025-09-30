@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Estacao } from '@/interfaces/Estacoes';
 import { Search, Plus, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import EstacaoSidebar from '@/components/EstacaoSidebar';
+import EstacaoSidebar from '@/components/EstacaoSidebar/EstacaoSidebar';
 import { useEstacoes } from '@/hooks/useEstacoes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
