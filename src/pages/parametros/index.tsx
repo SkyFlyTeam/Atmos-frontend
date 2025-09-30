@@ -79,6 +79,12 @@ const ParametrosPage = () => {
         setParamSelecionado(null);
     }
 
+    useEffect(() => {
+        console.log("confirm", showConfirmDelete);
+        console.log("param sel", paramSelecionado);
+        console.log("edit", showSideDrawer)
+    }, [showConfirmDelete, showSideDrawer, paramSelecionado])
+
     return (
         <>
             <div className="flex gap-3 flex-col">
@@ -115,10 +121,10 @@ const ParametrosPage = () => {
                         </div>
                     }
                     open={showConfirmDelete}
-                    onClose={() => closeSideDrawer()}
+                    onClose={() => {setShowConfimDelete(false); setParamSelecionado(null)}}
                     buttons={
                         <div className="flex items-center gap-2">
-                            <Button variant="secondary" onClick={() => closeSideDrawer(true)}>Cancelar</Button>
+                            <Button variant="secondary" onClick={() => {setShowConfimDelete(false); setParamSelecionado(null)}}>Cancelar</Button>
                             <Button variant="destructive" onClick={() => handleDeleteParam()}>Deletar</Button>
                         </div>
                     }
