@@ -31,9 +31,12 @@ export default function Estacoes() {
       }
       catch (error) { }
       finally {
-        if (done)
+        if (done) {
           setUserRole('admin')
-        setUserRole('user')
+        }
+        else{
+          setUserRole('user')
+        }
       }
     }
     verifyAuth();
