@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react';
 import { Estacao } from '@/interfaces/Estacoes';
 import { Search, Plus, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import EstacaoSidebar from '@/components/EstacaoSidebar';
+import EstacaoSidebar from '@/components/EstacaoSidebar/EstacaoSidebar';
 import { useEstacoes } from '@/hooks/useEstacoes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
+import Image from 'next/image';
 
 export default function Estacoes() {
   const { estacoes, loading, error, createEstacao, updateEstacao, deleteEstacao } = useEstacoes();
@@ -85,50 +86,27 @@ export default function Estacoes() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-bold text-gray-900">Estações</h1>
-              {/* Controles de Simulação */}
-              <div className="flex items-center gap-4 ml-6">
-                <div className='text-center'>
-                  <span className="text-xs font-medium text-gray-500">
-                    Simulando como:
-                  </span>
-                  <p className='font-semibold text-gray-800'>{userRole === 'admin' ? 'Administrador' : 'Usuário'}</p>
-                </div>
-                <button
-                  onClick={() => setUserRole(current => current === 'admin' ? 'user' : 'admin')}
-                  className="bg-gray-200 text-gray-800 px-3 py-2 rounded-lg text-sm hover:bg-gray-300 transition-colors"
-                >
-                  Trocar Papel
-                </button>
-              </div>
-            </div>
+      <>
+        <div className="flex justify-between items-center py-4">
+          <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-bold text-gray-900">Estações</h1>
+          </div>
 
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Buscar estação..."
-                  value={termoBusca}
-                  onChange={(e) => {
-                    setTermoBusca(e.target.value);
-                    setPageIndex(0); // Reset para primeira página ao buscar
-                  }}
-                  className="w-64"
-                />
-              </div>
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Buscar estação..."
+                value={termoBusca}
+                onChange={(e) => {
+                  setTermoBusca(e.target.value);
+                  setPageIndex(0); // Reset para primeira página ao buscar
+                }}
+                className="w-64 bg-white-pure"
+              />
             </div>
           </div>
         </div>
-      </header>
-
-      {/* Conteúdo principal */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Loading e Error States */}
         {loading && (
@@ -157,73 +135,111 @@ export default function Estacoes() {
         )}
 
         {/* Grid de estações */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Card para nova estação (somente admin) */}
-          {userRole === 'admin' && (
-            <div
-              className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center min-h-[300px] hover:border-green-500 hover:bg-green-50 transition-colors cursor-pointer"
-              onClick={handleNovaEstacao}
-            >
-              <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-                <Plus className="w-8 h-8 text-gray-400" />
+        {currentItems.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* Card para nova estação (somente admin) */}
+            {userRole === 'admin' && (
+              <div
+                className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center min-h-[300px] hover:border-green-500 hover:bg-green-50 transition-colors cursor-pointer"
+                onClick={handleNovaEstacao}
+              >
+                <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+                  <Plus className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Nova Estação</h3>
+                <p className="text-gray-500 text-center">Clique para adicionar uma nova estação de monitoramento</p>
               </div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">Nova Estação</h3>
-              <p className="text-gray-500 text-center">Clique para adicionar uma nova estação de monitoramento</p>
-            </div>
-          )}
+            )}
 
-          {/* Cards das estações existentes */}
-          {currentItems.map((estacao, index) => (
-            <Card key={estacao.pk} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-              {/* Imagem da estação */}
-              <div className="relative h-48 bg-gray-100">
-                {estacao.imagemBase64 ? (
-                  <img
-                    src={estacao.imagemBase64}
-                    alt={estacao.nome}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                    <span className="text-gray-400 font-medium">SEM IMAGEM</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Conteúdo do card */}
-              <div className="p-4">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{estacao.nome}</h3>
-                  {userRole === 'admin' && (
-                    <span 
-                      className={`inline-block w-2 h-2 rounded-full ${
-                        estacao.status ? 'bg-green-500' : 'bg-gray-400'
-                      }`}
-                      title={estacao.status ? 'Ativo' : 'Inativo'}
+            {/* Cards das estações existentes */}
+            {currentItems.map((estacao, index) => (
+              <Card key={estacao.pk} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                {/* Imagem da estação */}
+                <div className="relative h-48 bg-gray-100">
+                  {estacao.imagemBase64 ? (
+                    <img
+                      src={estacao.imagemBase64}
+                      alt={estacao.nome}
+                      className="w-full h-full object-cover"
                     />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                      <span className="text-gray-400 font-medium">SEM IMAGEM</span>
+                    </div>
                   )}
                 </div>
-                <p className="text-sm text-gray-600 mb-2">UUID: {estacao.uuid}</p>
-                <p className="text-sm text-gray-600 mb-3">{estacao.endereco}</p>
 
-                {estacao.parametros && estacao.parametros.length > 0 && (
-                  <div className="mb-4">
-                    <p className="text-sm text-gray-500 mb-1">Parâmetros:</p>
-                    <p className="text-sm text-gray-700">{estacao.parametros.join(', ')}</p>
+                {/* Conteúdo do card */}
+                <div className="p-4">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{estacao.nome}</h3>
+                    {userRole === 'admin' && (
+                      <span 
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          estacao.status ? 'bg-green-500' : 'bg-gray-400'
+                        }`}
+                        title={estacao.status ? 'Ativo' : 'Inativo'}
+                      />
+                    )}
                   </div>
-                )}
+                  <p className="text-sm text-gray-600 mb-2">UUID: {estacao.uuid}</p>
+                  <p className="text-sm text-gray-600 mb-3">{estacao.endereco}</p>
 
-                <button
-                  onClick={() => handleAbrirDetalhes(estacao.pk)}
-                  className="flex items-center text-green-600 hover:text-green-700 text-sm font-medium cursor-pointer"
-                >
-                  {userRole === 'admin' ? 'Ver detalhes' : 'Ver detalhes'}
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </button>
+                  {estacao.parametros && estacao.parametros.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-500 mb-1">Parâmetros:</p>
+                      <p className="text-sm text-gray-700">{estacao.parametros.join(', ')}</p>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => handleAbrirDetalhes(estacao.pk)}
+                    className="flex items-center text-green-600 hover:text-green-700 text-sm font-medium cursor-pointer"
+                  >
+                    {userRole === 'admin' ? 'Ver detalhes' : 'Ver detalhes'}
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          termoBusca ? (
+            <div className="flex flex-col gap-3 justify-center items-center h-[32rem]">
+              <Image
+                src="/sem-dados.svg"    
+                alt="Imagem sem dados"               
+                width={400}                         
+                height={300}                        
+              />
+              <span style={{fontFamily: "Londrina Solid"}} className="text-2xl">Oops! Parece que não tem dados aqui!</span>
+            </div>
+          ) : (
+            userRole === 'admin' ? (
+              <div
+                className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center w-72 min-h-[300px] hover:border-green-500 hover:bg-green-50 transition-colors cursor-pointer"
+                onClick={handleNovaEstacao}
+              >
+                <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+                  <Plus className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Nova Estação</h3>
+                <p className="text-gray-500 text-center">Clique para adicionar uma nova estação de monitoramento</p>
               </div>
-            </Card>
-          ))}
-        </div>
+            ) : (
+              <div className="flex flex-col gap-3 justify-center items-center h-[32rem]">
+                <Image
+                  src="/sem-dados.svg"    
+                  alt="Imagem sem dados"               
+                  width={400}                         
+                  height={300}                        
+                />
+                <span style={{fontFamily: "Londrina Solid"}} className="text-2xl">Oops! Parece que não tem dados aqui!</span>
+              </div>
+            )
+          )
+        )}
+        
 
         {/* Paginação */}
         {!loading && estacoesFilteredBySearch.length > 0 && (
@@ -258,7 +274,7 @@ export default function Estacoes() {
             </div>
           </div>
         )}
-      </main>
+
       <EstacaoSidebar
         open={sidebarOpen}
         onOpenChange={setSidebarOpen}
@@ -267,6 +283,6 @@ export default function Estacoes() {
         userRole={userRole} // Passa o papel do usuário para o sidebar
         onSave={handleSalvarEstacao}
       />
-    </div>
+    </>
   );
 }
