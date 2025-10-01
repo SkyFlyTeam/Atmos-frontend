@@ -215,7 +215,7 @@ export default function Estacoes() {
 
                 <button
                   onClick={() => handleAbrirDetalhes(estacao.pk)}
-                  className="flex items-center text-green-600 hover:text-green-700 text-sm font-medium"
+                  className="flex items-center text-green-600 hover:text-green-700 text-sm font-medium cursor-pointer"
                 >
                   {userRole === 'admin' ? 'Ver detalhes' : 'Ver detalhes'}
                   <ArrowRight className="w-4 h-4 ml-1" />
