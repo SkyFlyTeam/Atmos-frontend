@@ -148,7 +148,7 @@ const UsuariosPage = () => {
   if (loading) {
     return (
             <div className="flex-1 pr-0 md:pr-8 w-full">
-              <h1 className="text-4xl font-bold text-dark-green mb-8 font-lato">Usuários</h1>
+              <h1>Usuários</h1>
               <Card className="flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none">
                 <div className="w-full flex justify-between md:items-center items-end flex-wrap gap-4 md:flex-row flex-col-reverse mb-6">
                   <div className="relative bg-white md:w-sm w-full animate-pulse">
@@ -192,7 +192,7 @@ const UsuariosPage = () => {
     <>
           {/* Área Principal - Lista de Usuários */}
           <div className="flex gap-3 flex-col">
-            <h1 className="text-4xl font-bold text-dark-green mb-8 font-lato">Usuários</h1>
+            <h1>Usuários</h1>
             
             <Card className="flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none">
               <div className="w-full flex justify-between md:items-center items-end flex-wrap gap-4 md:flex-row flex-col-reverse mb-6">
