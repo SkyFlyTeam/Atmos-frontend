@@ -98,9 +98,9 @@ const FormTipoAlerta = ({ paramData, onClose, onDelete }: FormTipoAlertaProps) =
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 flex flex-col items-end w-full">
-      <div className="w-full space-y-4">
-         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-1 flex flex-col items-end w-full">
+      <div className="w-full space-y-1">
+         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 pb-0.5">
            <div className="relative">
              <label htmlFor="tipo" className="text-sm md:text-base">Nome</label>
              <Controller
@@ -110,7 +110,7 @@ const FormTipoAlerta = ({ paramData, onClose, onDelete }: FormTipoAlertaProps) =
                  <Input {...field} placeholder="Índice UV" className={errors.tipo ? "border-red-500" : ""} />
                )}
              />
-             {errors.tipo && <span className="text-red-500 text-xs mt-1 block">{errors.tipo?.message}</span>}
+            <div className="text-red-500 text-xs mt-0.5 min-h-[12px]">{errors.tipo?.message}</div>
            </div>
 
            <div className="relative">
@@ -122,82 +122,80 @@ const FormTipoAlerta = ({ paramData, onClose, onDelete }: FormTipoAlertaProps) =
                  <Input {...field} placeholder="Força de raios ultravioleta" className={errors.descricao ? "border-red-500" : ""} />
                )}
              />
-             {errors.descricao && <span className="text-red-500 text-xs mt-1 block">{errors.descricao?.message}</span>}
+            <div className="text-red-500 text-xs mt-0.5 min-h-[12px]">{errors.descricao?.message}</div>
            </div>
         </div>
 
-         <div className={`grid gap-4 sm:gap-6 pb-6 ${selectedCriteria === '1' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
-           <div className="relative">
-             <label htmlFor="criterios" className="text-sm md:text-base whitespace-nowrap">Critérios</label>
-             <Controller
-               name="criterios"
-               control={control}
-               render={({ field }) => (
-                 <select 
-                   {...field} 
-                   value={field.value as string}
-                   onChange={(e) => {
-                     field.onChange(e.target.value);
-                   }}
-                   className={`w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.criterios ? "border-red-500" : ""}`}
-                 >
-                   <option value="">Selecione</option>
-                   {Object.entries(criteriosEnum).filter(([key]) => isNaN(Number(key))).map(([key, value]) => (
-                     <option key={value} value={value}>{key}</option>
-                   ))}
-                 </select>
-               )}
-             />
-             {errors.criterios && <span className="text-red-500 text-xs mt-1 block">{errors.criterios?.message}</span>}
-           </div>
+        <div className={`grid gap-1 sm:gap-2 pb-0.5 grid-cols-1 sm:grid-cols-2`}>
+          <div className="relative">
+            <label htmlFor="criterios" className="text-sm md:text-base whitespace-nowrap">Critérios</label>
+            <Controller
+              name="criterios"
+              control={control}
+              render={({ field }) => (
+                <select 
+                  {...field} 
+                  value={field.value as string}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                  }}
+                  className={`w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.criterios ? "border-red-500" : ""}`}
+                >
+                  <option value="">Selecione</option>
+                  {Object.entries(criteriosEnum).filter(([key]) => isNaN(Number(key))).map(([key, value]) => (
+                    <option key={value} value={value}>{key}</option>
+                  ))}
+                </select>
+              )}
+            />
+            <div className="text-red-500 text-xs mt-0.5 min-h-[12px]">{errors.criterios?.message}</div>
+          </div>
 
-           <div className="relative">
-             <label htmlFor="valor_referencia" className="text-sm md:text-base whitespace-nowrap">Valor de Referência</label>
-             <Controller
-               name="valor_referencia"
-               control={control}
-               render={({ field }) => (
+          <div className="relative">
+            <label htmlFor="valor_referencia" className="text-sm md:text-base whitespace-nowrap">Valor de Referência</label>
+            <Controller
+              name="valor_referencia"
+              control={control}
+              render={({ field }) => (
+                <Input 
+                  type="number" 
+                  {...field} 
+                  value={field.value as string || ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  placeholder="5" 
+                  className={errors.valor_referencia ? "border-red-500" : ""}
+                />
+              )}
+            />
+            <div className="text-red-500 text-xs mt-0 min-h-[8px]">{errors.valor_referencia?.message}</div>
+          </div>
+
+          {selectedCriteria === '1' && (
+            <div className="relative sm:col-start-2 sm:row-start-2">
+              <label 
+                htmlFor="segunda_referencia" 
+                className="text-sm md:text-base whitespace-nowrap"
+              >
+                Segunda Referência
+              </label>
+               <Controller
+                 name="segunda_referencia"
+                 control={control}
+                 render={({ field }) => (
                  <Input 
                    type="number" 
-                   {...field} 
-                   value={field.value as string || ""}
+                   name={field.name}
+                   value={field.value as string || ''}
                    onChange={(e) => field.onChange(e.target.value)}
-                   placeholder="5" 
-                   className={errors.valor_referencia ? "border-red-500" : ""}
+                   onBlur={field.onBlur}
+                   placeholder="7" 
+                   className={errors.segunda_referencia ? "border-red-500" : ""}
                  />
-               )}
-             />
-             {errors.valor_referencia && <span className="text-red-500 text-xs mt-1 block">{errors.valor_referencia?.message}</span>}
-           </div>
-
-           {selectedCriteria === '1' && (
-             <div className="relative">
-               <label 
-                 htmlFor="segunda_referencia" 
-                 className="text-sm md:text-base whitespace-nowrap"
-               >
-                 Segunda Referência
-               </label>
-                <Controller
-                  name="segunda_referencia"
-                  control={control}
-                  render={({ field }) => (
-                  <Input 
-                    type="number" 
-                    name={field.name}
-                    value={field.value as string || ''}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    onBlur={field.onBlur}
-                    placeholder="7" 
-                    className={errors.segunda_referencia ? "border-red-500" : ""}
-                  />
-                  )}
-                />
-               {errors.segunda_referencia && (
-                  <span className="text-red-500 text-xs mt-1 block">{errors.segunda_referencia?.message}</span>
-                )}
-             </div>
-           )}
+                 )}
+               />
+              <div className="text-red-500 text-xs mt-0 min-h-[8px]">{errors.segunda_referencia?.message}</div>
+            </div>
+          )}
         </div>
 
         <div className="hidden">
@@ -223,3 +221,9 @@ const FormTipoAlerta = ({ paramData, onClose, onDelete }: FormTipoAlertaProps) =
 };
 
 export default FormTipoAlerta;
+
+
+
+
+
+

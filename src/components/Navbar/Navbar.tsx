@@ -33,7 +33,7 @@ const Navbar: React.FC = () => {
         }
     }, []);
 
-    const abaSelecionada = abas.find((aba) => aba.rota === pathname)?.nome || "";
+    const abaSelecionada = abas.find((aba) => aba.rota === pathname || (pathname === '/' && aba.rota === '/estacoes'))?.nome || "";
 
     const handleTrocaDeAba = (aba: typeof abas[number]) => {
         if (pathname !== aba.rota) {

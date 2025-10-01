@@ -11,7 +11,6 @@ import { useRouter } from "next/router";
 import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-
 const LoginPage = () => {
     const [needLogin, setNeedLogin] = useState<boolean>(false);
 
@@ -85,7 +84,6 @@ const LoginPage = () => {
         setIsLoggingIn(true);
 
         const login = await fetchLogin();
-        
         if ((login as Usuario).email && (login as Usuario).token)
             successLogin()
         else
@@ -102,7 +100,6 @@ const LoginPage = () => {
                 <form onSubmit={handleSubmitLogin}>
                     <div className="absolute text-[#00312D] w-screen min-h-full top-0 left-0 flex flex-row gap-0 z-[-1]">
                         <div className="text-wrap flex flex-col justify-center content-center invisible w-0 md:visible md:w-[50%]" >
-
                             <div className="">
                                 <AtmosIcon className={`mx-auto w-[28rem]`} />
                                 <p className={`text-center text-[2.8rem] text-nowrap`}>Bem vindo a <span className={`text-green ${londrina}`}>Atmos</span>!</p>
@@ -110,12 +107,10 @@ const LoginPage = () => {
                         </div>
                         <div className="bg-[#DEFFD9] align-bottom w-full md:w-[50%] flex flex-col justify-center">
                             <div className="mx-auto mt-32 mb-10 bg-white rounded-[18] px-8 py-20 md:py-30 min-w-[320px] w-[67%] min-h-[690px] md:min-h-[540px] shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] flex flex-col justify-center">
-
                                 <div className="visible  mb-12 md:invisible md:w-0 md:h-0 md:mb-0">
                                     <AtmosIcon className={`mx-auto w-[20rem]`} />
                                     <p className={`text-center text-[2.0rem] text-nowrap`}>Bem vindo a <span className={`text-green ${londrina}`}>Atmos</span>!</p>
-                                </div>
-
+                              </div>
                                 <div className="flex flex-col justify-center gap-12">
                                     <p className={`text-4xl md:text-5xl ${londrina}`}>Entrar</p>
 
