@@ -22,7 +22,7 @@ const LoginPage = () => {
     }
 
     const [loginData, setLoginData] = useState<Login>(blankLogin);
-    const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
+    const [isLoggingIn, setIsLoggingIn] = useState<boolean | undefined>(false);
 
 
     useEffect(() => {
