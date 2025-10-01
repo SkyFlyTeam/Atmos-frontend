@@ -10,7 +10,7 @@ const abas = [
     // {nome: "Guia Educativo", rota: "/guia-educativo", necessarioLogin: false},
     // {nome: "Dashboard", rota: "/dashboard", necessarioLogin: false},
     {nome: "Estações", rota: "/estacoes", necessarioLogin: false},
-    {nome: "Parâmetros", rota: "/parametros", necessarioLogin: true},
+    {nome: "Parâmetros", rota: "/parametros", necessarioLogin: false},
     {nome: "Alertas", rota: "/tipo-alerta", necessarioLogin: false}, // Corrigido para /tipo-alerta
     {nome: "Usuários", rota: "/usuarios", necessarioLogin: true},
 ]
