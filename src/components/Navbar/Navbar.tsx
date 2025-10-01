@@ -5,7 +5,23 @@ import React, { useState } from 'react';
 import { useRouter, usePathname } from "next/navigation";
 import Perfil from "@/components/Perfil/Perfil";
 import { toast } from "react-toastify";
-import { loginServices } from "@/services/loginServices";
+import { usuarioServices } from "@/services/usuarioServices";
+
+// Helper para decodificar payload de JWT (base64url)
+const decodeJwtPayload = (token: string): any | null => {
+    try {
+        const raw = token.startsWith('Bearer ') ? token.split(' ')[1] : token;
+        const payloadPart = raw.split('.')[1];
+        if (!payloadPart) return null;
+        let base = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+        while (base.length % 4 !== 0) base += '=';
+        const json = JSON.parse(atob(base));
+        return json;
+    } catch (e) {
+        console.error('Erro ao decodificar payload JWT:', e);
+        return null;
+    }
+};
 
 // Abas comentadas conforme solicitado
 const abas = [
@@ -51,6 +67,7 @@ const Navbar: React.FC = () => {
         if (estaLogado) {
             // Logout
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
             setEstaLogado(false);
             router.push('/');
         } else {
@@ -64,31 +81,59 @@ const Navbar: React.FC = () => {
         try {
             let id: number | null = null;
             if (typeof window !== 'undefined') {
+                // 1) Tenta obter do localStorage.user
                 const stored = localStorage.getItem('user');
+                let storedEmail: string | null = null;
                 if (stored) {
                     try {
                         const parsed = JSON.parse(stored);
                         id = parsed?.pk ?? parsed?.id ?? null;
+                        storedEmail = parsed?.email ?? null;
                     } catch (e) {
-                        // valor possivelmente salvo incorretamente em versões anteriores
+                        // Pode ser um valor antigo como "[object Object]"
+                        console.warn('Aviso: user no localStorage não é JSON válido. Continuando com fallbacks...');
                     }
                 }
+
+                // 2) Se ainda não encontrou, tenta buscar por email na lista de usuários
+                if (!id && storedEmail) {
+                    try {
+                        const all = await usuarioServices.getAllUsuarios();
+                        const found = Array.isArray(all)
+                          ? all.find((u: any) => (u?.email || '').toLowerCase() === storedEmail!.toLowerCase())
+                          : null;
+                        if (found?.pk || found?.id) {
+                            id = found.pk ?? found.id;
+                            // Salva usuário mínimo reparado
+                            localStorage.setItem('user', JSON.stringify({ pk: id, email: found.email, nome: found.nome }));
+                        }
+                    } catch (err) {
+                        console.error('Erro ao buscar usuários para identificar o ID:', err);
+                    }
+                }
+
+                // 3) Fallback: decodifica o JWT (base64url) para extrair o id/pk
                 if (!id) {
-                    const auth = await loginServices.getAuth();
-                    if (auth) {
-                        id = auth?.pk ?? auth?.id ?? null;
-                        try { localStorage.setItem('user', JSON.stringify(auth)); } catch {}
+                    const token = localStorage.getItem('token') || '';
+                    if (token) {
+                        const payload = decodeJwtPayload(token);
+                        if (payload) {
+                            id = payload?.pk ?? payload?.id ?? payload?.sub ?? null;
+                            if (id && !storedEmail) {
+                                localStorage.setItem('user', JSON.stringify({ pk: id }));
+                            }
+                        }
                     }
                 }
+
                 if (id) {
-                    setUsuarioId(id);
-                    setOpenPerfil(true);
-                } else {
-                    toast.error('Não foi possível identificar o usuário logado.');
-                    router.push('/login');
+                    setUsuarioId(Number(id));
                 }
+                // Abre o Perfil mesmo que o ID não tenha sido resolvido aqui; o componente resolve internamente
+                setOpenPerfil(true);
             }
         } catch (e) {
+            console.error('Erro ao abrir o perfil:', e);
             toast.error('Erro ao abrir o perfil.');
         }
     };
@@ -170,8 +215,8 @@ const Navbar: React.FC = () => {
                 </div>
             </div>
         </nav>
-        {openPerfil && usuarioId !== null && (
-            <Perfil usuarioId={usuarioId} open={openPerfil} onClose={() => setOpenPerfil(false)} />
+        {openPerfil && (
+            <Perfil usuarioId={usuarioId ?? undefined} open={openPerfil} onClose={() => setOpenPerfil(false)} />
         )}
         </>
     );
