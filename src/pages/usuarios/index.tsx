@@ -2,32 +2,20 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import ButtonIconRight from "@/components/Buttons/ButtonIconRight";
 import { FaPlus } from "react-icons/fa";
-import SearchInput from "@/components/SearchInput";
-import Pagination from "@/components/Pagination";
 import UsuarioModal from "@/components/Modal/UsuarioModal";
 import Modal from "@/components/Modal/Modal";
-import ActionButtons from "@/components/Buttons/ActionButtons";
 import { Usuario } from "@/interfaces/Usuarios";
 import { usuarioServices, testApiConnection } from "@/services/usuarioServices";
 import { Card } from "@/components/ui/card";
-import Image from 'next/image';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { toast } from 'react-toastify';
+import { DataTable } from "@/components/DataTable/Datatable";
+import { columns } from "./columns";
+ 
 
 const UsuariosPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [usuarioToDelete, setUsuarioToDelete] = useState<Usuario | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -115,35 +103,7 @@ const UsuariosPage = () => {
     setSelectedUsuario(null);
   };
 
-  // Filtrar usuários baseado no termo de busca
-  const filteredUsers = (usuarios || []).filter(usuario =>
-    usuario.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    usuario.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Configurações de paginação
-  const itemsPerPage = 10;
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
-
-  // Handler para mudança de página
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  // Garantir que a busca considere todas as páginas: ao digitar, volte para a página 1
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
-
-  // Evitar página fora do intervalo ao mudar filtro/dados
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages === 0 ? 1 : totalPages);
-    }
-  }, [totalPages, currentPage]);
+  // A busca e paginação agora são controladas pelo DataTable.
 
   if (loading) {
     return (
@@ -195,176 +155,30 @@ const UsuariosPage = () => {
             <h1>Usuários</h1>
             
             <Card className="flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none">
-              <div className="w-full flex justify-between md:items-center items-end flex-wrap gap-4 md:flex-row flex-col-reverse mb-6">
-                <SearchInput
-                  placeholder="Buscar..."
-                  value={searchTerm}
-                  onChange={setSearchTerm}
-                  className="md:w-sm w-full"
-                />
-                <ButtonIconRight 
-                  label="Novo Usuário"
-                  onClick={handleCreateUser}
-                  icon={<FaPlus className="!w-3 !h-3" />}
-                />
-              </div>
-              
-              {/* Lista responsiva de Usuários */}
-              <div className="w-full">
-                {/* Tabela para telas médias e maiores */}
-                <div className="hidden md:block overflow-hidden rounded-md border">
-                  <Table className="table-fixed w-full">
-                    <colgroup>
-                      <col className="w-[45%]" />
-                      <col className="w-[45%]" />
-                      <col className="w-[10%]" />
-                    </colgroup>
-                    <TableHeader>
-                      <TableRow className="bg-gray/10 hover:bg-gray/10 border-b-2 border-gray/30">
-                        <TableHead className="font-semibold text-dark-cyan font-lato text-lg h-12 px-6">
-                          Nome
-                        </TableHead>
-                        <TableHead className="font-semibold text-dark-cyan font-lato text-lg h-12 px-6">
-                          Email
-                        </TableHead>
-                        <TableHead className="font-semibold text-dark-cyan font-lato text-lg h-12 text-right px-6">
-                          Ações
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {error && (
-                        <TableRow>
-                          <TableCell colSpan={3} className="text-center text-dark-cyan py-8">
-                            <div className="flex flex-col items-center space-y-3">
-                              <svg className="h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              <div className="text-center">
-                                <p className="text-red-600 font-medium">{error}</p>
-                                <p className="text-gray-500 text-sm mt-1">
-                                  O frontend está rodando em <code>http://localhost:3001</code><br/>
-                                  Certifique-se de que o servidor backend está rodando em <code>http://localhost:3000</code>
-                                </p>
-                                <button 
-                                  onClick={loadUsuarios}
-                                  className="mt-3 px-4 py-2 bg-green text-white rounded-lg hover:bg-green/90 transition-colors"
-                                >
-                                  Tentar novamente
-                                </button>
-                              </div>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                      {!error && paginatedUsers.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={3} className="p-4 h-24 text-center">
-                            <div className="flex flex-col gap-3 justify-center items-center">
-                              <Image
-                                src="/sem-dados.svg"
-                                alt="Imagem sem dados"
-                                width={400}
-                                height={300}
-                              />
-                              <span style={{fontFamily: "Londrina Solid"}} className="text-2xl text-dark-cyan">Oops! Parece que não tem dados aqui!</span>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                      {!error && paginatedUsers.map((usuario) => (
-                        <TableRow key={usuario.pk} className="hover:bg-gray/5 border-b border-gray/20">
-                          <TableCell className="text-dark-cyan font-lato text-base py-3 px-6">
-                            {usuario.nome}
-                          </TableCell>
-                          <TableCell className="text-dark-cyan font-lato text-base py-3 px-6">
-                            {usuario.email}
-                          </TableCell>
-                          <TableCell className="text-right py-3 px-6">
-                            <div className="flex justify-end gap-2">
-                              <ActionButtons
-                                onEdit={() => handleEditUser(usuario)}
-                                onDelete={() => handleDeleteUser(usuario)}
-                              />
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+              {error && (
+                <div className="w-full text-center text-red-600 bg-red-50 border border-red-200 rounded-md px-4 py-3">
+                  {error}
+                  <div>
+                    <button onClick={loadUsuarios} className="mt-2 px-4 py-2 bg-green text-white rounded-lg hover:bg-green/90 transition-colors">
+                      Tentar novamente
+                    </button>
+                  </div>
                 </div>
-
-                {/* Cards para telas pequenas */}
-                <div className="md:hidden flex flex-col gap-3">
-                  {error ? (
-                    <div className="text-center text-dark-cyan py-6">
-                      <div className="flex flex-col items-center space-y-3">
-                        <svg className="h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div className="text-center">
-                          <p className="text-red-600 font-medium">{error}</p>
-                          <p className="text-gray-500 text-sm mt-1">
-                            O frontend está rodando em <code>http://localhost:3001</code><br/>
-                            Certifique-se de que o servidor backend está rodando em <code>http://localhost:3000</code>
-                          </p>
-                          <button 
-                            onClick={loadUsuarios}
-                            className="mt-3 px-4 py-2 bg-green text-white rounded-lg hover:bg-green/90 transition-colors"
-                          >
-                            Tentar novamente
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : paginatedUsers.length === 0 ? (
-                    <div className="p-4">
-                      <div className="flex flex-col gap-3 justify-center items-center">
-                        <Image
-                          src="/sem-dados.svg"
-                          alt="Imagem sem dados"
-                          width={400}
-                          height={300}
-                        />
-                              <span style={{fontFamily: "Lato"}} className="text-2xl text-dark-cyan">Oops! Parece que não tem dados aqui!</span>
-                      </div>
-                    </div>
-                  ) : (
-                    paginatedUsers.map((usuario) => (
-                      <Card key={usuario.pk} className="w-full p-4 shadow">
-                        <div className="flex justify-between text-sm py-2">
-                          <strong className="text-gray-600">Nome:</strong>
-                          <span className="text-dark-cyan font-lato">{usuario.nome}</span>
-                        </div>
-                        <div className="flex justify-between text-sm py-2">
-                          <strong className="text-gray-600">Email:</strong>
-                          <span className="text-dark-cyan font-lato">{usuario.email}</span>
-                        </div>
-                        <div className="flex justify-between text-sm py-2">
-                          <strong className="text-gray-600">Ações:</strong>
-                          <div className="flex gap-2">
-                            <ActionButtons
-                              onEdit={() => handleEditUser(usuario)}
-                              onDelete={() => handleDeleteUser(usuario)}
-                            />
-                          </div>
-                        </div>
-                      </Card>
-                    ))
-                  )}
-                </div>
-
-                {/* Contador e Paginação */}
-                <div className="w-full flex items-center justify-between flex-wrap gap-y-2 mt-6">
-                  <span className="text-gray">{filteredUsers.length} registros</span>
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                    className="mt-0"
+              )}
+              <DataTable
+                columns={columns}
+                data={usuarios}
+                meta={{
+                  actions: { onEdit: handleEditUser, onDelete: handleDeleteUser },
+                }}
+                actionButton={
+                  <ButtonIconRight
+                    label="Novo Usuário"
+                    onClick={handleCreateUser}
+                    icon={<FaPlus className="!w-3 !h-3" />}
                   />
-                </div>
-              </div>
+                }
+              />
             </Card>
           </div>
 
