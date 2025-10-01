@@ -3,6 +3,9 @@
 import { CircleUserRound } from 'lucide-react';
 import React, { useState } from 'react';
 import { useRouter, usePathname } from "next/navigation";
+import Perfil from "@/components/Perfil/Perfil";
+import { toast } from "react-toastify";
+import { loginServices } from "@/services/loginServices";
 
 // Abas comentadas conforme solicitado
 const abas = [
@@ -18,6 +21,8 @@ const abas = [
 
 const Navbar: React.FC = () => {
     const [estaLogado, setEstaLogado] = useState<boolean>(false);
+    const [openPerfil, setOpenPerfil] = useState<boolean>(false);
+    const [usuarioId, setUsuarioId] = useState<number | null>(null);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -54,7 +59,42 @@ const Navbar: React.FC = () => {
         }
     };
 
+    const handleOpenPerfil = async () => {
+        if (!estaLogado) return;
+        try {
+            let id: number | null = null;
+            if (typeof window !== 'undefined') {
+                const stored = localStorage.getItem('user');
+                if (stored) {
+                    try {
+                        const parsed = JSON.parse(stored);
+                        id = parsed?.pk ?? parsed?.id ?? null;
+                    } catch (e) {
+                        // valor possivelmente salvo incorretamente em versões anteriores
+                    }
+                }
+                if (!id) {
+                    const auth = await loginServices.getAuth();
+                    if (auth) {
+                        id = auth?.pk ?? auth?.id ?? null;
+                        try { localStorage.setItem('user', JSON.stringify(auth)); } catch {}
+                    }
+                }
+                if (id) {
+                    setUsuarioId(id);
+                    setOpenPerfil(true);
+                } else {
+                    toast.error('Não foi possível identificar o usuário logado.');
+                    router.push('/login');
+                }
+            }
+        } catch (e) {
+            toast.error('Erro ao abrir o perfil.');
+        }
+    };
+
     return (
+        <>
         <nav className="bg-white shadow-md border-b border-gray-200">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
@@ -99,7 +139,8 @@ const Navbar: React.FC = () => {
                     <div className="flex items-center gap-2">
                     {estaLogado && (
                         <CircleUserRound
-                            className="w-7 h-7"
+                            onClick={handleOpenPerfil}
+                            className="w-7 h-7 cursor-pointer"
                             style={{ color: 'var(--color-green)' }}
                         />
                     )}
@@ -129,6 +170,10 @@ const Navbar: React.FC = () => {
                 </div>
             </div>
         </nav>
+        {openPerfil && usuarioId !== null && (
+            <Perfil usuarioId={usuarioId} open={openPerfil} onClose={() => setOpenPerfil(false)} />
+        )}
+        </>
     );
 };
 
