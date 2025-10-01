@@ -27,6 +27,13 @@ const TipoAlertasPage = () => {
     // Loading
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
+    const [isLogged, setIsLogged] = useState<boolean>(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        setIsLogged(!!token);
+    }, [])
+
     const fetchAllTipoAlertas = async () => {
         try{
             const tipoAlertass = await tipoAlertaServices.getAllTipoAlertas();
@@ -99,12 +106,17 @@ const TipoAlertasPage = () => {
                             data={tipoAlertas}
                             meta={{
                                 actions: { onEdit, onDelete },
+                                perms: {
+                                    canEdit: isLogged,
+                                    canDelete: isLogged,
+                                },
                             }}
                             actionButton={
-                                <ButtonIconRight 
-                                    label="Novo Tipo de Alerta"
-                                    onClick={onAddParameter} 
-                                    icon={<FaPlus className="!w-3 !h-3" />} 
+                                <ButtonIconRight
+                                    label="Novo Parâmetro"
+                                    onClick={onAddParameter}
+                                    icon={<FaPlus className="!w-3 !h-3" />}
+                                    className={`${!isLogged && 'hidden'}`}
                                 />
                             }
                         />

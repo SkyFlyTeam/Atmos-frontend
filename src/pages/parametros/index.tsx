@@ -27,6 +27,13 @@ const ParametrosPage = () => {
     // Loading
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
+    const [isLogged, setIsLogged] = useState<boolean>(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        setIsLogged(!!token);
+    }, [])
+
     const fetchAllParametros = async () => {
         try {
             const parametros = await parametroServices.getAllParametros();
@@ -79,12 +86,6 @@ const ParametrosPage = () => {
         setParamSelecionado(null);
     }
 
-    useEffect(() => {
-        console.log("confirm", showConfirmDelete);
-        console.log("param sel", paramSelecionado);
-        console.log("edit", showSideDrawer)
-    }, [showConfirmDelete, showSideDrawer, paramSelecionado])
-
     return (
         <>
             <div className="flex gap-3 flex-col">
@@ -99,12 +100,17 @@ const ParametrosPage = () => {
                             data={parametros}
                             meta={{
                                 actions: { onEdit, onDelete },
+                                perms: {
+                                    canEdit: isLogged,
+                                    canDelete: isLogged,
+                                },
                             }}
                             actionButton={
                                 <ButtonIconRight
                                     label="Novo Parâmetro"
                                     onClick={onAddParameter}
                                     icon={<FaPlus className="!w-3 !h-3" />}
+                                    className={`${!isLogged && 'hidden'}`}
                                 />
                             }
                         />
