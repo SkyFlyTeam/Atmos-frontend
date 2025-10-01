@@ -63,10 +63,10 @@ const LoginPage = () => {
 
         setNeedLogin(false);
 
-        router.push("/");
-
         if (typeof window !== 'undefined')
             window.dispatchEvent(new Event('usuarioLogado'));
+
+        router.push("/");
     }
 
     const handleLoginEmail = (e: ChangeEvent<HTMLInputElement>) => {
