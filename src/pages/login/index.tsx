@@ -153,7 +153,7 @@ const LoginPage = () => {
                                     >Entrar</Button>
                                     {/* <Button
                                         className="rounded-[12]"
-                                        type="button"
+                                        type="button" 
                                         onClick={async () => alert(JSON.stringify(await loginServices.getAuth()))}
                                         disabled={isLoggingIn}
                                     >TOKEN</Button> */}
