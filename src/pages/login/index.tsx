@@ -85,8 +85,8 @@ const LoginPage = () => {
         setIsLoggingIn(true);
 
         const login = await fetchLogin();
-        alert(JSON.stringify(login))
-        if ((login as Usuario).email)
+        
+        if ((login as Usuario).email && (login as Usuario).token)
             successLogin()
         else
             toast.error((login as ApiException).message)
