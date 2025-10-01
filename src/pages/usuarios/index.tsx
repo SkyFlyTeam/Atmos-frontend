@@ -9,6 +9,7 @@ import { usuarioServices, testApiConnection } from "@/services/usuarioServices";
 import { Card } from "@/components/ui/card";
 import { DataTable } from "@/components/DataTable/Datatable";
 import { columns } from "./columns";
+import { toast } from 'react-toastify';
  
 
 const UsuariosPage = () => {
@@ -86,10 +87,12 @@ const UsuariosPage = () => {
         await loadUsuarios(); // Recarregar lista
         setShowConfirmDelete(false);
         setUsuarioToDelete(null);
+        toast.success("Usuário excluído com sucesso!");
       } catch (error) {
         console.error('Erro ao deletar usuário:', error);
         setError('Erro ao deletar usuário. Verifique se o servidor backend está rodando.');
         setTimeout(() => setError(null), 5000);
+        toast.error("Erro ao deletar usuário.");
       }
     }
   };
