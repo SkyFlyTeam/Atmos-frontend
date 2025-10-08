@@ -178,7 +178,7 @@ const UsuarioModal: React.FC<UsuarioModalProps> = ({
                     onClick={handleDelete}
                     disabled={loading}
                   >
-                    Excluir
+                    Excluir usuário
                   </Button>
                 )}
                 <Button
