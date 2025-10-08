@@ -8,7 +8,7 @@ const setLogin = async (login: Login): Promise<Usuario | ApiException> => {
     try {
         const { data } = await Api.post("/usuario/login", login);
         localStorage.setItem('token', data.token);
-        let user = data;
+        let user = {...data};
         delete user['token'];
         localStorage.setItem('user', JSON.stringify(user))
         return data as Usuario
@@ -38,10 +38,6 @@ const getAuth = async (): Promise<any | ApiException> => {
         delete auth['token'];
         delete auth['message'];
         localStorage.setItem('user', auth);
-        // if(res.status == 200)
-        //     auth['auth'] = true;
-        // else
-        //     auth['auth'] = false;
         return auth;
     } catch (error) {
         if (localStorage.getItem('token'))

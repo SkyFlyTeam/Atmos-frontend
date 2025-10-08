@@ -27,6 +27,13 @@ const ParametrosPage = () => {
     // Loading
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
+    const [isLogged, setIsLogged] = useState<boolean>(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        setIsLogged(!!token);
+    }, [])
+
     const fetchAllParametros = async () => {
         try {
             const parametros = await parametroServices.getAllParametros();
@@ -93,12 +100,17 @@ const ParametrosPage = () => {
                             data={parametros}
                             meta={{
                                 actions: { onEdit, onDelete },
+                                perms: {
+                                    canEdit: isLogged,
+                                    canDelete: isLogged,
+                                },
                             }}
                             actionButton={
                                 <ButtonIconRight
                                     label="Novo Parâmetro"
                                     onClick={onAddParameter}
                                     icon={<FaPlus className="!w-3 !h-3" />}
+                                    className={`${!isLogged && 'hidden'}`}
                                 />
                             }
                         />
@@ -115,10 +127,10 @@ const ParametrosPage = () => {
                         </div>
                     }
                     open={showConfirmDelete}
-                    onClose={() => closeSideDrawer()}
+                    onClose={() => {setShowConfimDelete(false); setParamSelecionado(null)}}
                     buttons={
                         <div className="flex items-center gap-2">
-                            <Button variant="secondary" onClick={() => closeSideDrawer(true)}>Cancelar</Button>
+                            <Button variant="secondary" onClick={() => {setShowConfimDelete(false); setParamSelecionado(null)}}>Cancelar</Button>
                             <Button variant="destructive" onClick={() => handleDeleteParam()}>Deletar</Button>
                         </div>
                     }

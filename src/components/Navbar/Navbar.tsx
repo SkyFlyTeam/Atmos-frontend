@@ -3,6 +3,25 @@
 import { CircleUserRound } from 'lucide-react';
 import React, { useState } from 'react';
 import { useRouter, usePathname } from "next/navigation";
+import Perfil from "@/components/Perfil/Perfil";
+import { toast } from "react-toastify";
+import { usuarioServices } from "@/services/usuarioServices";
+
+// Helper para decodificar payload de JWT (base64url)
+const decodeJwtPayload = (token: string): any | null => {
+    try {
+        const raw = token.startsWith('Bearer ') ? token.split(' ')[1] : token;
+        const payloadPart = raw.split('.')[1];
+        if (!payloadPart) return null;
+        let base = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+        while (base.length % 4 !== 0) base += '=';
+        const json = JSON.parse(atob(base));
+        return json;
+    } catch (e) {
+        console.error('Erro ao decodificar payload JWT:', e);
+        return null;
+    }
+};
 
 // Abas comentadas conforme solicitado
 const abas = [
@@ -10,7 +29,7 @@ const abas = [
     // {nome: "Guia Educativo", rota: "/guia-educativo", necessarioLogin: false},
     // {nome: "Dashboard", rota: "/dashboard", necessarioLogin: false},
     {nome: "Estações", rota: "/estacoes", necessarioLogin: false},
-    {nome: "Parâmetros", rota: "/parametros", necessarioLogin: true},
+    {nome: "Parâmetros", rota: "/parametros", necessarioLogin: false},
     {nome: "Alertas", rota: "/tipo-alerta", necessarioLogin: false}, // Corrigido para /tipo-alerta
     {nome: "Usuários", rota: "/usuarios", necessarioLogin: true},
 ]
@@ -18,6 +37,8 @@ const abas = [
 
 const Navbar: React.FC = () => {
     const [estaLogado, setEstaLogado] = useState<boolean>(false);
+    const [openPerfil, setOpenPerfil] = useState<boolean>(false);
+    const [usuarioId, setUsuarioId] = useState<number | null>(null);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -33,7 +54,7 @@ const Navbar: React.FC = () => {
         }
     }, []);
 
-    const abaSelecionada = abas.find((aba) => aba.rota === pathname)?.nome || "";
+    const abaSelecionada = abas.find((aba) => aba.rota === pathname || (pathname === '/' && aba.rota === '/estacoes'))?.nome || "";
 
     const handleTrocaDeAba = (aba: typeof abas[number]) => {
         if (pathname !== aba.rota) {
@@ -46,6 +67,7 @@ const Navbar: React.FC = () => {
         if (estaLogado) {
             // Logout
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
             setEstaLogado(false);
             router.push('/');
         } else {
@@ -54,7 +76,70 @@ const Navbar: React.FC = () => {
         }
     };
 
+    const handleOpenPerfil = async () => {
+        if (!estaLogado) return;
+        try {
+            let id: number | null = null;
+            if (typeof window !== 'undefined') {
+                // 1) Tenta obter do localStorage.user
+                const stored = localStorage.getItem('user');
+                let storedEmail: string | null = null;
+                if (stored) {
+                    try {
+                        const parsed = JSON.parse(stored);
+                        id = parsed?.pk ?? parsed?.id ?? null;
+                        storedEmail = parsed?.email ?? null;
+                    } catch (e) {
+                        // Pode ser um valor antigo como "[object Object]"
+                        console.warn('Aviso: user no localStorage não é JSON válido. Continuando com fallbacks...');
+                    }
+                }
+
+                // 2) Se ainda não encontrou, tenta buscar por email na lista de usuários
+                if (!id && storedEmail) {
+                    try {
+                        const all = await usuarioServices.getAllUsuarios();
+                        const found = Array.isArray(all)
+                          ? all.find((u: any) => (u?.email || '').toLowerCase() === storedEmail!.toLowerCase())
+                          : null;
+                        if (found?.pk || found?.id) {
+                            id = found.pk ?? found.id;
+                            // Salva usuário mínimo reparado
+                            localStorage.setItem('user', JSON.stringify({ pk: id, email: found.email, nome: found.nome }));
+                        }
+                    } catch (err) {
+                        console.error('Erro ao buscar usuários para identificar o ID:', err);
+                    }
+                }
+
+                // 3) Fallback: decodifica o JWT (base64url) para extrair o id/pk
+                if (!id) {
+                    const token = localStorage.getItem('token') || '';
+                    if (token) {
+                        const payload = decodeJwtPayload(token);
+                        if (payload) {
+                            id = payload?.pk ?? payload?.id ?? payload?.sub ?? null;
+                            if (id && !storedEmail) {
+                                localStorage.setItem('user', JSON.stringify({ pk: id }));
+                            }
+                        }
+                    }
+                }
+
+                if (id) {
+                    setUsuarioId(Number(id));
+                }
+                // Abre o Perfil mesmo que o ID não tenha sido resolvido aqui; o componente resolve internamente
+                setOpenPerfil(true);
+            }
+        } catch (e) {
+            console.error('Erro ao abrir o perfil:', e);
+            toast.error('Erro ao abrir o perfil.');
+        }
+    };
+
     return (
+        <>
         <nav className="bg-white shadow-md border-b border-gray-200">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
@@ -99,7 +184,8 @@ const Navbar: React.FC = () => {
                     <div className="flex items-center gap-2">
                     {estaLogado && (
                         <CircleUserRound
-                            className="w-7 h-7"
+                            onClick={handleOpenPerfil}
+                            className="w-7 h-7 cursor-pointer"
                             style={{ color: 'var(--color-green)' }}
                         />
                     )}
@@ -129,6 +215,10 @@ const Navbar: React.FC = () => {
                 </div>
             </div>
         </nav>
+        {openPerfil && (
+            <Perfil usuarioId={usuarioId ?? undefined} open={openPerfil} onClose={() => setOpenPerfil(false)} />
+        )}
+        </>
     );
 };
 
