@@ -13,6 +13,20 @@ export const Api = axios.create({
 // Interceptor para logs de request
 Api.interceptors.request.use(
   (config) => {
+    // Anexa token ao header Authorization se existir e não estiver definido
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token && !(config.headers && 'Authorization' in config.headers)) {
+        const authHeader = token.startsWith('Bearer ') || token.startsWith('JWT ')
+          ? token
+          : `Bearer ${token}`;
+        config.headers = {
+          ...(config.headers || {}),
+          Authorization: authHeader,
+        };
+      }
+    }
+
     console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },

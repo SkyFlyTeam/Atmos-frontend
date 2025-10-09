@@ -49,7 +49,9 @@ export function useEstacoes(): UseEstacoesReturn {
           })
         );
 
-        setEstacoes(estacoesComParametros);
+        const ordenadas = estacoesComParametros.sort((a, b) => (b.status ? 1 : 0) - (a.status ? 1 : 0));
+
+        setEstacoes(ordenadas);
       }
     } catch (err) {
       const errorMessage =

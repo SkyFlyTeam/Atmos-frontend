@@ -32,8 +32,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils";
-import { Textarea } from "./ui/textarea";
+import { Textarea } from "../ui/textarea";
 import { toast } from "react-toastify";
+
+import styles from './style.module.css'
 
 type Props = {
   open: boolean;
@@ -91,8 +93,8 @@ export default function EstacaoSidebar({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-
     if (!open) return;
+    
     if (estacao) {
       reset({
         uuid: estacao.uuid ?? "",
@@ -102,11 +104,19 @@ export default function EstacaoSidebar({
         lat: estacao.lat ?? "",
         long: estacao.long ?? "",
         endereco: estacao.endereco ?? "",
-        imagemUrl: null, // não vem em Base64 agora
+        imagemUrl: estacao.imagemBase64 ? 'existing-image' : null,
         parametros: estacao.parametros ?? [],
       });
-      setImagemUrl(estacao.imagemBase64 ?? null);
+      
+      // Set the existing image if it exists
+      if (estacao.imagemBase64) {
+        setImagemUrl(estacao.imagemBase64);
+      } else {
+        setImagemUrl(null);
+      }
+      
       setParametrosSelecionados(estacao.parametros ?? []);
+      setImagemRemovida(false);
     } else {
       reset({
         uuid: "",
@@ -121,11 +131,8 @@ export default function EstacaoSidebar({
       });
       setImagemUrl(null);
       setParametrosSelecionados([]);
+      setImagemRemovida(false);
     }
-    
-    // Resetar estados de imagem
-    setImagemUrl(null);
-    setImagemRemovida(false);
   }, [open, estacao, reset]);
 
   function handleAddParametro(value: string) {
@@ -193,7 +200,9 @@ export default function EstacaoSidebar({
       long: data.long || null,
       endereco: data.endereco || null,
       parametros: data.parametros || [],
-      imagemBase64: imagemRemovida ? null : imagemUrl // Se foi removida, envia null
+      // Se estiver editando e não houve alteração na imagem, mantém a imagem original
+      imagemBase64: imagemRemovida ? null : 
+                   (imagemUrl || (estacao?.imagemBase64 && !imagemRemovida ? estacao.imagemBase64 : null))
     };
     try {
       if (mode === "create") {
@@ -263,7 +272,7 @@ export default function EstacaoSidebar({
           {/* Status e coordenadas */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
             {/* Status */}
-            <div className="w-max">
+            <div className={styles.container}>
               <label className="block text-sm font-medium text-[#00312D] mb-1">Status</label>
               <div className="flex flex-col items-start gap-2">
                 <div className="flex items-center gap-2 mt-0.5">

@@ -30,6 +30,11 @@ type MetaPermissions<TData> = {
     onEdit: (row: TData) => void;    
     onDelete: (row: TData) => void;  
   };
+  perms: {
+    canEdit: boolean;  
+    canDelete: boolean; 
+    [key: string]: boolean;
+  };
 };
 
 interface DataTableProps<TData, TValue> {

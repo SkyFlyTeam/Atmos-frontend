@@ -14,7 +14,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Navbar />
-      <main className={`flex flex-1 flex-col gap-4 md:px-12 px-4 py-0 ${londrina} ${lato}`}>
+      <main className={`flex flex-1 flex-col gap-4 md:px-12 px-4 py-6 ${londrina} ${lato}`}>
         <Component {...pageProps} />
         <ToastContainer position="bottom-right" autoClose={2000} />
       </main>

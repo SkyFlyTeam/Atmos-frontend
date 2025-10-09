@@ -65,13 +65,28 @@ export const columns: ColumnDef<TipoAlerta>[] = [
       return value.toFixed(2).replace('.', ',');
     },
   },
-  {
+   {
     id: "Ações",
-    header: "Ações",  
+    header: ({column, table }) => { 
+      const meta = table.options.meta as { 
+          actions: { onEdit: Function, onDelete: Function },
+          perms: { canEdit: boolean, canDelete: boolean }
+      };
+      if (!meta.perms.canEdit && !meta.perms.canDelete) {
+          return null;
+        }
+      return "Ações" 
+    },  
     cell: ({ row, table }) => {
         const meta = table.options.meta as { 
-            actions: { onEdit: Function, onDelete: Function }
+            actions: { onEdit: Function, onDelete: Function },
+            perms: { canEdit: boolean, canDelete: boolean }
         };
+
+        if (!meta.perms.canEdit && !meta.perms.canDelete) {
+          return null;
+        }
+
         return(
             <div className="flex justify-end gap-2 w-fit">
                 <Button

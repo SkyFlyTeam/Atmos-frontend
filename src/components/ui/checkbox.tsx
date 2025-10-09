@@ -22,14 +22,14 @@ const Checkbox = React.forwardRef<
       "data-[state=checked]:border-[#00312D]",
       // pseudo-elemento para hover (simula ::after do CSS do radio)
       "after:content-[''] after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:rounded-full after:pointer-events-none after:w-0 after:h-0",
-      "hover:after:w-[10px] hover:after:h-[10px] hover:after:border hover:after:border-[#00312D] hover:after:bg-[rgba(2,2,2,0.5)]",
+      "hover:after:w-[0.6rem] hover:after:h-[0.6rem] hover:after:border hover:after:border-[#00312D] hover:after:bg-[rgba(2,2,2,0.5)]",
       className
     )}
     {...props}
   >
     {/* bolinha interna quando marcado */}
     <CheckboxPrimitive.Indicator className={cn("relative z-10 flex items-center justify-center")}> 
-      <span className="block h-2.5 w-2.5 rounded-full bg-[#CCCCCC] border border-[#00312D]" />
+      <span className="block h-[0.6rem] w-[0.6rem] rounded-full bg-[#CCCCCC] border border-[#00312D]" />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 ))
