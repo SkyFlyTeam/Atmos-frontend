@@ -7,7 +7,9 @@ export default {
     extend: {
       fontFamily: {
         'londrina': ['Londrina Solid', 'cursive'],
-        'sans': ['Londrina Solid', 'system-ui', 'sans-serif'],
+        'sans': ['ui-sans-serif', 'system-ui', 'sans-serif'],
+        'serif': ['ui-serif', 'Georgia', 'serif'],
+        'mono': ['ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       colors: {
         'dark-green': 'var(--dark-green)',
@@ -19,12 +21,6 @@ export default {
         gray: 'var(--gray)',
         'gray-dark': 'var(--gray-dark)',
         red: 'var(--red)',
-      },
-      fontFamily: {
-        'sans': ['ui-sans-serif', 'system-ui', 'sans-serif'],
-        'serif': ['ui-serif', 'Georgia', 'serif'],
-        'mono': ['ui-monospace', 'SFMono-Regular', 'monospace'],
-        'custom': ['"londrina-solid"', 'sans-serif'],
       },
     } 
   },
