@@ -9,4 +9,7 @@ export interface Estacao {
     endereco?: string | null,
     parametros?: string[],
     imagemBase64?: string | null
+    cidadeIbgeId?: number | null;   // vindo do dropdown IBGE
+    cidadeNome?: string | null;     // para exibir
+    cidadeUf?: string | null;       // para exibir
 }
