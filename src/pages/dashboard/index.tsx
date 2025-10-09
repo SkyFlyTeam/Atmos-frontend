@@ -4,6 +4,7 @@ import ChartLineDots from "./components/ChartLineDots"
 import Pagination from "@/components/Pagination"
 import LatestDataCardsContainer from "@/components/LatestDataCardsContainer/LatestDataCardsContainer"
 import mockParametros from "./dadosMockados"
+import GeneralFilter from "./components/GeneralFilter";
 
 const ITEMS_PER_PAGE = 2
 
@@ -62,6 +63,8 @@ const Dashboard = () => {
     <div className="flex flex-col gap-6">
       {/* Título da página */}
       <h1>Dashboard</h1>
+
+      <GeneralFilter />
 
       {/* Cards de últimos dados enviados */}
       <LatestDataCardsContainer />
