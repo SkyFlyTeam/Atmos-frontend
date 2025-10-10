@@ -25,8 +25,8 @@ export interface ComboBoxOption {
 
 interface ComboBoxProps {
   options: ComboBoxOption[]
-  value?: string
-  onSelect: (value: string) => void
+  value?: string[] // Alterado para array de valores
+  onSelect: (value: string[]) => void // Alterado para lidar com múltiplos valores
   placeholder?: string
   searchPlaceholder?: string
   emptyText?: string
@@ -35,31 +35,29 @@ interface ComboBoxProps {
   disabled?: boolean
 }
 
-export const ComboBox: React.FC<ComboBoxProps> = ({
+export const MultipleCombobox: React.FC<ComboBoxProps> = ({
   options,
-  value,
+  value = [], // Valor inicial como array
   onSelect,
   placeholder = "Selecionar...",
   searchPlaceholder = "Buscar...",
   emptyText = "Nenhum item encontrado.",
-  widthClass = "w-56 min-w-fit",
+  widthClass = "w-[240px] max-w-[240px]",
   className,
   disabled = false,
 }) => {
-  console.log("options", options)
   const [open, setOpen] = React.useState(false)
   const [searchTerm, setSearchTerm] = React.useState("")
-  const [visibleOptions, setVisibleOptions] = React.useState(options.slice(0, 50)) 
-  const [filteredOptions, setFilteredOptions] = React.useState(options) 
+  const [visibleOptions, setVisibleOptions] = React.useState(options.slice(0, 50))
+  const [filteredOptions, setFilteredOptions] = React.useState(options)
+  const selectedOptions = options.filter((o) => value.includes(o.value))
 
-  const selectedOption = options.find((o) => o.value === value)
-
-  
   const handleSearch = (term: string) => {
     setSearchTerm(term)
     const filtered = options.filter((option) =>
       option.label.toLowerCase().includes(term.toLowerCase())
     )
+    console.log("filtered", filtered)
     setFilteredOptions(filtered)
     setVisibleOptions(filtered.slice(0, 50)) 
   }
@@ -77,6 +75,19 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
     }
   }
 
+  React.useEffect(() => {
+    console.log("filteredOptions", filteredOptions);
+    console.log("visibleOptions", visibleOptions);
+  }, [filteredOptions, visibleOptions])
+
+  const toggleSelect = (rawValue: string) => {
+    if (rawValue === "") return;
+
+    // Se o valor já estiver selecionado, removemos da lista
+    const newValue = value.includes(rawValue) ? value.filter((v) => v !== rawValue) : [...value, rawValue];
+    onSelect(newValue)
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -86,12 +97,13 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            "justify-between bg-white rounded-md text-base border-gray",
+            "justify-between bg-white rounded-md text-base border-gray overflow-hidden overflow-ellipsis ",
             widthClass,
             className
           )}
         >
-          {selectedOption ? selectedOption.label : placeholder}
+          {/* Exibindo valores selecionados */}
+          <span className="overflow-hidden overflow-ellipsis whitespace-nowrap max-w-[220px]">{selectedOptions.length === 0 ? placeholder : selectedOptions.map((o) => o.label).join(", ")}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -108,12 +120,9 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
                   <CommandItem
                     key={option.value}
                     value={option.value}
-                    onSelect={(val) => {
-                      onSelect(val)
-                      setOpen(false)
-                    }}
+                    onSelect={() => toggleSelect(option.value)} // Selecionar múltiplos itens
                     className={cn(
-                        value === option.value && "bg-light-green",
+                      value.includes(option.value) && "bg-light-green", // Destacar valores selecionados
                     )}
                   >
                     <div className="flex flex-col">
@@ -122,7 +131,7 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
                     <Check
                       className={cn(
                         "ml-auto h-4 w-4",
-                        value === option.value ? "opacity-100" : "opacity-0"
+                        value.includes(option.value) ? "opacity-100" : "opacity-0"
                       )}
                     />
                   </CommandItem>
