@@ -23,6 +23,35 @@ const colorForIndex = (i: number, s = 65, l = 50) => {
   return `hsl(${hue} ${s}% ${l}%)`
 }
 
+// --- Hook interno ---
+function useElementSize<T extends HTMLElement>(
+  ref: React.RefObject<T | null>,
+  defaultSize = { width: 0, height: 0 }
+) {
+  const [size, setSize] = useState(defaultSize)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const updateSize = () => {
+      setSize({
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+      })
+    }
+
+    updateSize() // inicial
+
+    const observer = new ResizeObserver(() => updateSize())
+    observer.observe(el)
+
+    return () => observer.disconnect()
+  }, [ref])
+
+  return size
+}
+
 type StationName = string
 
 export type TimePoint = {
@@ -52,23 +81,14 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
 
   const chartWrapperRef = useRef<HTMLDivElement | null>(null) // referencia a <div> que contém o gráfico
   const legendRef = useRef<HTMLDivElement | null>(null) // referencia a legenda
-  const [chartHeight, setChartHeight] = useState<number | undefined>(undefined) // guarda a altura calculada do gráfico
+  const { width } = useElementSize(chartWrapperRef)
 
-  // Cálculo da altura responsiva (O Recharts não consegue ajustar automaticamente a altura do gráfico)
-  useEffect(() => {
-    const el = chartWrapperRef.current
-    if (!el) return
-    const aspect = 16 / 9
-    const reservedPx = 28
-    const ro = new ResizeObserver(() => {
-      const w = el.offsetWidth
-      if (w) setChartHeight(Math.max(120, Math.round(w / aspect) - reservedPx))
-    })
-    ro.observe(el)
-    const w = el.offsetWidth
-    if (w) setChartHeight(Math.max(120, Math.round(w / aspect) - reservedPx))
-    return () => ro.disconnect()
-  }, [])
+  // Altura proporcional 16:9
+  const aspect = 16 / 9
+  const reservedPx = 28
+  const chartHeight = width
+    ? Math.max(120, Math.round(width / aspect) - reservedPx)
+    : undefined
 
   return (
     <CardChart
@@ -107,7 +127,7 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
                 data={data}
                 margin={{ left: 12, right: 12, top: 10, bottom: 12 }}
               >
-                <CartesianGrid vertical={false} />
+                <CartesianGrid vertical={true} />
                 <XAxis
                   dataKey="time"
                   tickLine={false}
