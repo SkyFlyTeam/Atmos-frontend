@@ -1,5 +1,5 @@
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
   ChartConfig,
   ChartContainer,
@@ -68,7 +68,124 @@ type Props = {
   data: TimePoint[]
 }
 
+// Função para processar dados e pegar apenas o último registro de cada hora
+function processHourlyData(data: TimePoint[], stations: StationName[]): TimePoint[] {
+  // Agrupa os dados por hora e estação
+  const hourlyMap = new Map<string, Map<string, { datetime: string; value: number }>>()
+
+  data.forEach((point) => {
+    // Extrai a data/hora do campo time ou datetime
+    const dateTimeStr = point.time || (point as any).datetime
+    if (!dateTimeStr) return
+
+    // Extrai a hora (formato: "2025-10-15 13:05" -> "13")
+    const match = dateTimeStr.match(/(\d{4}-\d{2}-\d{2} \d{2})/)
+    if (!match) return
+
+    const hourKey = match[1] // "2025-10-15 13"
+
+    if (!hourlyMap.has(hourKey)) {
+      hourlyMap.set(hourKey, new Map())
+    }
+
+    const hourData = hourlyMap.get(hourKey)!
+
+    // Para cada estação, guarda o último valor encontrado
+    stations.forEach((station) => {
+      const value = point[station]
+      if (typeof value === 'number') {
+        hourData.set(station, { datetime: dateTimeStr, value })
+      }
+    })
+  })
+
+  // Converte o mapa de volta para array de TimePoint
+  const result: TimePoint[] = []
+
+  // Ordena as horas
+  const sortedHours = Array.from(hourlyMap.keys()).sort()
+
+  sortedHours.forEach((hourKey) => {
+    const hourData = hourlyMap.get(hourKey)!
+    
+    // Extrai data e hora separadamente
+    const [datePart, hourPart] = hourKey.split(' ')
+    const [year, month, day] = datePart.split('-')
+    
+    const timePoint: TimePoint = {
+      time: `${hourPart}h`, // "13h", "14h", etc.
+      date: `${day}/${month}/${year}`, // "15/10/2025"
+      fullDateTime: hourKey, // mantém o datetime completo para referência
+    }
+
+    stations.forEach((station) => {
+      const stationData = hourData.get(station)
+      if (stationData) {
+        timePoint[station] = stationData.value
+      }
+    })
+
+    result.push(timePoint)
+  })
+
+  return result
+}
+
+// Componente customizado para o tick do eixo X (horário + data)
+// Precisa ser criado dentro do componente para ter acesso ao timeToDateMap
+const createCustomXAxisTick = (timeToDateMap: Map<string, string>) => {
+  return (props: any) => {
+    const { x, y, payload } = props
+    
+    const timeValue = payload?.value || ''
+    const date = timeToDateMap.get(timeValue) || ''
+    
+    return (
+      <g transform={`translate(${x},${y})`}>
+        {/* Horário */}
+        <text
+          x={0}
+          y={0}
+          dy={8}
+          textAnchor="middle"
+          fill="hsl(var(--foreground))"
+          fontSize="12"
+          fontWeight="500"
+        >
+          {timeValue}
+        </text>
+        
+        {/* Data */}
+        <text
+          x={0}
+          y={0}
+          dy={24}
+          textAnchor="middle"
+          fill="hsl(var(--muted-foreground))"
+          fontSize="10"
+        >
+          {date}
+        </text>
+      </g>
+    )
+  }
+}
+
 export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stations, data }: Props) {
+  // Processa os dados para pegar apenas o último registro de cada hora
+  const processedData = useMemo(() => processHourlyData(data, stations), [data, stations])
+
+  // Cria um mapa de hora -> data para usar no CustomXAxisTick
+  const timeToDateMap = useMemo(() => {
+    const map = new Map<string, string>()
+    processedData.forEach((point) => {
+      if (point.time && point.date) {
+        map.set(String(point.time), String(point.date))
+      }
+    })
+    return map
+  }, [processedData])
+
   // Monta config dinamicamente para o ChartContainer (cores + labels por estação)
   const chartConfig: ChartConfig = stations.reduce((acc, station, idx) => {
     const key = slugify(station)
@@ -124,8 +241,8 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
             >
               <LineChart
                 accessibilityLayer
-                data={data}
-                margin={{ left: 12, right: 12, top: 10, bottom: 12 }}
+                data={processedData}
+                margin={{ left: 12, right: 40, top: 10, bottom: 35 }}
               >
                 <CartesianGrid vertical={true} />
                 <XAxis
@@ -133,6 +250,8 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
                   tickLine={false}
                   axisLine={true}
                   tickMargin={12}
+                  tick={createCustomXAxisTick(timeToDateMap)}
+                  height={60}
                 />
                 <YAxis
                   tickLine={false}
@@ -166,7 +285,7 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
                 })}
               </LineChart>
             </ChartContainer>
-            <div className="w-full text-center text-sm text-muted-foreground mt-1">
+            <div className="w-full text-center text-sm text-muted-foreground -mt-5">
               {xLabel}
             </div>
           </div>

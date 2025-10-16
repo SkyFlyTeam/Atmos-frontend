@@ -13,84 +13,193 @@ const mockParametros = [
       "Estação Éter",
       "Estação Fênix",
       "Estação Gelo",
-      "Estação Horizonte",
-      "Estação Ícaro",
-      "Estação Júpiter",
-      "Estação Kronos",
-      "Estação Lótus",
-      "Estação Miragem",
-      "Estação Nimbus",
-      "Estação Orion",
     ],
     dados: [
-      { time: "00:00", "Estação Aurora": 21.3, "Estação Boreal": 20.8, "Estação Cobalto": 22.1, "Estação Duna": 19.9, "Estação Éter": 21.0, "Estação Fênix": 21.8, "Estação Gelo": 18.7, "Estação Horizonte": 20.4, "Estação Ícaro": 21.1, "Estação Júpiter": 20.3, "Estação Kronos": 19.5, "Estação Lótus": 21.4, "Estação Miragem": 22.0, "Estação Nimbus": 20.1, "Estação Orion": 21.7 },
-      { time: "01:00", "Estação Aurora": 20.9, "Estação Boreal": 20.3, "Estação Cobalto": 21.6, "Estação Duna": 19.6, "Estação Éter": 20.7, "Estação Fênix": 21.3, "Estação Gelo": 18.3, "Estação Horizonte": 20.0, "Estação Ícaro": 20.8, "Estação Júpiter": 19.9, "Estação Kronos": 19.2, "Estação Lótus": 21.0, "Estação Miragem": 21.6, "Estação Nimbus": 19.8, "Estação Orion": 21.3 },
-      { time: "02:00", "Estação Aurora": 20.5, "Estação Boreal": 19.9, "Estação Cobalto": 21.2, "Estação Duna": 19.2, "Estação Éter": 20.3, "Estação Fênix": 20.9, "Estação Gelo": 17.9, "Estação Horizonte": 19.7, "Estação Ícaro": 20.4, "Estação Júpiter": 19.5, "Estação Kronos": 18.8, "Estação Lótus": 20.6, "Estação Miragem": 21.3, "Estação Nimbus": 19.4, "Estação Orion": 21.0 },
-      { time: "03:00", "Estação Aurora": 20.2, "Estação Boreal": 19.5, "Estação Cobalto": 20.8, "Estação Duna": 18.9, "Estação Éter": 20.0, "Estação Fênix": 20.5, "Estação Gelo": 17.5, "Estação Horizonte": 19.3, "Estação Ícaro": 20.0, "Estação Júpiter": 19.2, "Estação Kronos": 18.5, "Estação Lótus": 20.2, "Estação Miragem": 20.9, "Estação Nimbus": 19.1, "Estação Orion": 20.6 },
-      { time: "04:00", "Estação Aurora": 20.0, "Estação Boreal": 19.3, "Estação Cobalto": 20.5, "Estação Duna": 18.7, "Estação Éter": 19.8, "Estação Fênix": 20.3, "Estação Gelo": 17.3, "Estação Horizonte": 19.0, "Estação Ícaro": 19.7, "Estação Júpiter": 19.0, "Estação Kronos": 18.3, "Estação Lótus": 19.9, "Estação Miragem": 20.6, "Estação Nimbus": 18.9, "Estação Orion": 20.3 },
-      { time: "05:00", "Estação Aurora": 19.8, "Estação Boreal": 19.1, "Estação Cobalto": 20.3, "Estação Duna": 18.6, "Estação Éter": 19.6, "Estação Fênix": 20.0, "Estação Gelo": 17.2, "Estação Horizonte": 18.9, "Estação Ícaro": 19.5, "Estação Júpiter": 18.8, "Estação Kronos": 18.1, "Estação Lótus": 19.7, "Estação Miragem": 20.3, "Estação Nimbus": 18.8, "Estação Orion": 20.1 },
-      { time: "06:00", "Estação Aurora": 20.4, "Estação Boreal": 19.7, "Estação Cobalto": 20.9, "Estação Duna": 19.0, "Estação Éter": 20.1, "Estação Fênix": 20.6, "Estação Gelo": 17.7, "Estação Horizonte": 19.4, "Estação Ícaro": 20.0, "Estação Júpiter": 19.3, "Estação Kronos": 18.7, "Estação Lótus": 20.2, "Estação Miragem": 20.8, "Estação Nimbus": 19.3, "Estação Orion": 20.7 },
-      { time: "07:00", "Estação Aurora": 21.1, "Estação Boreal": 20.5, "Estação Cobalto": 21.6, "Estação Duna": 19.7, "Estação Éter": 20.9, "Estação Fênix": 21.3, "Estação Gelo": 18.5, "Estação Horizonte": 20.1, "Estação Ícaro": 20.7, "Estação Júpiter": 19.9, "Estação Kronos": 19.3, "Estação Lótus": 20.9, "Estação Miragem": 21.5, "Estação Nimbus": 19.9, "Estação Orion": 21.4 },
+      // 🌅 Estação Aurora
+      { datetime: "2025-10-15 13:05", "Estação Aurora": 21.1 },
+      { datetime: "2025-10-15 13:20", "Estação Aurora": 21.5 },
+      { datetime: "2025-10-15 13:35", "Estação Aurora": 21.9 },
+      { datetime: "2025-10-15 13:50", "Estação Aurora": 22.2 },
+
+      { datetime: "2025-10-15 14:10", "Estação Aurora": 22.5 },
+      { datetime: "2025-10-15 14:25", "Estação Aurora": 22.8 },
+      { datetime: "2025-10-15 14:40", "Estação Aurora": 23.1 },
+      { datetime: "2025-10-15 14:55", "Estação Aurora": 23.3 },
+
+      { datetime: "2025-10-15 15:05", "Estação Aurora": 23.6 },
+      { datetime: "2025-10-15 15:20", "Estação Aurora": 23.9 },
+      { datetime: "2025-10-15 15:35", "Estação Aurora": 24.1 },
+      { datetime: "2025-10-15 15:50", "Estação Aurora": 24.3 },
+
+      { datetime: "2025-10-15 16:10", "Estação Aurora": 24.1 },
+      { datetime: "2025-10-15 16:25", "Estação Aurora": 23.8 },
+      { datetime: "2025-10-15 16:40", "Estação Aurora": 23.4 },
+      { datetime: "2025-10-15 16:55", "Estação Aurora": 23.0 },
+
+      { datetime: "2025-10-15 17:05", "Estação Aurora": 22.7 },
+      { datetime: "2025-10-15 17:20", "Estação Aurora": 22.3 },
+      { datetime: "2025-10-15 17:35", "Estação Aurora": 21.9 },
+      { datetime: "2025-10-15 17:50", "Estação Aurora": 21.6 },
+
+      // 🌄 Estação Boreal
+      { datetime: "2025-10-15 13:08", "Estação Boreal": 20.3 },
+      { datetime: "2025-10-15 13:22", "Estação Boreal": 20.6 },
+      { datetime: "2025-10-15 13:38", "Estação Boreal": 20.9 },
+      { datetime: "2025-10-15 13:53", "Estação Boreal": 21.1 },
+
+      { datetime: "2025-10-15 14:05", "Estação Boreal": 21.4 },
+      { datetime: "2025-10-15 14:20", "Estação Boreal": 21.7 },
+      { datetime: "2025-10-15 14:35", "Estação Boreal": 22.0 },
+      { datetime: "2025-10-15 14:50", "Estação Boreal": 22.3 },
+
+      { datetime: "2025-10-15 15:05", "Estação Boreal": 22.7 },
+      { datetime: "2025-10-15 15:20", "Estação Boreal": 23.0 },
+      { datetime: "2025-10-15 15:35", "Estação Boreal": 23.3 },
+      { datetime: "2025-10-15 15:50", "Estação Boreal": 23.5 },
+
+      { datetime: "2025-10-15 16:05", "Estação Boreal": 23.4 },
+      { datetime: "2025-10-15 16:20", "Estação Boreal": 23.1 },
+      { datetime: "2025-10-15 16:35", "Estação Boreal": 22.8 },
+      { datetime: "2025-10-15 16:50", "Estação Boreal": 22.4 },
+
+      { datetime: "2025-10-15 17:05", "Estação Boreal": 22.0 },
+      { datetime: "2025-10-15 17:20", "Estação Boreal": 21.6 },
+      { datetime: "2025-10-15 17:35", "Estação Boreal": 21.2 },
+      { datetime: "2025-10-15 17:50", "Estação Boreal": 20.9 },
+
+      // 🪨 Estação Cobalto
+      { datetime: "2025-10-15 13:10", "Estação Cobalto": 22.1 },
+      { datetime: "2025-10-15 13:25", "Estação Cobalto": 22.4 },
+      { datetime: "2025-10-15 13:40", "Estação Cobalto": 22.7 },
+      { datetime: "2025-10-15 13:55", "Estação Cobalto": 22.9 },
+
+      { datetime: "2025-10-15 14:10", "Estação Cobalto": 23.3 },
+      { datetime: "2025-10-15 14:25", "Estação Cobalto": 23.6 },
+      { datetime: "2025-10-15 14:40", "Estação Cobalto": 23.8 },
+      { datetime: "2025-10-15 14:55", "Estação Cobalto": 24.0 },
+
+      { datetime: "2025-10-15 15:10", "Estação Cobalto": 24.3 },
+      { datetime: "2025-10-15 15:25", "Estação Cobalto": 24.6 },
+      { datetime: "2025-10-15 15:40", "Estação Cobalto": 24.8 },
+      { datetime: "2025-10-15 15:55", "Estação Cobalto": 25.0 },
+
+      { datetime: "2025-10-15 16:10", "Estação Cobalto": 24.7 },
+      { datetime: "2025-10-15 16:25", "Estação Cobalto": 24.3 },
+      { datetime: "2025-10-15 16:40", "Estação Cobalto": 23.9 },
+      { datetime: "2025-10-15 16:55", "Estação Cobalto": 23.5 },
+
+      { datetime: "2025-10-15 17:10", "Estação Cobalto": 23.1 },
+      { datetime: "2025-10-15 17:25", "Estação Cobalto": 22.8 },
+      { datetime: "2025-10-15 17:40", "Estação Cobalto": 22.5 },
+      { datetime: "2025-10-15 17:55", "Estação Cobalto": 22.2 },
+
+      // 🌵 Estação Duna
+      { datetime: "2025-10-15 13:02", "Estação Duna": 19.8 },
+      { datetime: "2025-10-15 13:17", "Estação Duna": 20.1 },
+      { datetime: "2025-10-15 13:32", "Estação Duna": 20.3 },
+      { datetime: "2025-10-15 13:47", "Estação Duna": 20.5 },
+
+      { datetime: "2025-10-15 14:05", "Estação Duna": 20.8 },
+      { datetime: "2025-10-15 14:20", "Estação Duna": 21.0 },
+      { datetime: "2025-10-15 14:35", "Estação Duna": 21.3 },
+      { datetime: "2025-10-15 14:50", "Estação Duna": 21.5 },
+
+      { datetime: "2025-10-15 15:10", "Estação Duna": 21.8 },
+      { datetime: "2025-10-15 15:25", "Estação Duna": 22.0 },
+      { datetime: "2025-10-15 15:40", "Estação Duna": 22.3 },
+      { datetime: "2025-10-15 15:55", "Estação Duna": 22.4 },
+
+      { datetime: "2025-10-15 16:10", "Estação Duna": 22.3 },
+      { datetime: "2025-10-15 16:25", "Estação Duna": 22.0 },
+      { datetime: "2025-10-15 16:40", "Estação Duna": 21.8 },
+      { datetime: "2025-10-15 16:55", "Estação Duna": 21.4 },
+
+      { datetime: "2025-10-15 17:05", "Estação Duna": 21.1 },
+      { datetime: "2025-10-15 17:20", "Estação Duna": 20.9 },
+      { datetime: "2025-10-15 17:35", "Estação Duna": 20.6 },
+      { datetime: "2025-10-15 17:50", "Estação Duna": 20.3 },
+
+      // ⚡ Estação Éter
+      { datetime: "2025-10-15 13:06", "Estação Éter": 21.0 },
+      { datetime: "2025-10-15 13:21", "Estação Éter": 21.3 },
+      { datetime: "2025-10-15 13:36", "Estação Éter": 21.6 },
+      { datetime: "2025-10-15 13:51", "Estação Éter": 21.9 },
+
+      { datetime: "2025-10-15 14:08", "Estação Éter": 22.3 },
+      { datetime: "2025-10-15 14:23", "Estação Éter": 22.7 },
+      { datetime: "2025-10-15 14:38", "Estação Éter": 23.1 },
+      { datetime: "2025-10-15 14:53", "Estação Éter": 23.5 },
+
+      { datetime: "2025-10-15 15:08", "Estação Éter": 23.8 },
+      { datetime: "2025-10-15 15:23", "Estação Éter": 24.1 },
+      { datetime: "2025-10-15 15:38", "Estação Éter": 24.3 },
+      { datetime: "2025-10-15 15:53", "Estação Éter": 24.2 },
+
+      { datetime: "2025-10-15 16:10", "Estação Éter": 24.0 },
+      { datetime: "2025-10-15 16:25", "Estação Éter": 23.7 },
+      { datetime: "2025-10-15 16:40", "Estação Éter": 23.4 },
+      { datetime: "2025-10-15 16:55", "Estação Éter": 23.0 },
+
+      { datetime: "2025-10-15 17:05", "Estação Éter": 22.6 },
+      { datetime: "2025-10-15 17:20", "Estação Éter": 22.3 },
+      { datetime: "2025-10-15 17:35", "Estação Éter": 21.9 },
+      { datetime: "2025-10-15 17:50", "Estação Éter": 21.5 },
+
+      // 🔥 Estação Fênix
+      { datetime: "2025-10-15 13:03", "Estação Fênix": 22.0 },
+      { datetime: "2025-10-15 13:18", "Estação Fênix": 22.4 },
+      { datetime: "2025-10-15 13:33", "Estação Fênix": 22.7 },
+      { datetime: "2025-10-15 13:48", "Estação Fênix": 23.0 },
+
+      { datetime: "2025-10-15 14:10", "Estação Fênix": 23.4 },
+      { datetime: "2025-10-15 14:25", "Estação Fênix": 23.7 },
+      { datetime: "2025-10-15 14:40", "Estação Fênix": 24.0 },
+      { datetime: "2025-10-15 14:55", "Estação Fênix": 24.3 },
+
+      { datetime: "2025-10-15 15:05", "Estação Fênix": 24.5 },
+      { datetime: "2025-10-15 15:20", "Estação Fênix": 24.7 },
+      { datetime: "2025-10-15 15:35", "Estação Fênix": 24.9 },
+      { datetime: "2025-10-15 15:50", "Estação Fênix": 25.0 },
+
+      { datetime: "2025-10-15 16:10", "Estação Fênix": 24.7 },
+      { datetime: "2025-10-15 16:25", "Estação Fênix": 24.4 },
+      { datetime: "2025-10-15 16:40", "Estação Fênix": 24.0 },
+      { datetime: "2025-10-15 16:55", "Estação Fênix": 23.7 },
+
+      { datetime: "2025-10-15 17:05", "Estação Fênix": 23.3 },
+      { datetime: "2025-10-15 17:20", "Estação Fênix": 22.9 },
+      { datetime: "2025-10-15 17:35", "Estação Fênix": 22.5 },
+      { datetime: "2025-10-15 17:50", "Estação Fênix": 22.2 },
+
+      // ❄️ Estação Gelo
+      { datetime: "2025-10-15 13:07", "Estação Gelo": 18.3 },
+      { datetime: "2025-10-15 13:22", "Estação Gelo": 18.5 },
+      { datetime: "2025-10-15 13:37", "Estação Gelo": 18.8 },
+      { datetime: "2025-10-15 13:52", "Estação Gelo": 19.0 },
+
+      { datetime: "2025-10-15 14:08", "Estação Gelo": 19.3 },
+      { datetime: "2025-10-15 14:23", "Estação Gelo": 19.6 },
+      { datetime: "2025-10-15 14:38", "Estação Gelo": 19.8 },
+      { datetime: "2025-10-15 14:53", "Estação Gelo": 20.0 },
+
+      { datetime: "2025-10-15 15:08", "Estação Gelo": 20.2 },
+      { datetime: "2025-10-15 15:23", "Estação Gelo": 20.4 },
+      { datetime: "2025-10-15 15:38", "Estação Gelo": 20.6 },
+      { datetime: "2025-10-15 15:53", "Estação Gelo": 20.8 },
+
+      { datetime: "2025-10-15 16:08", "Estação Gelo": 20.6 },
+      { datetime: "2025-10-15 16:23", "Estação Gelo": 20.3 },
+      { datetime: "2025-10-15 16:38", "Estação Gelo": 20.0 },
+      { datetime: "2025-10-15 16:53", "Estação Gelo": 19.6 },
+
+      { datetime: "2025-10-15 17:05", "Estação Gelo": 19.3 },
+      { datetime: "2025-10-15 17:20", "Estação Gelo": 19.0 },
+      { datetime: "2025-10-15 17:35", "Estação Gelo": 18.8 },
+      { datetime: "2025-10-15 17:50", "Estação Gelo": 18.5 },
     ],
   },
-  {
-    tipo_parametro: "Radiação UV (índice)",
-    estacoes: [
-      "Estação Aurora",
-      "Estação Boreal",
-      "Estação Cobalto",
-      "Estação Duna",
-      "Estação Éter",
-      "Estação Fênix",
-      "Estação Gelo",
-      "Estação Horizonte",
-      "Estação Ícaro",
-      "Estação Júpiter",
-      "Estação Kronos",
-      "Estação Lótus",
-      "Estação Miragem",
-      "Estação Nimbus",
-      "Estação Orion",
-    ],
-    dados: [
-      { time: "00:00", "Estação Aurora": 0.0, "Estação Boreal": 0.0, "Estação Cobalto": 0.0, "Estação Duna": 0.0, "Estação Éter": 0.0, "Estação Fênix": 0.0, "Estação Gelo": 0.0, "Estação Horizonte": 0.0, "Estação Ícaro": 0.0, "Estação Júpiter": 0.0, "Estação Kronos": 0.0, "Estação Lótus": 0.0, "Estação Miragem": 0.0, "Estação Nimbus": 0.0, "Estação Orion": 0.0 },
-      { time: "01:00", "Estação Aurora": 0.0, "Estação Boreal": 0.0, "Estação Cobalto": 0.0, "Estação Duna": 0.0, "Estação Éter": 0.0, "Estação Fênix": 0.0, "Estação Gelo": 0.0, "Estação Horizonte": 0.0, "Estação Ícaro": 0.0, "Estação Júpiter": 0.0, "Estação Kronos": 0.0, "Estação Lótus": 0.0, "Estação Miragem": 0.0, "Estação Nimbus": 0.0, "Estação Orion": 0.0 },
-      { time: "05:00", "Estação Aurora": 0.1, "Estação Boreal": 0.1, "Estação Cobalto": 0.1, "Estação Duna": 0.1, "Estação Éter": 0.1, "Estação Fênix": 0.1, "Estação Gelo": 0.1, "Estação Horizonte": 0.1, "Estação Ícaro": 0.1, "Estação Júpiter": 0.1, "Estação Kronos": 0.1, "Estação Lótus": 0.1, "Estação Miragem": 0.1, "Estação Nimbus": 0.1, "Estação Orion": 0.1 },
-      { time: "06:00", "Estação Aurora": 0.6, "Estação Boreal": 0.5, "Estação Cobalto": 0.7, "Estação Duna": 0.6, "Estação Éter": 0.6, "Estação Fênix": 0.6, "Estação Gelo": 0.4, "Estação Horizonte": 0.6, "Estação Ícaro": 0.5, "Estação Júpiter": 0.5, "Estação Kronos": 0.4, "Estação Lótus": 0.6, "Estação Miragem": 0.6, "Estação Nimbus": 0.5, "Estação Orion": 0.6 },
-      { time: "07:00", "Estação Aurora": 1.8, "Estação Boreal": 1.6, "Estação Cobalto": 2.0, "Estação Duna": 1.7, "Estação Éter": 1.9, "Estação Fênix": 2.1, "Estação Gelo": 1.4, "Estação Horizonte": 1.8, "Estação Ícaro": 1.7, "Estação Júpiter": 1.5, "Estação Kronos": 1.6, "Estação Lótus": 1.9, "Estação Miragem": 2.0, "Estação Nimbus": 1.8, "Estação Orion": 2.1 },
-    ],
-  },
-  {
-    tipo_parametro: "Umidade do ar (%)",
-    estacoes: [
-      "Estação Aurora",
-      "Estação Boreal",
-      "Estação Cobalto",
-      "Estação Duna",
-      "Estação Éter",
-      "Estação Fênix",
-      "Estação Gelo",
-      "Estação Horizonte",
-      "Estação Ícaro",
-      "Estação Júpiter",
-      "Estação Kronos",
-      "Estação Lótus",
-      "Estação Miragem",
-      "Estação Nimbus",
-      "Estação Orion",
-    ],
-    dados: [
-      { time: "00:00", "Estação Aurora": 84, "Estação Boreal": 81, "Estação Cobalto": 79, "Estação Duna": 88, "Estação Éter": 83, "Estação Fênix": 80, "Estação Gelo": 91, "Estação Horizonte": 82, "Estação Ícaro": 84, "Estação Júpiter": 89, "Estação Kronos": 87, "Estação Lótus": 81, "Estação Miragem": 78, "Estação Nimbus": 85, "Estação Orion": 83 },
-      { time: "01:00", "Estação Aurora": 85, "Estação Boreal": 82, "Estação Cobalto": 80, "Estação Duna": 89, "Estação Éter": 84, "Estação Fênix": 81, "Estação Gelo": 92, "Estação Horizonte": 83, "Estação Ícaro": 85, "Estação Júpiter": 90, "Estação Kronos": 88, "Estação Lótus": 82, "Estação Miragem": 79, "Estação Nimbus": 86, "Estação Orion": 84 },
-      { time: "02:00", "Estação Aurora": 86, "Estação Boreal": 83, "Estação Cobalto": 81, "Estação Duna": 90, "Estação Éter": 85, "Estação Fênix": 82, "Estação Gelo": 93, "Estação Horizonte": 84, "Estação Ícaro": 86, "Estação Júpiter": 91, "Estação Kronos": 89, "Estação Lótus": 83, "Estação Miragem": 80, "Estação Nimbus": 87, "Estação Orion": 85 },
-      { time: "03:00", "Estação Aurora": 86, "Estação Boreal": 83, "Estação Cobalto": 82, "Estação Duna": 90, "Estação Éter": 85, "Estação Fênix": 83, "Estação Gelo": 93, "Estação Horizonte": 84, "Estação Ícaro": 86, "Estação Júpiter": 91, "Estação Kronos": 89, "Estação Lótus": 83, "Estação Miragem": 81, "Estação Nimbus": 87, "Estação Orion": 85 },
-      { time: "04:00", "Estação Aurora": 87, "Estação Boreal": 84, "Estação Cobalto": 82, "Estação Duna": 91, "Estação Éter": 86, "Estação Fênix": 84, "Estação Gelo": 94, "Estação Horizonte": 85, "Estação Ícaro": 87, "Estação Júpiter": 92, "Estação Kronos": 90, "Estação Lótus": 84, "Estação Miragem": 82, "Estação Nimbus": 88, "Estação Orion": 86 },
-      { time: "05:00", "Estação Aurora": 86, "Estação Boreal": 84, "Estação Cobalto": 81, "Estação Duna": 90, "Estação Éter": 85, "Estação Fênix": 83, "Estação Gelo": 93, "Estação Horizonte": 84, "Estação Ícaro": 86, "Estação Júpiter": 91, "Estação Kronos": 89, "Estação Lótus": 83, "Estação Miragem": 80, "Estação Nimbus": 87, "Estação Orion": 85 },
-      { time: "06:00", "Estação Aurora": 84, "Estação Boreal": 82, "Estação Cobalto": 79, "Estação Duna": 88, "Estação Éter": 83, "Estação Fênix": 80, "Estação Gelo": 91, "Estação Horizonte": 82, "Estação Ícaro": 84, "Estação Júpiter": 89, "Estação Kronos": 87, "Estação Lótus": 81, "Estação Miragem": 78, "Estação Nimbus": 85, "Estação Orion": 83 },
-      { time: "07:00", "Estação Aurora": 81, "Estação Boreal": 79, "Estação Cobalto": 76, "Estação Duna": 85, "Estação Éter": 80, "Estação Fênix": 77, "Estação Gelo": 88, "Estação Horizonte": 79, "Estação Ícaro": 81, "Estação Júpiter": 86, "Estação Kronos": 84, "Estação Lótus": 78, "Estação Miragem": 75, "Estação Nimbus": 82, "Estação Orion": 80 },
-    ],
-  },
-]
+];
+
 
 const ITEMS_PER_PAGE = 2
 
@@ -124,7 +233,7 @@ const Dashboard = () => {
             yLabel={param.tipo_parametro} 
             xLabel="Horário"
             stations={param.estacoes}
-            data={param.dados}
+            data={param.dados.map(d => ({ ...d, time: d.datetime } as any))}
           />
         ))}
       </div>
