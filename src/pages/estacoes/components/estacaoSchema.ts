@@ -39,22 +39,22 @@ export const estacaoFormSchema = z.object({
   }
   
   // Se ambos os métodos estiverem preenchidos, gera erro
-  if (temLatLong && (temEndereco || temCidade)) {
-    if (temEndereco) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Remova o endereço ou as coordenadas para continuar",
-        path: ["endereco"],
-      });
-    }
-    if (temCidade) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Remova a cidade ou as coordenadas para continuar",
-        path: ["cidadeNome"],
-      });
-    }
-  }
+  // if (temLatLong && (temEndereco || temCidade)) {
+  //   if (temEndereco) {
+  //     ctx.addIssue({
+  //       code: z.ZodIssueCode.custom,
+  //       message: "Remova o endereço ou as coordenadas para continuar",
+  //       path: ["endereco"],
+  //     });
+  //   }
+  //   if (temCidade) {
+  //     ctx.addIssue({
+  //       code: z.ZodIssueCode.custom,
+  //       message: "Remova a cidade ou as coordenadas para continuar",
+  //       path: ["cidadeNome"],
+  //     });
+  //   }
+  // }
 });
 
 export const estacaoValidationSchema = estacaoFormSchema.transform((data) => ({
