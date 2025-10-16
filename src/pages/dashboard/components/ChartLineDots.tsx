@@ -56,8 +56,8 @@ type StationName = string
 
 export type TimePoint = {
   time: string
-  // cada estação vira uma key com valor numérico
-  [station: StationName]: number | string
+  // cada estação vira uma key com valor numérico ou null
+  [station: StationName]: number | string | null
 }
 
 type Props = {
@@ -68,67 +68,22 @@ type Props = {
   data: TimePoint[]
 }
 
-// Função para processar dados e pegar apenas o último registro de cada hora
-function processHourlyData(data: TimePoint[], stations: StationName[]): TimePoint[] {
-  // Agrupa os dados por hora e estação
-  const hourlyMap = new Map<string, Map<string, { datetime: string; value: number }>>()
-
+// Função para mapear o horário para a data, considerando todos os pontos
+function buildTimeToDateMap(data: TimePoint[]): Map<string, string> {
+  const map = new Map<string, string>()
   data.forEach((point) => {
-    // Extrai a data/hora do campo time ou datetime
-    const dateTimeStr = point.time || (point as any).datetime
-    if (!dateTimeStr) return
-
-    // Extrai a hora (formato: "2025-10-15 13:05" -> "13")
-    const match = dateTimeStr.match(/(\d{4}-\d{2}-\d{2} \d{2})/)
-    if (!match) return
-
-    const hourKey = match[1] // "2025-10-15 13"
-
-    if (!hourlyMap.has(hourKey)) {
-      hourlyMap.set(hourKey, new Map())
-    }
-
-    const hourData = hourlyMap.get(hourKey)!
-
-    // Para cada estação, guarda o último valor encontrado
-    stations.forEach((station) => {
-      const value = point[station]
-      if (typeof value === 'number') {
-        hourData.set(station, { datetime: dateTimeStr, value })
+    if (point.time && (point as any).date) {
+      map.set(String(point.time), String((point as any).date))
+    } else if (point.time) {
+      // Se não houver campo date, tenta extrair da string time
+      const match = String(point.time).match(/(\d{4}-\d{2}-\d{2})/)
+      if (match) {
+        const [year, month, day] = match[1].split('-')
+        map.set(String(point.time), `${day}/${month}/${year}`)
       }
-    })
-  })
-
-  // Converte o mapa de volta para array de TimePoint
-  const result: TimePoint[] = []
-
-  // Ordena as horas
-  const sortedHours = Array.from(hourlyMap.keys()).sort()
-
-  sortedHours.forEach((hourKey) => {
-    const hourData = hourlyMap.get(hourKey)!
-
-    // Extrai data e hora separadamente
-    const [datePart, hourPart] = hourKey.split(' ')
-    const [year, month, day] = datePart.split('-')
-
-    const timePoint: TimePoint = {
-      time: `${hourPart}h`, // "13h", "14h", etc.
-      date: `${day}/${month}/${year}`, // "15/10/2025"
-      fullDateTime: hourKey, // mantém o datetime completo para referência
     }
-
-    stations.forEach((station) => {
-      const stationData = hourData.get(station)
-      if (stationData) {
-        timePoint[station] = stationData.value
-      }
-    })
-
-    result.push(timePoint)
   })
-
-  return result
+  return map
 }
 
 // Componente customizado para o tick do eixo X (horário + data)
@@ -138,6 +93,16 @@ const createCustomXAxisTick = (timeToDateMap: Map<string, string>) => {
 
     const timeValue = payload?.value || ''
     const date = timeToDateMap.get(timeValue) || ''
+    
+    // Extrai a hora do formato "2025-10-15 13:00" -> "13h"
+    let hourLabel = ''
+    if (timeValue.includes(' ')) {
+      const timePart = timeValue.split(' ')[1]
+      const hour = timePart.split(':')[0]
+      hourLabel = `${hour}h`
+    } else {
+      hourLabel = timeValue
+    }
 
     return (
       <g transform={`translate(${x},${y})`}>
@@ -151,7 +116,7 @@ const createCustomXAxisTick = (timeToDateMap: Map<string, string>) => {
           fontSize="12"
           fontWeight="500"
         >
-          {timeValue}
+          {hourLabel}
         </text>
 
         {/* Data */}
@@ -170,20 +135,100 @@ const createCustomXAxisTick = (timeToDateMap: Map<string, string>) => {
   }
 }
 
-export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stations, data }: Props) {
-  // Processa os dados para pegar apenas o último registro de cada hora
-  const processedData = useMemo(() => processHourlyData(data, stations), [data, stations])
 
+// Função para gerar uma lista completa de horas cheias entre o menor e maior horário
+function getFullHourTicks(times: string[]): string[] {
+  if (times.length === 0) return [];
+  const datetimes = times.map(t => new Date(t.replace(' ', 'T')));
+  const min = new Date(Math.min(...datetimes.map(d => d.getTime())));
+  const max = new Date(Math.max(...datetimes.map(d => d.getTime())));
+  min.setMinutes(0, 0, 0);
+  max.setMinutes(0, 0, 0);
+  const ticks: string[] = [];
+  for (let d = new Date(min); d <= max; d.setHours(d.getHours() + 1)) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    ticks.push(`${yyyy}-${mm}-${dd} ${hh}:00`);
+  }
+  return ticks;
+}
+
+// Função para consolidar e preencher os dados para todas as estações e horários
+function fillDataForStations(data: any[], stations: StationName[]): TimePoint[] {
+  // Primeiro, consolida todos os dados por horário
+  const consolidatedMap = new Map<string, TimePoint>();
+  data.forEach(item => {
+    const time = item.datetime || item.time;
+    if (!time) return;
+    if (!consolidatedMap.has(time)) {
+      consolidatedMap.set(time, { time });
+    }
+    const entry = consolidatedMap.get(time)!;
+    stations.forEach(station => {
+      if (item[station] !== undefined) {
+        entry[station] = item[station];
+      }
+    });
+  });
+  // Gera todos os ticks de horas cheias e adiciona ao mapa se não existirem
+  const allTimes = Array.from(consolidatedMap.keys());
+  if (allTimes.length > 0) {
+    const hourTicks = getFullHourTicks(allTimes);
+    hourTicks.forEach(tick => {
+      if (!consolidatedMap.has(tick)) {
+        const entry: TimePoint = { time: tick };
+        stations.forEach(station => {
+          entry[station] = null;
+        });
+        consolidatedMap.set(tick, entry);
+      }
+    });
+  }
+  // Converte o mapa para array e ordena
+  const result = Array.from(consolidatedMap.values()).sort((a, b) => a.time.localeCompare(b.time));
+  // Adiciona a data formatada a cada entrada
+  result.forEach(entry => {
+    entry.date = entry.time.split(' ')[0].split('-').reverse().join('/');
+    stations.forEach(station => {
+      if (entry[station] === undefined) {
+        entry[station] = null;
+      }
+    });
+  });
+  return result;
+}
+
+export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stations, data }: Props) {
+  // Preenche os dados para todas as estações e horários
+  const processedData = useMemo(() => fillDataForStations(data, stations), [data, stations]);
+  // Gera os ticks de hora cheia para o eixo X
+  const hourTicks = useMemo(() => {
+    // Sempre gera ticks entre 13h e 17h para os dados mockados
+    if (processedData.length > 0) {
+      const times = processedData.map(d => d.time);
+      return getFullHourTicks(times);
+    }
+    return [];
+  }, [processedData]);
   // Cria um mapa de hora -> data para usar no CustomXAxisTick
   const timeToDateMap = useMemo(() => {
-    const map = new Map<string, string>()
+    const map = new Map<string, string>();
     processedData.forEach((point) => {
       if (point.time && point.date) {
-        map.set(String(point.time), String(point.date))
+        map.set(String(point.time), String(point.date));
       }
-    })
-    return map
-  }, [processedData])
+    });
+    // Adiciona também as entradas para as horas cheias (ticks)
+    hourTicks.forEach(tick => {
+      if (!map.has(tick)) {
+        const date = tick.split(' ')[0].split('-').reverse().join('/');
+        map.set(tick, date);
+      }
+    });
+    return map;
+  }, [processedData, hourTicks])
 
   // Monta config dinamicamente para o ChartContainer (cores + labels por estação)
   const chartConfig: ChartConfig = stations.reduce((acc, station, idx) => {
@@ -205,6 +250,10 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
   const chartHeight = width
     ? Math.max(120, Math.round(width / aspect) - reservedPx)
     : undefined
+
+  // ChartContainer com largura fixa para scroll horizontal e espaçamento igual entre horas
+  const tickWidth = 120; // px por hora
+  const chartWidth = hourTicks.length * tickWidth;
 
   return (
     <CardChart
@@ -231,59 +280,70 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
             })}
           </div>
 
-          {/* ChartContainer com altura explícita (calculada) para o ResponsiveContainer */}
-          <div ref={chartWrapperRef} className="w-full">
-            <ChartContainer
-              config={chartConfig}
-              className="w-full"
-              style={chartHeight ? { height: chartHeight } : undefined}
-            >
-              <LineChart
-                accessibilityLayer
-                data={processedData}
-                margin={{ left: 12, right: 40, top: 10, bottom: 35 }}
+          {/* ChartContainer com largura fixa e scroll horizontal */}
+          <div ref={chartWrapperRef} className="w-full overflow-x-auto">
+            <div style={{ minWidth: chartWidth }}>
+              <ChartContainer
+                config={chartConfig}
+                className="w-full"
+                style={{ height: chartHeight, minWidth: chartWidth }}
               >
-                <CartesianGrid vertical={true} />
-                <XAxis
-                  dataKey="time"
-                  tickLine={false}
-                  axisLine={true}
-                  tickMargin={12}
-                  tick={createCustomXAxisTick(timeToDateMap)}
-                  height={60}
-                />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  width={48}
-                  label={{
-                    value: yLabel ?? title,
-                    angle: -90,
-                    position: "insideLeft",
-                    style: { textAnchor: "middle" },
-                  }}
-                />
+                <LineChart
+                  accessibilityLayer
+                  data={processedData}
+                  margin={{ left: 12, right: 40, top: 10, bottom: 35 }}
+                  width={chartWidth}
+                  height={chartHeight}
+                >
+                  <CartesianGrid vertical={true} />
+                  <XAxis
+                    dataKey="time"
+                    tickLine={false}
+                    axisLine={true}
+                    tickMargin={12}
+                    tick={createCustomXAxisTick(timeToDateMap)}
+                    height={60}
+                    ticks={hourTicks}
+                    type="category"
+                    allowDuplicatedCategory={false}
+                    interval={0}
+                    // Força espaçamento igual entre ticks
+                    minTickGap={0}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    width={48}
+                    label={{
+                      value: yLabel ?? title,
+                      angle: -90,
+                      position: "insideLeft",
+                      style: { textAnchor: "middle" },
+                    }}
+                  />
 
-                <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                  <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
 
-                {stations.map((station) => {
-                  const key = slugify(station)
-                  const stroke = `var(--color-${key})`
-                  return (
-                    <Line
-                      key={key}
-                      type="monotone"
-                      dataKey={station}
-                      name={station}
-                      stroke={stroke}
-                      strokeWidth={2}
-                      dot={{ r: 3, strokeWidth: 0, fill: stroke }}
-                      activeDot={{ r: 5 }}
-                    />
-                  )
-                })}
-              </LineChart>
-            </ChartContainer>
+                  {stations.map((station) => {
+                    const key = slugify(station)
+                    const stroke = `var(--color-${key})`
+                    return (
+                      <Line
+                        key={key}
+                        type="monotone"
+                        dataKey={station}
+                        name={station}
+                        stroke={stroke}
+                        strokeWidth={2}
+                        dot={{ r: 3, strokeWidth: 0, fill: stroke }}
+                        activeDot={{ r: 5 }}
+                        connectNulls={true}
+                      />
+                    )
+                  })}
+                </LineChart>
+              </ChartContainer>
+            </div>
             <div className="w-full text-center text-sm text-muted-foreground -mt-5">
               {xLabel}
             </div>
@@ -292,6 +352,4 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
       }
     />
   )
-
-
 }
