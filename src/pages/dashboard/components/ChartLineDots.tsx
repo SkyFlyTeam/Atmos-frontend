@@ -1,5 +1,7 @@
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react"
 import {
   ChartConfig,
   ChartContainer,
@@ -66,24 +68,6 @@ type Props = {
   yLabel?: string
   stations: StationName[]
   data: TimePoint[]
-}
-
-// Função para mapear o horário para a data, considerando todos os pontos
-function buildTimeToDateMap(data: TimePoint[]): Map<string, string> {
-  const map = new Map<string, string>()
-  data.forEach((point) => {
-    if (point.time && (point as any).date) {
-      map.set(String(point.time), String((point as any).date))
-    } else if (point.time) {
-      // Se não houver campo date, tenta extrair da string time
-      const match = String(point.time).match(/(\d{4}-\d{2}-\d{2})/)
-      if (match) {
-        const [year, month, day] = match[1].split('-')
-        map.set(String(point.time), `${day}/${month}/${year}`)
-      }
-    }
-  })
-  return map
 }
 
 // Componente customizado para o tick do eixo X (horário + data)
@@ -201,6 +185,13 @@ function fillDataForStations(data: any[], stations: StationName[]): TimePoint[] 
 }
 
 export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stations, data }: Props) {
+  // Controle de Zoom: altera a largura por hora para ver melhor os pontos dentro de cada hora
+  const BASE_TICK_WIDTH = 120 // px por hora (zoom 1x)
+  const [zoom, setZoom] = useState(1)
+  const MIN_ZOOM = 0.5
+  const MAX_ZOOM = 3
+  const ZOOM_STEP = 0.25
+
   // Preenche os dados para todas as estações e horários
   const processedData = useMemo(() => fillDataForStations(data, stations), [data, stations]);
   // Gera os ticks de hora cheia para o eixo X
@@ -252,32 +243,99 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
     : undefined
 
   // ChartContainer com largura fixa para scroll horizontal e espaçamento igual entre horas
-  const tickWidth = 120; // px por hora
-  const chartWidth = hourTicks.length * tickWidth;
+  const tickWidth = useMemo(() => Math.round(BASE_TICK_WIDTH * zoom), [zoom])
+  const chartWidth = useMemo(() => hourTicks.length * tickWidth, [hourTicks.length, tickWidth])
+
+  const handleZoomIn = () => setZoom((z) => Math.min(MAX_ZOOM, parseFloat((z + ZOOM_STEP).toFixed(2))))
+  const handleZoomOut = () => setZoom((z) => Math.max(MIN_ZOOM, parseFloat((z - ZOOM_STEP).toFixed(2))))
+  const handleZoomReset = () => setZoom(1)
+
+  // Atalhos de teclado: Ctrl + '+', Ctrl + '-', Ctrl + '0'
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Evita interferir quando digitando em inputs/textareas/contentEditable
+      const target = e.target as HTMLElement | null
+      const tag = (target?.tagName || "").toLowerCase()
+      const isEditable = !!target && (tag === "input" || tag === "textarea" || target.isContentEditable)
+      if (isEditable) return
+
+      if (e.ctrlKey || e.metaKey) {
+        const key = e.key
+        if (key === "+" || key === "=") {
+          e.preventDefault()
+          handleZoomIn()
+        } else if (key === "-") {
+          e.preventDefault()
+          handleZoomOut()
+        } else if (key === "0") {
+          e.preventDefault()
+          handleZoomReset()
+        }
+      }
+    }
+    document.addEventListener("keydown", onKeyDown)
+    return () => document.removeEventListener("keydown", onKeyDown)
+  }, [])
 
   return (
     <CardChart
       title={title}
       chart={
         <>
-          {/* Legenda (fora do ChartContainer para não impactar a altura do SVG) */}
-          <div ref={legendRef} className="flex flex-wrap items-center gap-4 px-2 pb-2">
-            {stations.map((station) => {
-              const key = slugify(station)
-              const itemConfig = chartConfig[key as keyof typeof chartConfig]
-              const bulletColor =
-                (itemConfig && (itemConfig as any).color) || `var(--color-${key})`
-              return (
-                <div key={key} className="flex items-center gap-2">
-                  <span
-                    className="inline-block h-3 w-3 rounded-full border"
-                    style={{ backgroundColor: bulletColor, borderColor: bulletColor }}
-                    aria-hidden
-                  />
-                  <span className="text-sm">{station}</span>
-                </div>
-              )
-            })}
+          {/* Legenda e, abaixo, os controles de Zoom */}
+          <div className="px-2 pb-2">
+            <div ref={legendRef} className="flex flex-wrap items-center justify-center gap-4">
+              {stations.map((station) => {
+                const key = slugify(station)
+                const itemConfig = chartConfig[key as keyof typeof chartConfig]
+                const bulletColor =
+                  (itemConfig && (itemConfig as any).color) || `var(--color-${key})`
+                return (
+                  <div key={key} className="flex items-center gap-2">
+                    <span
+                      className="inline-block h-3 w-3 rounded-full border"
+                      style={{ backgroundColor: bulletColor, borderColor: bulletColor }}
+                      aria-hidden
+                    />
+                    <span className="text-sm">{station}</span>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleZoomOut}
+                disabled={zoom <= MIN_ZOOM}
+                aria-label="Diminuir zoom"
+                title="Diminuir zoom"
+              >
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+              <div className="min-w-12 text-center text-xs text-muted-foreground">
+                {Math.round(zoom * 100)}%
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleZoomIn}
+                disabled={zoom >= MAX_ZOOM}
+                aria-label="Aumentar zoom"
+                title="Aumentar zoom"
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleZoomReset}
+                aria-label="Resetar zoom"
+                title="Resetar zoom (Ctrl+0)"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {/* ChartContainer com largura fixa e scroll horizontal */}
@@ -322,7 +380,23 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
                     }}
                   />
 
-                  <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                  <ChartTooltip
+                    cursor={false}
+                    content={
+                      <ChartTooltipContent
+                        hideLabel={false}
+                        labelFormatter={(rawLabel, payload) => {
+                          // rawLabel é a string do eixo X: "YYYY-MM-DD HH:MM"
+                          const labelStr = String(rawLabel)
+                          const [datePart, timePart] = labelStr.split(" ")
+                          const [yyyy, mm, dd] = (datePart || "").split("-")
+                          const prettyDate = dd && mm && yyyy ? `${dd}/${mm}/${yyyy}` : ""
+                          const prettyTime = (timePart || "").slice(0,5) // HH:MM
+                          return `${prettyDate} ${prettyTime}`.trim()
+                        }}
+                      />
+                    }
+                  />
 
                   {stations.map((station) => {
                     const key = slugify(station)
