@@ -37,6 +37,8 @@ import { toast } from "react-toastify";
 
 import { cidadeAPIServices, CidadeItem } from "@/services/cidadeAPIServices";
 import { ComboBox } from "../Combobox/Combobox";
+import { coordenadasAPIServices } from "@/services/coordenadasAPIServices";
+import { EnderecoCompleto, CoordenadasAPI } from "@/interfaces/coordenadasAPI";
 
 type Props = {
   open: boolean;
@@ -105,6 +107,8 @@ export default function EstacaoSidebar({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [usingCoordinates, setUsingCoordinates] = useState(false);
   const [usingAddress, setUsingAddress] = useState(false);
+  const [isLoadingAddress, setIsLoadingAddress] = useState(false);
+  const [enderecoPreenchidoAutomaticamente, setEnderecoPreenchidoAutomaticamente] = useState(false);
 
   const cidadeOptions = useMemo(() => {
     return cidades.map((cidade) => ({
@@ -118,7 +122,7 @@ export default function EstacaoSidebar({
     if (estacao) {
       const hasLatLong = !!(estacao.lat && estacao.long);
       const hasAddress = !!(estacao.endereco || estacao.cidadeIbgeId);
-      
+
       setUsingCoordinates(hasLatLong);
       setUsingAddress(hasAddress);
     }
@@ -143,13 +147,19 @@ export default function EstacaoSidebar({
     const subscription = watch((value, { name }) => {
       const hasLatLong = !!value.lat || !!value.long;
       const hasAddress = !!value.endereco || !!cidadeSelecionada;
-      
+
       setUsingCoordinates(hasLatLong);
       setUsingAddress(hasAddress);
+
+      //se ambas coordenadas estiverem preenchidas, busca o endereço
+      if (value.lat && value.long && !hasAddress) {
+        buscarEnderecoPorCoordenadas(value.lat, value.long);
+      }
+
     });
-    
+
     return () => subscription.unsubscribe();
-  }, [watch, cidadeSelecionada]);
+  }, [watch, cidadeSelecionada, cidades]);
 
   // Preenche formulário ao abrir/editar
   useEffect(() => {
@@ -211,6 +221,19 @@ export default function EstacaoSidebar({
     setImagemRemovida(false);
   }, [open, estacao, cidades, reset]);
 
+  useEffect(() => {
+    const subscription = watch((value) => {
+      // Se ambas as coordenadas estão vazias e o endereço foi preenchido automaticamente, limpa tudo
+      if (!value.lat && !value.long && enderecoPreenchidoAutomaticamente) {
+        setValue("endereco", "");
+        setCidadeSelecionada(null);
+        setEnderecoPreenchidoAutomaticamente(false);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [watch, enderecoPreenchidoAutomaticamente, setValue]);
+
   function handleAddParametro(value: string) {
     if (!value) return;
     const novosParametros = parametrosSelecionados.includes(value)
@@ -264,6 +287,110 @@ export default function EstacaoSidebar({
     setCidadeSelecionada(item);
     setCidadeOpen(false);
   }
+
+  const buscarEnderecoPorCoordenadas = async (lat: string, long: string) => {
+    if (!lat || !long) return;
+
+    setIsLoadingAddress(true);
+    try {
+      const enderecoCompleto = await coordenadasAPIServices.getCoordenadas(
+        parseFloat(lat),
+        parseFloat(long)
+      );
+
+      if (enderecoCompleto) {
+        console.log("Endereço completo retornado:", enderecoCompleto); // Debug
+        
+        // Mapeamento de estados (nome completo -> sigla)
+        const mapeamentoEstados: { [key: string]: string } = {
+          'acre': 'AC',
+          'alagoas': 'AL',
+          'amapá': 'AP',
+          'amazonas': 'AM',
+          'bahia': 'BA',
+          'ceará': 'CE',
+          'distrito federal': 'DF',
+          'espírito santo': 'ES',
+          'goiás': 'GO',
+          'maranhão': 'MA',
+          'mato grosso': 'MT',
+          'mato grosso do sul': 'MS',
+          'minas gerais': 'MG',
+          'pará': 'PA',
+          'paraíba': 'PB',
+          'paraná': 'PR',
+          'pernambuco': 'PE',
+          'piauí': 'PI',
+          'rio de janeiro': 'RJ',
+          'rio grande do norte': 'RN',
+          'rio grande do sul': 'RS',
+          'rondônia': 'RO',
+          'roraima': 'RR',
+          'santa catarina': 'SC',
+          'são paulo': 'SP',
+          'sergipe': 'SE',
+          'tocantins': 'TO'
+        };
+
+        // Converte o estado retornado para sigla
+        const estadoSigla = mapeamentoEstados[enderecoCompleto.estado.toLowerCase()] || enderecoCompleto.estado;
+        
+        console.log(`Estado convertido: "${enderecoCompleto.estado}" -> "${estadoSigla}"`); // Debug
+        
+        // Busca a cidade na lista de cidades carregadas
+        const cidadeEncontrada = cidades.find((cidade) => {
+          const nomeCidade = cidade.nome.toLowerCase().trim();
+          const nomeRetornado = enderecoCompleto.cidade.toLowerCase().trim();
+          const ufCidade = cidade.uf.toLowerCase().trim();
+          const ufRetornado = estadoSigla.toLowerCase().trim();
+          
+          console.log(`Comparando: "${nomeCidade}" com "${nomeRetornado}" e "${ufCidade}" com "${ufRetornado}"`); // Debug
+          
+          // Busca exata
+          if (nomeCidade === nomeRetornado && ufCidade === ufRetornado) {
+            return true;
+          }
+          
+          // Busca parcial (caso a cidade tenha nomes diferentes)
+          if (nomeCidade.includes(nomeRetornado) || nomeRetornado.includes(nomeCidade)) {
+            return ufCidade === ufRetornado;
+          }
+          
+          return false;
+        });
+
+        if (cidadeEncontrada) {
+          setCidadeSelecionada(cidadeEncontrada);
+          console.log("Cidade encontrada e selecionada:", cidadeEncontrada); // Debug
+        } else {
+          // Se não encontrar na lista, cria um item temporário com a sigla correta
+          const cidadeTemporaria = {
+            id: 0, // ID temporário
+            nome: enderecoCompleto.cidade,
+            uf: estadoSigla, // Usa a sigla convertida
+            label: `${enderecoCompleto.cidade} - ${estadoSigla}`,
+          };
+          setCidadeSelecionada(cidadeTemporaria);
+          console.log("Cidade temporária criada:", cidadeTemporaria); // Debug
+        }
+
+        // Preenche o campo de endereço
+        setValue("endereco", enderecoCompleto.endereco, { shouldValidate: true });
+        
+        // Marca que o endereço foi preenchido automaticamente
+        setEnderecoPreenchidoAutomaticamente(true);
+
+        toast.success("Endereço encontrado automaticamente!");
+      } else {
+        toast.warning("Não foi possível encontrar o endereço para essas coordenadas");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar endereço:", error);
+      toast.error("Erro ao buscar endereço. Tente novamente.");
+    } finally {
+      setIsLoadingAddress(false);
+    }
+  };
 
   function onSubmit(data: EstacaoFormSchema) {
     const estacaoData: Omit<Estacao, "pk"> & {
@@ -385,7 +512,9 @@ export default function EstacaoSidebar({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#00312D] mb-1">Latitude</label>
+              <label className="block text-sm font-medium text-[#00312D] mb-1">
+                Latitude {isLoadingAddress && <span className="text-gray-500">(Buscando endereço...)</span>}
+              </label>
               <Input
                 type="number"
                 step="any"
@@ -393,20 +522,27 @@ export default function EstacaoSidebar({
                 {...register("lat", {
                   onChange: (e) => {
                     if (e.target.value && !usingCoordinates) {
-                      // Se começou a preencher coordenadas, limpa os campos de endereço
                       setValue("endereco", "");
                       setCidadeSelecionada(null);
+                      setEnderecoPreenchidoAutomaticamente(false);
+                    } else if (!e.target.value && enderecoPreenchidoAutomaticamente) {
+                      // Se apagou a latitude e o endereço foi preenchido automaticamente, limpa tudo
+                      setValue("endereco", "");
+                      setCidadeSelecionada(null);
+                      setEnderecoPreenchidoAutomaticamente(false);
                     }
                   }
                 })}
-                disabled={isReadOnly || usingAddress}
-                className={`text-black placeholder:text-gray-300 ${isReadOnly || usingAddress ? "bg-gray-100" : ""} ${errors.lat ? "border-red-500" : ""}`}
+                disabled={isReadOnly || (usingAddress && !enderecoPreenchidoAutomaticamente && !!watch("lat") && !!watch("long"))}
+                className={`text-black placeholder:text-gray-300 ${isReadOnly || (usingAddress && !enderecoPreenchidoAutomaticamente && !!watch("lat") && !!watch("long")) ? "bg-gray-100" : ""} ${errors.lat ? "border-red-500" : ""}`}
               />
               {errors.lat && <p className="text-red-500 text-xs mt-1">{errors.lat.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#00312D] mb-1">Longitude</label>
+              <label className="block text-sm font-medium text-[#00312D] mb-1">
+                Longitude {isLoadingAddress && <span className="text-gray-500">(Buscando endereço...)</span>}
+              </label>
               <Input
                 type="number"
                 step="any"
@@ -414,14 +550,19 @@ export default function EstacaoSidebar({
                 {...register("long", {
                   onChange: (e) => {
                     if (e.target.value && !usingCoordinates) {
-                      // Se começou a preencher coordenadas, limpa os campos de endereço
                       setValue("endereco", "");
                       setCidadeSelecionada(null);
+                      setEnderecoPreenchidoAutomaticamente(false);
+                    } else if (!e.target.value && enderecoPreenchidoAutomaticamente) {
+                      // Se apagou a longitude e o endereço foi preenchido automaticamente, limpa tudo
+                      setValue("endereco", "");
+                      setCidadeSelecionada(null);
+                      setEnderecoPreenchidoAutomaticamente(false);
                     }
                   }
                 })}
-                disabled={isReadOnly || usingAddress}
-                className={`text-black placeholder:text-gray-300 ${isReadOnly || usingAddress ? "bg-gray-100" : ""} ${errors.long ? "border-red-500" : ""}`}
+                disabled={isReadOnly || (usingAddress && !enderecoPreenchidoAutomaticamente && !!watch("lat") && !!watch("long"))}
+                className={`text-black placeholder:text-gray-300 ${isReadOnly || (usingAddress && !enderecoPreenchidoAutomaticamente && !!watch("lat") && !!watch("long")) ? "bg-gray-100" : ""} ${errors.long ? "border-red-500" : ""}`}
               />
               {errors.long && <p className="text-red-500 text-xs mt-1">{errors.long.message}</p>}
             </div>
@@ -434,24 +575,24 @@ export default function EstacaoSidebar({
               <label className="block text-sm font-medium text-[#00312D] mb-1">Cidade</label>
               <ComboBox
                 options={cidadeOptions}
-                value={cidadeSelecionada?.id ? String(cidadeSelecionada.id) : undefined}
+                value={cidadeSelecionada?.id ? String(cidadeSelecionada.id) : ""} // Mudança: usar "" em vez de undefined
                 onSelect={(val) => {
-                  if (usingCoordinates) return; // Não permite selecionar cidade se já estiver usando coordenadas
+                  if (usingCoordinates && enderecoPreenchidoAutomaticamente) return;
                   const selecionada = cidades.find((c) => String(c.id) === val);
                   if (selecionada) {
                     setCidadeSelecionada(selecionada);
-                    // Se começou a preencher endereço, limpa as coordenadas
+                    setEnderecoPreenchidoAutomaticamente(false);
                     if (!usingAddress) {
                       setValue("lat", "");
                       setValue("long", "");
                     }
                   }
                 }}
-                disabled={isReadOnly || usingCoordinates}
-                placeholder={usingCoordinates ? "Desative as coordenadas" : "Selecione uma cidade"}
+                disabled={isReadOnly || (usingCoordinates && enderecoPreenchidoAutomaticamente)}
+                placeholder="Selecione uma cidade"
                 emptyText="Nenhuma cidade encontrada"
                 searchPlaceholder="Pesquisar cidade..."
-                className={`${errors.cidadeIbgeId ? "border-red-500" : ""} `}
+                className={`${errors.cidadeIbgeId ? "border-red-500" : ""} ${isReadOnly || (usingCoordinates && enderecoPreenchidoAutomaticamente) ? "bg-gray-100" : ""} `}
               />
               {errors.cidadeIbgeId && (
                 <p className="text-red-500 text-xs mt-1">{errors.cidadeIbgeId.message}</p>
@@ -463,10 +604,15 @@ export default function EstacaoSidebar({
               <label className=" block text-sm font-medium text-[#00312D] mb-1">Endereço</label>
               <Input
                 placeholder="Bairro, rua e número"
-                {...register("endereco")}
-                disabled={isReadOnly || usingCoordinates}
-                className={`text-black placeholder:text-gray-300 ${isReadOnly || usingCoordinates ? "bg-gray-100" : ""} ${errors.endereco ? "border-red-500" : ""
-                  }`}
+                {...register("endereco", {
+                  onChange: (e) => {
+                    if (e.target.value && !usingAddress) {
+                      setEnderecoPreenchidoAutomaticamente(false); // Marca como preenchido manualmente
+                    }
+                  }
+                })}
+                disabled={isReadOnly || (usingCoordinates && enderecoPreenchidoAutomaticamente)}
+                className={`text-black placeholder:text-gray-300 ${isReadOnly || (usingCoordinates && enderecoPreenchidoAutomaticamente) ? "bg-gray-100" : ""} ${errors.endereco ? "border-red-500" : ""}`}
               />
               {errors.endereco && (
                 <p className="text-red-500 text-xs mt-1">{errors.endereco.message}</p>
