@@ -107,11 +107,11 @@ function processHourlyData(data: TimePoint[], stations: StationName[]): TimePoin
 
   sortedHours.forEach((hourKey) => {
     const hourData = hourlyMap.get(hourKey)!
-    
+
     // Extrai data e hora separadamente
     const [datePart, hourPart] = hourKey.split(' ')
     const [year, month, day] = datePart.split('-')
-    
+
     const timePoint: TimePoint = {
       time: `${hourPart}h`, // "13h", "14h", etc.
       date: `${day}/${month}/${year}`, // "15/10/2025"
@@ -132,14 +132,13 @@ function processHourlyData(data: TimePoint[], stations: StationName[]): TimePoin
 }
 
 // Componente customizado para o tick do eixo X (horário + data)
-// Precisa ser criado dentro do componente para ter acesso ao timeToDateMap
 const createCustomXAxisTick = (timeToDateMap: Map<string, string>) => {
   return (props: any) => {
     const { x, y, payload } = props
-    
+
     const timeValue = payload?.value || ''
     const date = timeToDateMap.get(timeValue) || ''
-    
+
     return (
       <g transform={`translate(${x},${y})`}>
         {/* Horário */}
@@ -154,7 +153,7 @@ const createCustomXAxisTick = (timeToDateMap: Map<string, string>) => {
         >
           {timeValue}
         </text>
-        
+
         {/* Data */}
         <text
           x={0}
