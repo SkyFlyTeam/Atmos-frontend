@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/command"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useEffect, useState } from "react"
 
 export interface ComboBoxOption {
   value: string
@@ -42,14 +43,14 @@ export const MultipleCombobox: React.FC<ComboBoxProps> = ({
   placeholder = "Selecionar...",
   searchPlaceholder = "Buscar...",
   emptyText = "Nenhum item encontrado.",
-  widthClass = "w-[240px] max-w-[240px]",
+  widthClass = "w-[10rem] max-w-[10rem]",
   className,
   disabled = false,
 }) => {
-  const [open, setOpen] = React.useState(false)
-  const [searchTerm, setSearchTerm] = React.useState("")
-  const [visibleOptions, setVisibleOptions] = React.useState(options.slice(0, 50))
-  const [filteredOptions, setFilteredOptions] = React.useState(options)
+  const [open, setOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [visibleOptions, setVisibleOptions] = useState<ComboBoxOption[]>([])
+  const [filteredOptions, setFilteredOptions] = useState<ComboBoxOption[]>(options)
   const selectedOptions = options.filter((o) => value.includes(o.value))
 
   const handleSearch = (term: string) => {
@@ -57,7 +58,6 @@ export const MultipleCombobox: React.FC<ComboBoxProps> = ({
     const filtered = options.filter((option) =>
       option.label.toLowerCase().includes(term.toLowerCase())
     )
-    console.log("filtered", filtered)
     setFilteredOptions(filtered)
     setVisibleOptions(filtered.slice(0, 50)) 
   }
@@ -75,10 +75,10 @@ export const MultipleCombobox: React.FC<ComboBoxProps> = ({
     }
   }
 
-  React.useEffect(() => {
-    console.log("filteredOptions", filteredOptions);
-    console.log("visibleOptions", visibleOptions);
-  }, [filteredOptions, visibleOptions])
+  useEffect(() => {
+    setFilteredOptions(options);
+    setVisibleOptions(options.slice(0, 50)); 
+  }, [options]);
 
   const toggleSelect = (rawValue: string) => {
     if (rawValue === "") return;
