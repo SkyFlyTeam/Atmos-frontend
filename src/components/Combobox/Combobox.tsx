@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/command"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useEffect, useState } from "react"
 
 export interface ComboBoxOption {
   value: string
@@ -42,15 +43,14 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
   placeholder = "Selecionar...",
   searchPlaceholder = "Buscar...",
   emptyText = "Nenhum item encontrado.",
-  widthClass = "w-56 min-w-fit",
+  widthClass = "w-[10rem] max-w-[15rem] min-w-fit",
   className,
   disabled = false,
 }) => {
-  console.log("options", options)
-  const [open, setOpen] = React.useState(false)
-  const [searchTerm, setSearchTerm] = React.useState("")
-  const [visibleOptions, setVisibleOptions] = React.useState(options.slice(0, 50)) 
-  const [filteredOptions, setFilteredOptions] = React.useState(options) 
+  const [open, setOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [visibleOptions, setVisibleOptions] = useState<ComboBoxOption[]>([])
+  const [filteredOptions, setFilteredOptions] = useState<ComboBoxOption[]>([])
 
   const selectedOption = options.find((o) => o.value === value)
 
@@ -76,6 +76,11 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
       loadMoreItems()
     }
   }
+
+  useEffect(() => {
+    setFilteredOptions(options);
+    setVisibleOptions(options.slice(0, 50)); 
+  }, [options]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

@@ -5,13 +5,34 @@ import Pagination from "@/components/Pagination"
 import LatestDataCardsContainer from "@/components/LatestDataCardsContainer/LatestDataCardsContainer"
 import mockParametros from "./dadosMockados"
 import GeneralFilter from "./components/GeneralFilter";
+import { DateRange } from "react-day-picker";
+
+import { ParametroGrafico } from "@/interfaces/ParametroGrafico";
+import { ParametroUltimoValor } from "@/interfaces/ParametroUltimoValor";
+import { dashboardServices } from "@/services/dashboardServices";
+import { toast } from "react-toastify";
+import DateInput from "@/components/Inputs/DateInput/DateInput";
 
 const ITEMS_PER_PAGE = 2
+
 
 const Dashboard = () => {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  
+  const [chartData, setChartData] = useState<ParametroGrafico[] | null>(null);
+  const [cardsData, setCardsData] = useState<ParametroUltimoValor[] | null>(null);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Filtros gerais
+  const [cidade, setCidade] = useState<string>("");
+  const [estacoes, setEstacoes] = useState<string[]>([]);
+  const [parametros, setParametros] = useState<string[]>([]);
+  const [dateRange, setDateRange] = useState<DateRange>({
+      from: new Date(),
+      to: new Date()
+  } as DateRange);
 
   // Verifica se o usuário está logado
   useEffect(() => {
@@ -25,6 +46,67 @@ const Dashboard = () => {
       setIsLoading(false)
     }
   }, [router])
+
+  const fetchChartData = async () => {
+    try {
+        const chartData = await dashboardServices.getValoresCapturadosPorParametro(
+            cidade ? parseInt(cidade) : 1,
+            estacoes.map(e => parseInt(e)),
+            parametros.map(p => parseInt(p)),
+            dateRange.from ?  new Date(new Date(dateRange.from).setHours(0, 0, 0, 0)) : new Date(),
+            dateRange.to ? new Date(new Date(dateRange.to).setHours(23, 59, 59, 999)) : new Date()
+        );
+        
+        setChartData(chartData as ParametroGrafico[]);
+    } catch (error) {
+        toast.error("Nenhum dado encontrado para os filtros selecionados. Tente ajustar os filtros.");
+        console.error("Erro ao buscar dados do gráfico", error);
+    } 
+  }
+
+  const fetchCardsData = async () => {
+      try {
+          const cardsData = await dashboardServices.getUltimosValoresCapturadosPorParametro({
+              cidade: cidade ? parseInt(cidade) : 1,
+              estacoes: estacoes.map(e => parseInt(e)),
+              parametros: parametros.map(p => parseInt(p))
+          });
+
+          setCardsData(cardsData as ParametroUltimoValor[]);
+          if((cardsData as ParametroUltimoValor[]).length === 0) {
+              toast.warning("Nenhum dado encontrado para os filtros selecionados");
+          }
+      } catch (error) {
+          toast.error("Nenhum dado encontrado para os filtros selecionados. Tente ajustar os filtros.");
+          console.error("Erro ao buscar dados dos cards", error);
+      }
+  }
+
+    const handleApplyFilters = async () => {
+        if(!cidade && estacoes.length === 0 && parametros.length === 0 && !dateRange.from && !dateRange.to) {
+            toast.warning("Por favor, selecione ao menos um filtro para aplicar.");
+            return;
+        }
+        await Promise.all([
+            fetchChartData(),
+            fetchCardsData()
+        ]);
+    }
+
+    useEffect(() => {
+        let isMounted = true;
+        const load = async () => {
+            setIsLoading(true);
+            try {
+                await handleApplyFilters();
+            } finally {
+                if (isMounted) {
+                    setIsLoading(false);
+                }
+            }
+        };
+        load();
+    }, [cidade, estacoes, parametros, dateRange]);
 
   // Estado que guarda o número da página atual
   const [currentPage, setCurrentPage] = useState(1)
@@ -53,7 +135,6 @@ const Dashboard = () => {
       </div>
     )
   }
-
   // Não renderiza nada se não autenticado (redirect já foi feito)
   if (!isAuthenticated) {
     return null
@@ -64,7 +145,20 @@ const Dashboard = () => {
       {/* Título da página */}
       <h1>Dashboard</h1>
 
-      <GeneralFilter />
+      <GeneralFilter 
+          cidade={cidade}
+          setCidade={setCidade}
+          estacoes={estacoes}
+          setEstacoes={setEstacoes}
+          parametros={parametros}
+          setParametros={setParametros}
+      />
+      <DateInput
+          mode="range"
+          date={dateRange}
+          setDate={setDateRange}
+          disabledDates={{ after: new Date() }}
+      />
 
       {/* Cards de últimos dados enviados */}
       <LatestDataCardsContainer />
