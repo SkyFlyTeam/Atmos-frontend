@@ -17,7 +17,7 @@ import {
   EstacaoFormSchema,
 } from "@/pages/estacoes/components/estacaoSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { TbXboxXFilled } from "react-icons/tb";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Check, ChevronsUpDown } from "lucide-react";
@@ -85,6 +85,7 @@ export default function EstacaoSidebar({
     watch,
     reset,
     setValue,
+    control,
   } = useForm<EstacaoFormSchema>({
     resolver: (values, context, options) =>
       zodResolver(estacaoFormSchema)(values, { ...context, cidadeSelecionada }, options),
@@ -109,6 +110,9 @@ export default function EstacaoSidebar({
   const [usingAddress, setUsingAddress] = useState(false);
   const [isLoadingAddress, setIsLoadingAddress] = useState(false);
   const [enderecoPreenchidoAutomaticamente, setEnderecoPreenchidoAutomaticamente] = useState(false);
+  const lat = useWatch({ control, name: "lat" });
+  const long = useWatch({ control, name: "long" });
+  const endereco = useWatch({ control, name: "endereco" });
 
   const cidadeOptions = useMemo(() => {
     return cidades.map((cidade) => ({
@@ -222,17 +226,17 @@ export default function EstacaoSidebar({
   }, [open, estacao, cidades, reset]);
 
   useEffect(() => {
-    const subscription = watch((value) => {
-      // Se ambas as coordenadas estão vazias e o endereço foi preenchido automaticamente, limpa tudo
-      if (!value.lat && !value.long && enderecoPreenchidoAutomaticamente) {
+    if (!open) return; // Evita rodar quando o modal está fechado
+  
+    if (!lat && !long && enderecoPreenchidoAutomaticamente) {
+      // Evita loop: só limpa se realmente houver algo a limpar
+      if (endereco || cidadeSelecionada) {
         setValue("endereco", "");
         setCidadeSelecionada(null);
         setEnderecoPreenchidoAutomaticamente(false);
       }
-    });
-    
-    return () => subscription.unsubscribe();
-  }, [watch, enderecoPreenchidoAutomaticamente, setValue]);
+    }
+  }, [open, lat, long, endereco, enderecoPreenchidoAutomaticamente, cidadeSelecionada, setValue]);
 
   function handleAddParametro(value: string) {
     if (!value) return;
@@ -300,7 +304,7 @@ export default function EstacaoSidebar({
 
       if (enderecoCompleto) {
         console.log("Endereço completo retornado:", enderecoCompleto); // Debug
-        
+
         // Mapeamento de estados (nome completo -> sigla)
         const mapeamentoEstados: { [key: string]: string } = {
           'acre': 'AC',
@@ -334,28 +338,28 @@ export default function EstacaoSidebar({
 
         // Converte o estado retornado para sigla
         const estadoSigla = mapeamentoEstados[enderecoCompleto.estado.toLowerCase()] || enderecoCompleto.estado;
-        
+
         console.log(`Estado convertido: "${enderecoCompleto.estado}" -> "${estadoSigla}"`); // Debug
-        
+
         // Busca a cidade na lista de cidades carregadas
         const cidadeEncontrada = cidades.find((cidade) => {
           const nomeCidade = cidade.nome.toLowerCase().trim();
           const nomeRetornado = enderecoCompleto.cidade.toLowerCase().trim();
           const ufCidade = cidade.uf.toLowerCase().trim();
           const ufRetornado = estadoSigla.toLowerCase().trim();
-          
+
           console.log(`Comparando: "${nomeCidade}" com "${nomeRetornado}" e "${ufCidade}" com "${ufRetornado}"`); // Debug
-          
+
           // Busca exata
           if (nomeCidade === nomeRetornado && ufCidade === ufRetornado) {
             return true;
           }
-          
+
           // Busca parcial (caso a cidade tenha nomes diferentes)
           if (nomeCidade.includes(nomeRetornado) || nomeRetornado.includes(nomeCidade)) {
             return ufCidade === ufRetornado;
           }
-          
+
           return false;
         });
 
@@ -376,7 +380,7 @@ export default function EstacaoSidebar({
 
         // Preenche o campo de endereço
         setValue("endereco", enderecoCompleto.endereco, { shouldValidate: true });
-        
+
         // Marca que o endereço foi preenchido automaticamente
         setEnderecoPreenchidoAutomaticamente(true);
 
