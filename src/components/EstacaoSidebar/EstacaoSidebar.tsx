@@ -38,7 +38,6 @@ import { toast } from "react-toastify";
 import { cidadeAPIServices, CidadeItem } from "@/services/cidadeAPIServices";
 import { ComboBox } from "../Combobox/Combobox";
 import { coordenadasAPIServices } from "@/services/coordenadasAPIServices";
-import { EnderecoCompleto, CoordenadasAPI } from "@/interfaces/coordenadasAPI";
 
 type Props = {
   open: boolean;
@@ -75,7 +74,6 @@ export default function EstacaoSidebar({
 
   // Cidades (combobox)
   const [cidades, setCidades] = useState<CidadeItem[]>([]);
-  const [cidadeOpen, setCidadeOpen] = useState(false);
   const [cidadeSelecionada, setCidadeSelecionada] = useState<CidadeItem | null>(null);
 
   const {
@@ -115,12 +113,24 @@ export default function EstacaoSidebar({
   const endereco = useWatch({ control, name: "endereco" });
 
   const cidadeOptions = useMemo(() => {
-    return cidades.map((cidade) => ({
-      value: String(cidade.id),
-      label: `${cidade.nome} - ${cidade.uf}`,
-    }));
-  }, [cidades]);
+  const base = cidades.map((cidade) => ({
+    value: String(cidade.id),
+    label: `${cidade.nome} - ${cidade.uf}`,
+  }));
 
+  if (
+    cidadeSelecionada &&
+    !base.some((c) => c.value === String(cidadeSelecionada.id))
+  ) {
+    // adiciona cidade temporária
+    base.push({
+      value: String(cidadeSelecionada.id),
+      label: `${cidadeSelecionada.nome} - ${cidadeSelecionada.uf}`,
+    });
+  }
+
+  return base;
+}, [cidades, cidadeSelecionada]);
   // Atualiza o estado inicial baseado nos valores iniciais
   useEffect(() => {
     if (estacao) {
@@ -148,7 +158,7 @@ export default function EstacaoSidebar({
 
   // Atualiza o estado dos campos de localização quando os valores mudam
   useEffect(() => {
-    const subscription = watch((value, { name }) => {
+    const subscription = watch((value) => {
       const hasLatLong = !!value.lat || !!value.long;
       const hasAddress = !!value.endereco || !!cidadeSelecionada;
 
@@ -168,8 +178,47 @@ export default function EstacaoSidebar({
   // Preenche formulário ao abrir/editar
   useEffect(() => {
     if (!open) return;
-
+  
     if (estacao) {
+      // A interface Estacao já tem os campos cidadeIbgeId, cidadeNome e cidadeUf
+  
+      console.log("🔍 DEBUG - Dados da estação recebidos:", {
+        uuid: estacao.uuid,
+        nome: estacao.nome,
+        lat: estacao.lat,
+        long: estacao.long,
+        endereco: estacao.endereco,
+        cidadeIbgeId: estacao.cidadeIbgeId,
+        cidadeNome: estacao.cidadeNome,
+        cidadeUf: estacao.cidadeUf,
+        totalCidades: cidades.length
+      });
+  
+      // Sempre preenche o formulário, independente se as cidades estão carregadas
+      const cidadeId = estacao.cidadeIbgeId ? Number(estacao.cidadeIbgeId) : null;
+      const cidadeDaLista = cidades.length > 0 ? (
+        cidadeId !== null
+          ? cidades.find((c) => c.id === cidadeId)
+          : cidades.find(
+              (c) =>
+                c.nome.toLowerCase() === estacao.cidadeNome?.toLowerCase() &&
+                c.uf.toLowerCase() === estacao.cidadeUf?.toLowerCase()
+            )
+      ) : null;
+  
+      const cidadeDefinida =
+        cidadeDaLista ||
+        (estacao.cidadeNome && estacao.cidadeUf
+          ? {
+              id: estacao.cidadeIbgeId ?? 0,
+              nome: estacao.cidadeNome,
+              uf: estacao.cidadeUf,
+              label: `${estacao.cidadeNome} - ${estacao.cidadeUf}`,
+            }
+          : null);
+
+      console.log("🏙️ DEBUG - Cidade definida:", cidadeDefinida);
+  
       reset({
         uuid: estacao.uuid ?? "",
         nome: estacao.nome ?? "",
@@ -180,30 +229,20 @@ export default function EstacaoSidebar({
         endereco: estacao.endereco ?? "",
         imagemUrl: null,
         parametros: estacao.parametros ?? [],
+        cidadeIbgeId: cidadeDefinida ? String(cidadeDefinida.id) : null,
+        cidadeNome: cidadeDefinida?.nome ?? null,
+        cidadeUf: cidadeDefinida?.uf ?? null,
       });
+  
+      setCidadeSelecionada(cidadeDefinida);
       setImagemUrl(estacao.imagemBase64 ?? null);
       setParametrosSelecionados(estacao.parametros ?? []);
+      setImagemRemovida(false);
 
-      // Pré-seleciona cidade (se vier do backend)
-      const anyEst = estacao as any;
-      if (anyEst?.cidadeIbgeId || (anyEst?.cidadeNome && anyEst?.cidadeUf)) {
-        const fromList =
-          (anyEst.cidadeIbgeId &&
-            cidades.find((c) => c.id === Number(anyEst.cidadeIbgeId))) ||
-          null;
-
-        if (fromList) {
-          setCidadeSelecionada(fromList);
-        } else if (anyEst.cidadeNome && anyEst.cidadeUf) {
-          setCidadeSelecionada({
-            id: anyEst.cidadeIbgeId ?? 0,
-            nome: anyEst.cidadeNome,
-            uf: anyEst.cidadeUf,
-            label: `${anyEst.cidadeNome} - ${anyEst.cidadeUf}`,
-          });
-        }
-      } else {
-        setCidadeSelecionada(null);
+      // Se a estação tem coordenadas mas não tem cidade, busca a cidade automaticamente
+      if (estacao.lat && estacao.long && !cidadeDefinida && cidades.length > 0) {
+        console.log("🔍 DEBUG - Buscando cidade automaticamente pelas coordenadas...");
+        buscarEnderecoPorCoordenadas(estacao.lat, estacao.long, true); // true = apenas cidade
       }
     } else {
       reset({
@@ -216,18 +255,38 @@ export default function EstacaoSidebar({
         endereco: "",
         imagemUrl: null,
         parametros: [],
+        cidadeIbgeId: null,
+        cidadeNome: null,
+        cidadeUf: null,
       });
+      setCidadeSelecionada(null);
       setImagemUrl(null);
       setParametrosSelecionados([]);
-      setCidadeSelecionada(null);
+      setImagemRemovida(false);
     }
-
-    setImagemRemovida(false);
   }, [open, estacao, cidades, reset]);
+
+  // Effect separado para atualizar a cidade quando as cidades são carregadas
+  useEffect(() => {
+    if (!open || !estacao || cidades.length === 0) return;
+
+    if (estacao.cidadeIbgeId && !cidadeSelecionada) {
+      // Se temos um cidadeIbgeId mas ainda não selecionamos a cidade, tenta encontrar
+      const cidadeId = Number(estacao.cidadeIbgeId);
+      const fromList = cidades.find((c) => c.id === cidadeId);
+      if (fromList) {
+        setCidadeSelecionada(fromList);
+        // Atualiza também os valores do formulário
+        setValue("cidadeIbgeId", String(fromList.id), { shouldValidate: true });
+        setValue("cidadeNome", fromList.nome, { shouldValidate: true });
+        setValue("cidadeUf", fromList.uf, { shouldValidate: true });
+      }
+    }
+  }, [cidades, estacao, open, cidadeSelecionada, setValue]);
 
   useEffect(() => {
     if (!open) return; // Evita rodar quando o modal está fechado
-  
+
     if (!lat && !long && enderecoPreenchidoAutomaticamente) {
       // Evita loop: só limpa se realmente houver algo a limpar
       if (endereco || cidadeSelecionada) {
@@ -287,12 +346,8 @@ export default function EstacaoSidebar({
     setImagemRemovida(true);
   }
 
-  function selecionarCidade(item: CidadeItem) {
-    setCidadeSelecionada(item);
-    setCidadeOpen(false);
-  }
 
-  const buscarEnderecoPorCoordenadas = async (lat: string, long: string) => {
+  const buscarEnderecoPorCoordenadas = async (lat: string, long: string, apenasCidade = false) => {
     if (!lat || !long) return;
 
     setIsLoadingAddress(true);
@@ -365,7 +420,11 @@ export default function EstacaoSidebar({
 
         if (cidadeEncontrada) {
           setCidadeSelecionada(cidadeEncontrada);
-          console.log("Cidade encontrada e selecionada:", cidadeEncontrada); // Debug
+          // Atualiza também os valores do formulário
+          setValue("cidadeIbgeId", String(cidadeEncontrada.id), { shouldValidate: true });
+          setValue("cidadeNome", cidadeEncontrada.nome, { shouldValidate: true });
+          setValue("cidadeUf", cidadeEncontrada.uf, { shouldValidate: true });
+          // console.log("Cidade encontrada e selecionada:", cidadeEncontrada); // Debug
         } else {
           // Se não encontrar na lista, cria um item temporário com a sigla correta
           const cidadeTemporaria = {
@@ -375,22 +434,26 @@ export default function EstacaoSidebar({
             label: `${enderecoCompleto.cidade} - ${estadoSigla}`,
           };
           setCidadeSelecionada(cidadeTemporaria);
+          setValue("cidadeIbgeId", "0", { shouldValidate: true });
+          setValue("cidadeNome", enderecoCompleto.cidade, { shouldValidate: true });
+          setValue("cidadeUf", estadoSigla, { shouldValidate: true });
           console.log("Cidade temporária criada:", cidadeTemporaria); // Debug
         }
 
-        // Preenche o campo de endereço
-        setValue("endereco", enderecoCompleto.endereco, { shouldValidate: true });
-
-        // Marca que o endereço foi preenchido automaticamente
-        setEnderecoPreenchidoAutomaticamente(true);
-
-        toast.success("Endereço encontrado automaticamente!");
+        // Só preenche o endereço se não for apenas para buscar a cidade
+        if (!apenasCidade) {
+          setValue("endereco", enderecoCompleto.endereco, { shouldValidate: true });
+          setEnderecoPreenchidoAutomaticamente(true);
+          // toast.success("Endereço encontrado automaticamente!");
+        } else {
+          // toast.success("Cidade encontrada automaticamente!");
+        }
       } else {
-        toast.warning("Não foi possível encontrar o endereço para essas coordenadas");
+        toast.warning("Não foi possível encontrar informações para essas coordenadas");
       }
     } catch (error) {
       console.error("Erro ao buscar endereço:", error);
-      toast.error("Erro ao buscar endereço. Tente novamente.");
+      toast.error("Erro ao buscar informações. Tente novamente.");
     } finally {
       setIsLoadingAddress(false);
     }
@@ -586,6 +649,11 @@ export default function EstacaoSidebar({
                   if (selecionada) {
                     setCidadeSelecionada(selecionada);
                     setEnderecoPreenchidoAutomaticamente(false);
+
+                    setValue("cidadeIbgeId", String(selecionada.id), { shouldValidate: true });
+                    setValue("cidadeNome", selecionada.nome, { shouldValidate: true });
+                    setValue("cidadeUf", selecionada.uf, { shouldValidate: true });
+
                     if (!usingAddress) {
                       setValue("lat", "");
                       setValue("long", "");
