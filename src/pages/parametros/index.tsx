@@ -15,8 +15,6 @@ import { Card } from "@/components/ui/card"
 import SkeletonTable from "@/components/DataTable/DatatableSkeleton"
 
 import { FaPlus } from "react-icons/fa"
-import CardChart from "@/components/CardChart/CardChart"
-
 const ParametrosPage = () => {
     const [parametros, setParametros] = useState<Parametro[]>([]);
     const [paramSelecionado, setParamSelecionado] = useState<Parametro | null>(null);
@@ -137,13 +135,6 @@ const ParametrosPage = () => {
                     }
                 />
             )}
-
-            <CardChart 
-                title="Temperatura"
-                chart={
-                    <span>Gráfico</span>
-                }
-            />
 
             {showSideDrawer &&
                 <SideDrawer
