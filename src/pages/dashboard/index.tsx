@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import ChartLineDots from "./components/ChartLineDots"
 import Pagination from "@/components/Pagination"
+import LatestDataCardsContainer from "@/components/LatestDataCardsContainer/LatestDataCardsContainer"
 import mockParametros from "./dadosMockados"
 
 const ITEMS_PER_PAGE = 2
@@ -27,6 +28,9 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Cards de últimos dados enviados */}
+      <LatestDataCardsContainer />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {pageItems.map((param, idx) => (
           <ChartLineDots
