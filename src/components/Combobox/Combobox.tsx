@@ -18,6 +18,7 @@ import {
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
+import SearchInput from "../SearchInput"
 
 export interface ComboBoxOption {
   value: string
@@ -54,7 +55,6 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
 
   const selectedOption = options.find((o) => o.value === value)
 
-  
   const handleSearch = (term: string) => {
     setSearchTerm(term)
     const filtered = options.filter((option) =>
@@ -101,11 +101,11 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className={cn(widthClass, "p-0")} style={{ maxHeight: '400px', overflowY: 'auto' }}>
+      <PopoverContent className={cn(widthClass, "p-0")} style={{ maxHeight: '400px', overflowY: 'auto' }} onOpenAutoFocus={(e) => e.preventDefault()}>
         <Command>
-          <CommandInput placeholder={searchPlaceholder} value={searchTerm} onValueChange={handleSearch} />
+          <SearchInput placeholder={searchPlaceholder} value={searchTerm} onChange={handleSearch} className="border-none shadow-none focus-visible:ring-0"/>
           <CommandList onScroll={handleScroll}>
-            <CommandGroup>
+            <CommandGroup className="border-t-1">
               {visibleOptions.length === 0 ? (
                 <CommandEmpty>{emptyText}</CommandEmpty>
               ) : (
@@ -119,6 +119,7 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
                     }}
                     className={cn(
                         value === option.value && "bg-light-green",
+                        "cursor-pointer"
                     )}
                   >
                     <div className="flex flex-col">
