@@ -12,6 +12,7 @@ import { parametroServices } from "@/services/parametroServices";
 import { Button } from "@/components/ui/button";
 import { estacaoParametroServices } from "@/services/estacaoParametroServices";
 import { ApiException } from "@/config/apiException";
+import { toast } from "react-toastify";
 
 
 type GeneralFilterProps = {
@@ -47,8 +48,12 @@ const GeneralFilter = ({
                     value: cidade.pk.toString(),
                     label: `${cidade.nome} - ${cidade.uf}`,
                 }))
-                
-            setCidade(cidadeOptions[0].value)
+            
+            if(cidadeOptions.length > 0) {
+                setCidade(cidadeOptions[0].value)
+            } else {
+                toast.warning("Nenhuma cidade encontrada. Cadastre estações com suas respectivas cidades para começar.")
+            }
             setCidadeOptions(cidadeOptions);
             
         } catch (error) {
