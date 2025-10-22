@@ -21,12 +21,6 @@ const LatestDataCard: React.FC<LatestDataCardProps> = ({
     return null;
   };
 
-  const getTrendColor = () => {
-    if (tendencia === 'up') return '#3A7817';
-    if (tendencia === 'down') return '#BF2A01';
-    return '#666666'; // cor neutra para stable
-  };
-
   return (
     <div
       className="min-w-[280px] rounded-lg shadow-md p-4 flex flex-col justify-between"
@@ -34,7 +28,7 @@ const LatestDataCard: React.FC<LatestDataCardProps> = ({
     >
       {/* Título do parâmetro */}
       <div className="mb-3">
-        <h3 className="text-base font-semibold text-gray-800 truncate">
+        <h3 className="text-base font-semibold truncate" style={{ color: '#3A7817' }}>
           {tipo_parametro}
         </h3>
       </div>
@@ -42,10 +36,7 @@ const LatestDataCard: React.FC<LatestDataCardProps> = ({
       {/* Valor e ícone de tendência */}
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <p
-            className="text-2xl font-bold"
-            style={{ color: getTrendColor() }}
-          >
+          <p className="text-2xl font-bold" style={{ color: '#3A7817' }}>
             {ultimo_valor.toFixed(2)}
           </p>
         </div>
