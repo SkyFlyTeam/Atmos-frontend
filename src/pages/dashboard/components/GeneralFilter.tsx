@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { estacaoParametroServices } from "@/services/estacaoParametroServices";
 import { ApiException } from "@/config/apiException";
 import { toast } from "react-toastify";
+import { Label } from "@/components/ui/label";
 
 
 type GeneralFilterProps = {
@@ -101,7 +102,7 @@ const GeneralFilter = ({
     }
 
     return (
-        <div className="flex gap-4 flex-wrap">
+        <div className="flex gap-4 flex-wrap items-end">
             {isLoading ? (
                 <>
                     <Skeleton className="w-52 h-10 rounded-md" />
@@ -119,31 +120,40 @@ const GeneralFilter = ({
                             Limpar Filtros
                         </Button>
                     )}
-                    <ComboBox
-                        options={cidadeOptions}
-                        value={cidade}
-                        onSelect={setCidade}
-                        placeholder="Selecionar"
-                        searchPlaceholder="Buscar"
-                    />
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="cidade-combobox">Cidade</Label>
+                        <ComboBox
+                            options={cidadeOptions}
+                            value={cidade}
+                            onSelect={setCidade}
+                            placeholder="Selecionar"
+                            searchPlaceholder="Buscar"
+                        />
+                    </div>
 
-                    <MultipleCombobox
-                        options={estacaoOptions}
-                        value={estacoes}
-                        onSelect={setEstacoes}
-                        placeholder="Selecionar"
-                        searchPlaceholder="Buscar"
-                        disabled={!cidade}
-                    />
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="estacao-combobox">Estação</Label>
+                        <MultipleCombobox
+                            options={estacaoOptions}
+                            value={estacoes}
+                            onSelect={setEstacoes}
+                            placeholder="Selecionar"
+                            searchPlaceholder="Buscar"
+                            disabled={!cidade}
+                        />
+                    </div>
 
-                    <MultipleCombobox
-                        options={parametrosOptions}
-                        value={parametros}
-                        onSelect={setParametros}
-                        placeholder="Selecionar"
-                        searchPlaceholder="Buscar"
-                        disabled={!cidade}
-                    />
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="parametro-combobox">Parâmetro</Label>
+                        <MultipleCombobox
+                            options={parametrosOptions}
+                            value={parametros}
+                            onSelect={setParametros}
+                            placeholder="Selecionar"
+                            searchPlaceholder="Buscar"
+                            disabled={!cidade}
+                        />
+                    </div>
                 </>
             )}
         </div>

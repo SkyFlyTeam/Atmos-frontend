@@ -12,6 +12,7 @@ import { ParametroUltimoValor } from "@/interfaces/ParametroUltimoValor";
 import { dashboardServices } from "@/services/dashboardServices";
 import { toast } from "react-toastify";
 import DateInput from "@/components/Inputs/DateInput/DateInput";
+import { Label } from "@/components/ui/label";
 
 const ITEMS_PER_PAGE = 2
 
@@ -153,12 +154,15 @@ const Dashboard = () => {
           parametros={parametros}
           setParametros={setParametros}
       />
-      <DateInput
-          mode="range"
-          date={dateRange}
-          setDate={setDateRange}
-          disabledDates={{ after: new Date() }}
-      />
+      <div className="flex flex-col gap-2">
+          <Label htmlFor="data-input">Data Período</Label>
+          <DateInput
+              mode="range"
+              date={dateRange}
+              setDate={setDateRange}
+              disabledDates={{ after: new Date() }}
+          />
+      </div>
 
       {/* Cards de últimos dados enviados */}
       <LatestDataCardsContainer />
