@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
+import { useRouter } from "next/router"
 import ChartLineDots from "./components/ChartLineDots"
 import Pagination from "@/components/Pagination"
 import LatestDataCardsContainer from "@/components/LatestDataCardsContainer/LatestDataCardsContainer"
@@ -7,6 +8,23 @@ import mockParametros from "./dadosMockados"
 const ITEMS_PER_PAGE = 2
 
 const Dashboard = () => {
+  const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+
+  // Verifica se o usuário está logado
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        router.push('/login')
+      } else {
+        setIsAuthenticated(true)
+      }
+      setIsLoading(false)
+    }
+  }, [router])
+
   // Estado que guarda o número da página atual
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -24,6 +42,20 @@ const Dashboard = () => {
   const handlePageChange = (page: number) => {
     const clamped = Math.max(1, Math.min(totalPages, page))
     setCurrentPage(clamped)
+  }
+
+  // Mostra loading enquanto verifica autenticação
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-lg text-gray-600">Carregando...</p>
+      </div>
+    )
+  }
+
+  // Não renderiza nada se não autenticado (redirect já foi feito)
+  if (!isAuthenticated) {
+    return null
   }
 
   return (
