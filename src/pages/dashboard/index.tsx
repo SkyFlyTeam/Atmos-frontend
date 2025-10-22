@@ -28,8 +28,16 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Título da página */}
+      <h1>Dashboard</h1>
+
       {/* Cards de últimos dados enviados */}
       <LatestDataCardsContainer />
+
+      {/* Título da seção de gráficos */}
+      <h2 className="font-londrina text-2xl md:text-[35px] leading-tight text-[#00312D] mt-4">
+        Variação dos parâmetros
+      </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {pageItems.map((param, idx) => (
