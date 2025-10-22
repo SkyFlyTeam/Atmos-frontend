@@ -93,7 +93,7 @@ const LatestDataCardsContainer: React.FC = () => {
       {selectedStation && (
         <>
           <div className="mb-3">
-            <h2 className="font-londrina text-[40px] leading-tight text-[#00312D]">Últimos dados</h2>
+            <h2 className="font-londrina text-2xl md:text-[35px] leading-tight text-[#00312D]">Últimos dados</h2>
             {updatedAt && (
               <p className="text-sm mt-1" style={{ color: '#ADADAD' }}>
                 {`Atualizado em ${format(updatedAt, "dd/MM/yyyy 'às' HH'h'mm")}`}
