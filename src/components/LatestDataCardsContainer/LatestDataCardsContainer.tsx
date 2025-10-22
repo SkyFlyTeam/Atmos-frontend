@@ -1,110 +1,124 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import LatestDataCard from '@/components/LatestDataCard/LatestDataCard';
-import { capturaValorServices } from '@/services/capturaValorServices';
-import { LatestCapturaValor } from '@/interfaces/CapturaValor';
-import { ApiException } from '@/config/apiException';
 import styles from './LatestDataCardsContainer.module.css';
-import { mockLatestCapturaValores } from './mockLatestData'; // Dados mockados para desenvolvimento
+import mockParametros from '@/pages/dashboard/dadosMockados';
+import { format, parse } from 'date-fns';
 
-// CONFIGURAÇÃO: Altere para 'true' quando o endpoint estiver pronto
-const USE_MOCK_DATA = true;
+type LatestComputed = {
+  tipo_parametro: string;
+  ultimo_valor: number;
+  tendencia: 'up' | 'down' | 'stable';
+  datetime: string; // ISO-like in mock format
+};
 
 const LatestDataCardsContainer: React.FC = () => {
-  const [latestData, setLatestData] = useState<LatestCapturaValor[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [selectedStation, setSelectedStation] = useState<string>('');
+  const [latestData, setLatestData] = useState<LatestComputed[]>([]);
 
-  useEffect(() => {
-    const fetchLatestData = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        if (USE_MOCK_DATA) {
-          // MODO DESENVOLVIMENTO: Usando dados mockados
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Simula delay da API
-          setLatestData(mockLatestCapturaValores);
-        } else {
-          // MODO PRODUÇÃO: Usando API real
-          const result = await capturaValorServices.getLatestCapturaValores();
-
-          if (result instanceof ApiException) {
-            setError(result.message);
-            setLatestData([]);
-          } else if (Array.isArray(result)) {
-            setLatestData(result);
-          } else {
-            console.error('Resposta da API não é um array:', result);
-            setError('Formato de dados inválido da API.');
-            setLatestData([]);
-          }
-        }
-      } catch (err) {
-        console.error('Erro ao carregar dados:', err);
-        setError('Erro ao carregar dados mais recentes.');
-        setLatestData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLatestData();
+  // Lista única de estações a partir dos dados mockados
+  const stations = useMemo(() => {
+    const set = new Set<string>();
+    (mockParametros as any[]).forEach((p: any) => {
+      (p.estacoes || []).forEach((s: string) => set.add(s));
+    });
+    return Array.from(set).sort();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="w-full py-4">
-        <div className="flex gap-4 overflow-x-auto pb-2">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="min-w-[280px] h-32 rounded-lg animate-pulse"
-              style={{ backgroundColor: '#E5E5E5' }}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
+  // Os dados mockados estão no formato 'yyyy-MM-dd HH:mm'
+  const parseDt = (s: string) => parse(s, 'yyyy-MM-dd HH:mm', new Date());
 
-  if (error) {
-    return (
-      <div className="w-full py-4">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p className="font-medium">Erro ao carregar dados</p>
-          <p className="text-sm">{error}</p>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!selectedStation) {
+      setLatestData([]);
+      return;
+    }
 
-  if (latestData.length === 0) {
-    return (
-      <div className="w-full py-4">
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
-          <p className="font-medium">Nenhum dado disponível</p>
-          <p className="text-sm">Não há dados de captura recentes para exibir.</p>
-        </div>
-      </div>
-    );
-  }
+    // Para cada tipo_parametro, encontrar o último dado (por datetime) da estação selecionada
+    const computed: LatestComputed[] = (mockParametros as any[]).map((p: any) => {
+      const serie = (p.dados || []).filter((d: any) => typeof d[selectedStation] === 'number');
+      if (serie.length === 0) return null;
+
+      // Ordena por datetime asc e pega o último
+      const ordered = [...serie].sort((a, b) => +parseDt(a.datetime) - +parseDt(b.datetime));
+      const last = ordered[ordered.length - 1];
+      const lastVal: number = last[selectedStation];
+
+      // Encontra o último valor diferente (variação)
+      let tendencia: 'up' | 'down' | 'stable' = 'stable';
+      for (let i = ordered.length - 2; i >= 0; i--) {
+        const prevVal = ordered[i][selectedStation];
+        if (prevVal !== lastVal) {
+          tendencia = lastVal > prevVal ? 'up' : 'down';
+          break;
+        }
+      }
+
+      return {
+        tipo_parametro: p.tipo_parametro as string,
+        ultimo_valor: lastVal,
+        tendencia,
+        datetime: last.datetime as string,
+      } satisfies LatestComputed;
+    }).filter(Boolean) as LatestComputed[];
+
+    // Ordena por nome de parâmetro para consistência
+    computed.sort((a, b) => a.tipo_parametro.localeCompare(b.tipo_parametro));
+    setLatestData(computed);
+  }, [selectedStation]);
+
+  // Calcula o timestamp "Atualizado em" como o mais recente entre os exibidos
+  const updatedAt: Date | null = latestData.length
+    ? latestData.map(d => parseDt(d.datetime)).reduce((max, dt) => (dt > max ? dt : max))
+    : null;
 
   return (
     <div className="w-full py-4">
-      <h2 className="text-xl font-bold mb-4 text-gray-800">
-        Últimos Dados Enviados
-      </h2>
-      
-      <div className={`flex gap-4 overflow-x-auto pb-2 ${styles['scrollbar-thin']}`}>
-        {Array.isArray(latestData) && latestData.map((data, index) => (
-          <LatestDataCard
-            key={`${data.tipo_parametro}-${index}`}
-            tipo_parametro={data.tipo_parametro}
-            ultimo_valor={data.ultimo_valor}
-            tendencia={data.tendencia}
-          />
-        ))}
+      {/* Filtro de estação (sempre visível) */}
+      <div className="flex items-center gap-2 mb-3">
+        <label htmlFor="station" className="text-sm text-[#00312D]">Estação:</label>
+        <select
+          id="station"
+          value={selectedStation}
+          onChange={(e) => setSelectedStation(e.target.value)}
+          className="border rounded-md px-3 py-2 text-sm"
+        >
+          <option value="">Selecione uma estação</option>
+          {stations.map(s => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
       </div>
+
+      {/* Título, atualizado em e cards só aparecem após escolher a estação */}
+      {selectedStation && (
+        <>
+          <div className="mb-3">
+            <h2 className="font-londrina text-[40px] leading-tight text-[#00312D]">Últimos dados</h2>
+            {updatedAt && (
+              <p className="text-sm mt-1" style={{ color: '#ADADAD' }}>
+                {`Atualizado em ${format(updatedAt, "dd/MM/yyyy 'às' HH'h'mm")}`}
+              </p>
+            )}
+          </div>
+
+          {latestData.length === 0 ? (
+            <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+              Nenhum dado disponível para a estação selecionada.
+            </div>
+          ) : (
+            <div className={`flex gap-4 overflow-x-auto pb-2 ${styles['scrollbar-thin']}`}>
+              {latestData.map((data, index) => (
+                <LatestDataCard
+                  key={`${data.tipo_parametro}-${index}`}
+                  tipo_parametro={data.tipo_parametro}
+                  ultimo_valor={data.ultimo_valor}
+                  tendencia={data.tendencia}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
