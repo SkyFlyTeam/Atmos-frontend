@@ -13,6 +13,7 @@ import { dashboardServices } from "@/services/dashboardServices";
 import { toast } from "react-toastify";
 import DateInput from "@/components/Inputs/DateInput/DateInput";
 import { Label } from "@/components/ui/label";
+import ReportTable from "./components/ReportTable"
 
 const ITEMS_PER_PAGE = 2
 
@@ -189,6 +190,10 @@ const Dashboard = () => {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
+
+
+      {/* Card de Relatorio */}
+      <ReportTable />
     </div>
   )
 }

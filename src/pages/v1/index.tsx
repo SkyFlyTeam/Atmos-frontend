@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 import SkeletonTable from "@/components/DataTable/DatatableSkeleton";
 import { Button } from "@/components/ui/button";
 import { RelatParam } from "@/interfaces/RelatParam";
-import { getMesEndDate, getMesNome, getMesNomesList } from "@/utils/datas";
+import { getMesNome, getMesNomesList } from "@/utils/datas";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChevronsUpDown } from "lucide-react";
 import { columns } from "./columns";
+import ReportTable from "./components/ReportTable";
 
 interface RelatConfig {
     mesNome: string,
@@ -18,15 +19,7 @@ interface RelatConfig {
     ano: Number,
 }
 
-interface ReportTableProps {
-    className?: string,
-    relatParam?: RelatParam
-}
-
-const ReportTable: React.FC<ReportTableProps> = ({
-    className = "",
-    relatParam
-}) => {
+const V1Page = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [relatorio, setRelatorio] = useState<Relatorio[]>([]);
 
@@ -35,7 +28,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
 
     const [relatConfig, setRelatConfig] = useState<RelatConfig>( // Usado para configurar os filtros de dados da tabela
     );
-    const [localRelatParam, setLocalRelatParam] = useState<RelatParam>(   // Usado para configurar os parametros para fetch no backend 
+    const [relatParam, setRelatParam] = useState<RelatParam>(   // Usado para configurar os parametros para fetch no backend 
     );
 
 
@@ -103,7 +96,6 @@ const ReportTable: React.FC<ReportTableProps> = ({
 
 
     useEffect(() => {
-
         const tempAnos: number[] = [];
 
         relatorio.forEach((param) => {
@@ -111,6 +103,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
                 tempAnos.push(param.ano)
         })
         setAnos(tempAnos);
+
         setMeses(getMesNomesList());
 
 
@@ -126,7 +119,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
 
     return (
         <>
-            <Card className={"flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none " + className}>
+            <Card className={"flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none "}>
                 <h1 className="md:mb-8">Relatório {relatConfig ? "-" : ""} {relatConfig?.mesNome} {relatConfig?.ano + ""}</h1>
                 <div>
                     {isLoading ? (
@@ -135,6 +128,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
                         <DataTable
                             columns={columns}
                             data={
+                                // relatorio.filter((param: Relatorio) => filterRelatorio(param))
                                 relatorio.filter((param: Relatorio) => filterRelatorio(param))
                             }
                             actionButton={
@@ -159,15 +153,15 @@ const ReportTable: React.FC<ReportTableProps> = ({
                                                         <CommandGroup>
                                                             {Object.entries(meses)
                                                                 .map(([index, nome]) => (
-                                                                        <CommandItem
-                                                                            key={index}
-                                                                            value={index}
-                                                                            onSelect={() => (
-                                                                                changeMes(Number(index) + 1)
-                                                                            )}
-                                                                        >
-                                                                            {nome}
-                                                                        </CommandItem>
+                                                                    <CommandItem
+                                                                        key={index}
+                                                                        value={index}
+                                                                        onSelect={() => (
+                                                                            changeMes(Number(index) + 1)
+                                                                        )}
+                                                                    >
+                                                                        {nome}
+                                                                    </CommandItem>
                                                                 ))}
                                                         </CommandGroup>
                                                     </CommandList>
@@ -217,7 +211,8 @@ const ReportTable: React.FC<ReportTableProps> = ({
                     )}
                 </div>
             </Card>
+            <ReportTable />
         </>
     )
 }
-export default ReportTable;
+export default V1Page; 
