@@ -24,7 +24,7 @@ const Dashboard = () => {
   const [chartData, setChartData] = useState<ParametroGrafico[] | null>(null);
   const [cardsData, setCardsData] = useState<ParametroUltimoValor[] | null>(null);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Filtros gerais
   const [cidade, setCidade] = useState<string>("");
@@ -44,9 +44,8 @@ const Dashboard = () => {
       } else {
         setIsAuthenticated(true)
       }
-      setIsLoading(false)
     }
-  }, [router])
+  }, [])
 
   const fetchChartData = async () => {
     try {
@@ -97,7 +96,6 @@ const Dashboard = () => {
     useEffect(() => {
         let isMounted = true;
         const load = async () => {
-            setIsLoading(true);
             try {
                 await handleApplyFilters();
             } finally {
