@@ -7,8 +7,7 @@ import SkeletonTable from "@/components/DataTable/DatatableSkeleton";
 import { Button } from "@/components/ui/button";
 import { RelatParam } from "@/interfaces/RelatParam";
 import { getMesEndDate, getMesNome, getMesNomesList } from "@/utils/datas";
-import { Controller } from "react-hook-form";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChevronsUpDown } from "lucide-react";
 import { columns } from "./columns";
@@ -127,7 +126,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
 
     return (
         <>
-            <Card className={"flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none "}>
+            <Card className={"flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none " + className}>
                 <h1 className="md:mb-8">Relatório {relatConfig ? "-" : ""} {relatConfig?.mesNome} {relatConfig?.ano + ""}</h1>
                 <div>
                     {isLoading ? (
@@ -136,7 +135,6 @@ const ReportTable: React.FC<ReportTableProps> = ({
                         <DataTable
                             columns={columns}
                             data={
-                                // relatorio.filter((param: Relatorio) => filterRelatorio(param))
                                 relatorio.filter((param: Relatorio) => filterRelatorio(param))
                             }
                             actionButton={
