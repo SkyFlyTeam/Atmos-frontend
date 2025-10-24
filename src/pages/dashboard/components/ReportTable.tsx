@@ -41,22 +41,23 @@ const ReportTable: React.FC<ReportTableProps> = ({
 
 
     const filterRelatorio = (param: Relatorio) => {
+        if (!relatorio)
+            return false;
+
         if (!relatConfig)
             return false;
 
-        if (!relatParam)
+        if (!localRelatParam)
             return param.mes == relatConfig.mes && param.ano == relatConfig.ano
 
         if (!(param.mes == relatConfig.mes && param.ano == relatConfig.ano))
             return false;
 
-        if (relatParam.estacao_id)
-            if (relatParam.estacao_id != param.estacao_id)
-                return false
+        if (localRelatParam.estacao_id != Number(param.estacao_id) && Number(localRelatParam.estacao_id) > 0)
+            return false
 
-        if (relatParam.parametros_pk)
-            if (relatParam.parametros_pk != param.Parametros_pk)
-                return false
+        if (localRelatParam.parametros_pk != Number(param.Parametros_pk) && Number(localRelatParam.parametros_pk) > 0)
+            return false
 
         return true;
     }
@@ -90,7 +91,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
         }
         catch (error) { }
         finally {
-            if (done)
+            if (done && !done.message)
                 setRelatorio(done)
             setIsLoading(false)
         }
@@ -98,8 +99,16 @@ const ReportTable: React.FC<ReportTableProps> = ({
     }
 
     useEffect(() => {
-        fetchRelatorio();
+        setLocalRelatParam(relatParam);
+
+        fetchRelatorio(localRelatParam);
     }, [])
+
+    useEffect(() => {
+        setLocalRelatParam(relatParam);
+
+        fetchRelatorio(localRelatParam);
+    }, [relatParam])
 
 
     useEffect(() => {
@@ -111,15 +120,18 @@ const ReportTable: React.FC<ReportTableProps> = ({
                 tempAnos.push(param.ano)
         })
         setAnos(tempAnos);
+
+        if (!(relatorio.length > 0))
+            return
+
+
         setMeses(getMesNomesList());
 
-
-        if (relatorio.length > 0)
-            setRelatConfig({
-                mes: relatorio[0].mes,
-                mesNome: getMesNome(relatorio[0].mes),
-                ano: relatorio[0].ano
-            })
+        setRelatConfig({
+            mes: relatorio[0].mes,
+            mesNome: getMesNome(relatorio[0].mes),
+            ano: relatorio[0].ano
+        })
     }, [relatorio])
 
 
@@ -127,7 +139,10 @@ const ReportTable: React.FC<ReportTableProps> = ({
     return (
         <>
             <Card className={"flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none " + className}>
-                <h1 className="md:mb-8">Relatório {relatConfig ? "-" : ""} {relatConfig?.mesNome} {relatConfig?.ano + ""}</h1>
+                <h1 className="md:mb-8">Relatório {
+                    relatConfig ? "- " + (relatConfig.mesNome ? relatConfig.mesNome : "") + (" " + relatConfig?.ano) : ""
+                }
+                </h1>
                 <div>
                     {isLoading ? (
                         <SkeletonTable />
@@ -135,7 +150,9 @@ const ReportTable: React.FC<ReportTableProps> = ({
                         <DataTable
                             columns={columns}
                             data={
-                                relatorio.filter((param: Relatorio) => filterRelatorio(param))
+                                (
+                                    relatorio.filter((param: Relatorio) => filterRelatorio(param))
+                                )
                             }
                             actionButton={
                                 <div className="flex flex-row gap-3 justify-between w-full md:justify-end md:w-xs mt-[1.2em] pb-[0.8em]">
@@ -159,15 +176,15 @@ const ReportTable: React.FC<ReportTableProps> = ({
                                                         <CommandGroup>
                                                             {Object.entries(meses)
                                                                 .map(([index, nome]) => (
-                                                                        <CommandItem
-                                                                            key={index}
-                                                                            value={index}
-                                                                            onSelect={() => (
-                                                                                changeMes(Number(index) + 1)
-                                                                            )}
-                                                                        >
-                                                                            {nome}
-                                                                        </CommandItem>
+                                                                    <CommandItem
+                                                                        key={index}
+                                                                        value={index}
+                                                                        onSelect={() => (
+                                                                            changeMes(Number(index) + 1)
+                                                                        )}
+                                                                    >
+                                                                        {nome}
+                                                                    </CommandItem>
                                                                 ))}
                                                         </CommandGroup>
                                                     </CommandList>
