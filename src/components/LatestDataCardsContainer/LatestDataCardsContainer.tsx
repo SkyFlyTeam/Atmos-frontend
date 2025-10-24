@@ -36,7 +36,8 @@ const LatestDataCardsContainer: React.FC<Props> = ({ cardsData = null, selectedS
 
   // If parent passed cardsData, use it directly (mapped). Otherwise fetch per station when selected.
   useEffect(() => {
-    if (cardsData && cardsData.length > 0 && !propsSelectedStationProvided()) {
+    // If parent passed cardsData, always use it instead of fetching locally.
+    if (cardsData && cardsData.length > 0) {
       const mapped = (cardsData as ParametroUltimoValor[]).map((c) => {
         const raw = (c as any).valor_atual;
         const n = typeof raw === 'number' ? raw : (raw ? Number(raw) : NaN);
@@ -88,44 +89,110 @@ const LatestDataCardsContainer: React.FC<Props> = ({ cardsData = null, selectedS
 
   // Try to derive an "updatedAt" timestamp from chartData for the selected stations
   useEffect(() => {
-    if (!chartData || derivedSelectedStations.length === 0) {
-      setUpdatedAt(null);
-      return;
-    }
+    // We'll try to find the most recent timestamp among all chartData entries
+    // that match the selected stations. If none found, we will try to extract
+    // timestamps from cardsData as a fallback.
+    let latest: Date | null = null;
 
-    const stationNames = derivedSelectedStations.map(s => {
-      const foundStation = stations.find(st => String(st.pk) === String(s));
-      return foundStation ? foundStation.nome : s;
-    });
+    if (chartData && Array.isArray(chartData) && chartData.length > 0 && derivedSelectedStations.length > 0) {
+      const stationNames = derivedSelectedStations.map(s => {
+        const foundStation = stations.find(st => String(st.pk) === String(s));
+        return foundStation ? foundStation.nome : s;
+      });
 
-    let found: string | null = null;
+      const tryParse = (v: any): Date | null => {
+        if (v === undefined || v === null) return null;
+        // numbers: unix seconds or ms
+        if (typeof v === 'number') {
+          if (v > 1e9 && v < 1e12) return new Date(v * 1000);
+          if (v >= 1e12) return new Date(v);
+          return null;
+        }
+        if (typeof v === 'string') {
+          const s = v.trim();
+          // ISO-like
+          const iso = new Date(s);
+          if (!isNaN(iso.getTime())) return iso;
 
-    outer: for (const entry of chartData) {
-      const estacoesArr = entry.estacoes || [];
-      // check if any of the selected stations match the entry by name or pk
-      const matches = derivedSelectedStations.some(ds => estacoesArr.includes(ds)) || stationNames.some(sn => estacoesArr.includes(sn));
-      if (!matches) continue;
-      const dados = entry.dados || [];
-      if (!Array.isArray(dados) || dados.length === 0) continue;
-      const last = dados[dados.length - 1];
-      if (!last) continue;
+          // Try common DD/MM/YYYY[ HH:mm[:ss]] formats
+          const dm = s.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);
+          if (dm) {
+            const day = parseInt(dm[1], 10);
+            const month = parseInt(dm[2], 10) - 1;
+            const year = parseInt(dm[3], 10);
+            const hour = dm[4] ? parseInt(dm[4], 10) : 0;
+            const minute = dm[5] ? parseInt(dm[5], 10) : 0;
+            const second = dm[6] ? parseInt(dm[6], 10) : 0;
+            const dt = new Date(year, month, day, hour, minute, second);
+            if (!isNaN(dt.getTime())) return dt;
+          }
 
-      if (last.time) { const dt = new Date(last.time); if (!isNaN(dt.getTime())) { found = formatDateForCard(dt); break outer; } }
-      if (last.datetime) { const dt = new Date(last.datetime); if (!isNaN(dt.getTime())) { found = formatDateForCard(dt); break outer; } }
+          // Try replacing space with T for variants like '2025-10-24 07:40:00'
+          const tReplace = new Date(s.replace(' ', 'T'));
+          if (!isNaN(tReplace.getTime())) return tReplace;
+        }
+        return null;
+      };
 
-      const keys = Object.keys(last);
-      for (const k of keys) {
-        const maybe = new Date(k);
-        if (!isNaN(maybe.getTime())) { found = formatDateForCard(maybe); break outer; }
-        const v = (last as any)[k];
-        if (v && typeof v === 'object') {
-          if (v.datetime) { const dt = new Date(v.datetime); if (!isNaN(dt.getTime())) { found = formatDateForCard(dt); break outer; } }
-          if (v.time) { const dt = new Date(v.time); if (!isNaN(dt.getTime())) { found = formatDateForCard(dt); break outer; } }
+      for (const entry of chartData) {
+        const estacoesArr = entry.estacoes || [];
+        const matches = derivedSelectedStations.some(ds => estacoesArr.includes(ds)) || stationNames.some(sn => estacoesArr.includes(sn));
+        if (!matches) continue;
+        const dados = entry.dados || [];
+        if (!Array.isArray(dados) || dados.length === 0) continue;
+
+        // iterate all dados and try to extract any timestamp we can
+        for (const d of dados) {
+          if (!d) continue;
+          // common fields
+          const candidates = [(d as any).time, (d as any).datetime, (d as any).date, (d as any).timestamp];
+          for (const c of candidates) {
+            const dt = tryParse(c);
+            if (dt && (!latest || dt.getTime() > latest.getTime())) latest = dt;
+          }
+
+          // check nested objects and keys
+          if (typeof d === 'object') {
+            const keys = Object.keys(d);
+            for (const k of keys) {
+              const maybeKeyDate = tryParse(k);
+              if (maybeKeyDate && (!latest || maybeKeyDate.getTime() > latest.getTime())) latest = maybeKeyDate;
+              const v = (d as any)[k];
+              const dt2 = tryParse(v);
+              if (dt2 && (!latest || dt2.getTime() > latest.getTime())) latest = dt2;
+            }
+          }
+        }
+      }
+
+      // If nothing matched for the selected stations, as a fallback scan all chartData
+      if (!latest) {
+        for (const entry of chartData) {
+          const dados = entry.dados || [];
+          if (!Array.isArray(dados) || dados.length === 0) continue;
+          for (const d of dados) {
+            if (!d) continue;
+            const candidates = [(d as any).time, (d as any).datetime, (d as any).date, (d as any).timestamp];
+            for (const c of candidates) {
+              const dt = tryParse(c);
+              if (dt && (!latest || dt.getTime() > latest.getTime())) latest = dt;
+            }
+            if (typeof d === 'object') {
+              for (const k of Object.keys(d)) {
+                const maybeKeyDate = tryParse(k);
+                if (maybeKeyDate && (!latest || maybeKeyDate.getTime() > latest.getTime())) latest = maybeKeyDate;
+                const v = (d as any)[k];
+                const dt2 = tryParse(v);
+                if (dt2 && (!latest || dt2.getTime() > latest.getTime())) latest = dt2;
+              }
+            }
+          }
         }
       }
     }
 
-    setUpdatedAt(found);
+    if (latest) setUpdatedAt(formatDateForCard(latest));
+    else setUpdatedAt(null);
   }, [chartData, derivedSelectedStations, selectedStationName, stations]);
 
   useEffect(() => {
@@ -197,8 +264,8 @@ const LatestDataCardsContainer: React.FC<Props> = ({ cardsData = null, selectedS
       <div className="mb-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         <div>
           <h2 className="font-londrina text-2xl md:text-[35px] leading-tight text-[#00312D]">Últimos dados</h2>
-          {/* Mostra updatedAt apenas quando temos estações selecionadas e updatedAt disponível */}
-          {derivedSelectedStations.length > 0 && updatedAt && <p className="text-sm text-gray-500 mt-1">{updatedAt}</p>}
+          {/* Mostrar updatedAt sempre que disponível (data/hora do último dado recebido) */}
+          {updatedAt && <p className="text-sm text-gray-500 mt-1">{updatedAt}</p>}
           {/* Quando não há estação selecionada, mostramos uma breve orientação abaixo do título (em telas pequenas ficará abaixo) */}
           {derivedSelectedStations.length === 0 && (
             <p className="text-sm text-gray-600 mt-1 md:mt-0">Selecione uma estação nos filtros para ver os últimos dados.</p>

@@ -160,24 +160,25 @@ const Dashboard = () => {
   {/* Cards de últimos dados enviados (dados vindos do backend via cardsData) 
       Pass selectedStationPk only when a single station is selected in the global filters
       so the container can show title/cards only in that case and compute updatedAt from chartData. */}
-  <LatestDataCardsContainer
-    cardsData={cardsData}
-    selectedStationPk={estacoes.length === 1 ? estacoes[0] : null}
-    selectedStations={estacoes}
-    chartData={chartData}
-    rightControls={(
-      <div className="flex items-center gap-4">
-        <GeneralFilter 
+      {/* Filtros gerais sempre visíveis (permitem selecionar a estação) */}
+      <GeneralFilter 
           cidade={cidade}
           setCidade={setCidade}
           estacoes={estacoes}
           setEstacoes={setEstacoes}
           parametros={parametros}
           setParametros={setParametros}
+      />
+
+      {/* Mostrar cards de últimos dados somente quando uma estação específica estiver selecionada */}
+      {estacoes.length === 1 ? (
+        <LatestDataCardsContainer
+          cardsData={cardsData}
+          selectedStationPk={estacoes[0]}
+          selectedStations={estacoes}
+          chartData={chartData}
         />
-      </div>
-    )}
-  />
+      ) : null}
 
       {/* Título da seção de gráficos */}
       <div className="mt-4 mb-2 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
