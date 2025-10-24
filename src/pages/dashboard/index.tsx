@@ -13,6 +13,7 @@ import { dashboardServices } from "@/services/dashboardServices";
 import { toast } from "react-toastify";
 import DateInput from "@/components/Inputs/DateInput/DateInput";
 import { Label } from "@/components/ui/label";
+
 import ReportTable from "./components/ReportTable"
 
 const ITEMS_PER_PAGE = 2
@@ -193,7 +194,9 @@ const Dashboard = () => {
 
 
       {/* Card de Relatorio */}
-      <ReportTable />
+      <ReportTable relatParam={{estacao_id: 0, parametros_pk: 0}}/>
+      {/* Se for pra ter uma estação e parametro em específico, basta mandar seus valores aqui */}
+      {/* Caso contrário, 0 para ambos (ou sem o campo 'relatParam') irá retornar todos os valores */}
     </div>
   )
 }
