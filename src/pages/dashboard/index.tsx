@@ -155,31 +155,45 @@ const Dashboard = () => {
       {/* Título da página */}
       <h1>Dashboard</h1>
 
-      <GeneralFilter 
+    {/* Últimos dados title + filtros alinhados */}
+
+  {/* Cards de últimos dados enviados (dados vindos do backend via cardsData) 
+      Pass selectedStationPk only when a single station is selected in the global filters
+      so the container can show title/cards only in that case and compute updatedAt from chartData. */}
+  <LatestDataCardsContainer
+    cardsData={cardsData}
+    selectedStationPk={estacoes.length === 1 ? estacoes[0] : null}
+    selectedStations={estacoes}
+    chartData={chartData}
+    rightControls={(
+      <div className="flex items-center gap-4">
+        <GeneralFilter 
           cidade={cidade}
           setCidade={setCidade}
           estacoes={estacoes}
           setEstacoes={setEstacoes}
           parametros={parametros}
           setParametros={setParametros}
-      />
-      <div className="flex flex-col gap-2">
-          <Label htmlFor="data-input">Data Período</Label>
-          <DateInput
+        />
+      </div>
+    )}
+  />
+
+      {/* Título da seção de gráficos */}
+      <div className="mt-4 mb-2 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+        <h2 className="font-londrina text-2xl md:text-[35px] leading-tight text-[#00312D]">Variação dos parâmetros</h2>
+        <div className="flex items-start md:items-center gap-2">
+          <div className="flex flex-col md:flex-row md:items-center gap-2">
+            <Label htmlFor="data-input" className="text-sm md:mr-2">Data Período</Label>
+            <DateInput
               mode="range"
               date={dateRange}
               setDate={setDateRange}
               disabledDates={{ after: new Date() }}
-          />
+            />
+          </div>
+        </div>
       </div>
-
-  {/* Cards de últimos dados enviados (dados vindos do backend via cardsData) */}
-  <LatestDataCardsContainer cardsData={cardsData} />
-
-      {/* Título da seção de gráficos */}
-      <h2 className="font-londrina text-2xl md:text-[35px] leading-tight text-[#00312D] mt-4">
-        Variação dos parâmetros
-      </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {pageItems.map((param, idx) => (
