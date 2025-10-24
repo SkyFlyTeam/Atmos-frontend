@@ -3,7 +3,8 @@ import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface LatestDataCardProps {
   tipo_parametro: string;
-  ultimo_valor: number;
+  // backend may sometimes return numeric strings; accept number | string and handle gracefully
+  ultimo_valor: number | string | null | undefined;
   tendencia: 'up' | 'down' | 'stable';
 }
 
@@ -36,10 +37,16 @@ const LatestDataCard: React.FC<LatestDataCardProps> = ({
       {/* Valor e ícone de tendência */}
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <p className="text-2xl font-bold" style={{ color: '#3A7817' }}>
-            {ultimo_valor.toFixed(2)}
-          </p>
-        </div>
+            <p className="text-2xl font-bold" style={{ color: '#3A7817' }}>
+              {(() => {
+                // normalize to number when possible
+                const n = typeof ultimo_valor === 'number' ? ultimo_valor : (ultimo_valor ? Number(ultimo_valor) : NaN);
+                if (typeof n === 'number' && !isNaN(n)) return n.toFixed(2);
+                // fallback: show raw value or a dash
+                return ultimo_valor ?? '-';
+              })()}
+            </p>
+          </div>
         
         {/* Ícone de tendência */}
         <div className="flex items-center justify-center ml-3">
