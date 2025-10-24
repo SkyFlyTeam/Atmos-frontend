@@ -3,7 +3,6 @@ import { useRouter } from "next/router"
 import ChartLineDots from "./components/ChartLineDots"
 import Pagination from "@/components/Pagination"
 import LatestDataCardsContainer from "@/components/LatestDataCardsContainer/LatestDataCardsContainer"
-import mockParametros from "./dadosMockados"
 import GeneralFilter from "./components/GeneralFilter";
 import { DateRange } from "react-day-picker";
 
@@ -113,14 +112,24 @@ const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState(1)
 
   // Calcula o total de páginas disponíveis
-  const totalPages = Math.ceil(mockParametros.length / ITEMS_PER_PAGE)
+  // total pages based on backend chartData
+  const totalPages = useMemo(() => {
+    if (!chartData || chartData.length === 0) return 0
+    return Math.ceil(chartData.length / ITEMS_PER_PAGE)
+  }, [chartData])
 
-  // Cria um subconjunto (slice) dos itens da página atual
+  // Cria um subconjunto (slice) dos itens da página atual a partir de chartData
   const pageItems = useMemo(() => {
+    if (!chartData) return []
     const start = (currentPage - 1) * ITEMS_PER_PAGE
     const end = start + ITEMS_PER_PAGE
-    return mockParametros.slice(start, end)
-  }, [currentPage])
+    return chartData.slice(start, end)
+  }, [currentPage, chartData])
+
+  // Quando chartData muda, volta para página 1
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [chartData])
 
   // Função que atualiza a página
   const handlePageChange = (page: number) => {
@@ -164,8 +173,8 @@ const Dashboard = () => {
           />
       </div>
 
-      {/* Cards de últimos dados enviados */}
-      <LatestDataCardsContainer />
+  {/* Cards de últimos dados enviados (dados vindos do backend via cardsData) */}
+  <LatestDataCardsContainer cardsData={cardsData} />
 
       {/* Título da seção de gráficos */}
       <h2 className="font-londrina text-2xl md:text-[35px] leading-tight text-[#00312D] mt-4">
