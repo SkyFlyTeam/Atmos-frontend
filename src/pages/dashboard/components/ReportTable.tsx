@@ -139,11 +139,11 @@ const ReportTable: React.FC<ReportTableProps> = ({
     return (
         <>
             <Card className={"flex flex-col gap-3 md:p-6 p-0 md:shadow-[0px_4px_35px_0px_rgba(0,_0,_0,_0.12)] md:bg-white bg-white-bg shadow-none " + className}>
-                <h1 className="md:mb-8">Relatório {
+                <h1>Relatório {
                     relatConfig ? "- " + (relatConfig.mesNome ? relatConfig.mesNome : "") + (" " + relatConfig?.ano) : ""
                 }
                 </h1>
-                <div>
+                <div className="reports-table">
                     {isLoading ? (
                         <SkeletonTable />
                     ) : (
@@ -232,6 +232,17 @@ const ReportTable: React.FC<ReportTableProps> = ({
                             }
                         />
                     )}
+
+                    {/* Scoped styles: somente para a tabela de relatórios no Dashboard. 
+                        Adiciona espaçamento acima da linha de paginação (desktop e mobile) sem tocar no componente DataTable. */}
+                    <style jsx>{`
+                        .reports-table :global(.overflow-hidden) {
+                            margin-bottom: 0.75rem;
+                        }
+                        .reports-table :global(.overflow-x-auto) {
+                            margin-bottom: 0.75rem;
+                        }
+                    `}</style>
                 </div>
             </Card>
         </>
