@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from "react"
 import { useRouter } from "next/router"
+import Image from 'next/image'
 import ChartLineDots from "./components/ChartLineDots"
 import Pagination from "@/components/Pagination"
 import LatestDataCardsContainer from "@/components/LatestDataCardsContainer/LatestDataCardsContainer"
@@ -160,61 +161,89 @@ const Dashboard = () => {
   {/* Cards de últimos dados enviados (dados vindos do backend via cardsData) 
       Pass selectedStationPk only when a single station is selected in the global filters
       so the container can show title/cards only in that case and compute updatedAt from chartData. */}
-      {/* Filtros gerais sempre visíveis (permitem selecionar a estação) */}
-      <GeneralFilter 
-          cidade={cidade}
-          setCidade={setCidade}
-          estacoes={estacoes}
-          setEstacoes={setEstacoes}
-          parametros={parametros}
-          setParametros={setParametros}
-      />
-
-      {/* Mostrar cards de últimos dados somente quando uma estação específica estiver selecionada */}
-      {estacoes.length === 1 ? (
-        <LatestDataCardsContainer
-          cardsData={cardsData}
-          selectedStationPk={estacoes[0]}
-          selectedStations={estacoes}
-          chartData={chartData}
-        />
-      ) : null}
-
-      {/* Título da seção de gráficos */}
-      <div className="mt-4 mb-2 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-        <h2 className="font-londrina text-2xl md:text-[35px] leading-tight text-[#00312D]">Variação dos parâmetros</h2>
-        <div className="flex items-start md:items-center gap-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="data-input" className="text-sm">Data Período</Label>
-            <DateInput
-              mode="range"
-              date={dateRange}
-              setDate={setDateRange}
-              disabledDates={{ after: new Date() }}
+      <div className="flex flex-col md:flex-row md:items-start gap-4">
+        <div className="flex-1">
+          {estacoes.length === 1 ? (
+            <LatestDataCardsContainer
+              cardsData={cardsData}
+              selectedStationPk={estacoes[0]}
+              selectedStations={estacoes}
+              chartData={chartData}
             />
-          </div>
+          ) : (
+            null
+          )}
+        </div>
+
+        <div className="md:w-auto w-full">
+          <GeneralFilter 
+              cidade={cidade}
+              setCidade={setCidade}
+              estacoes={estacoes}
+              setEstacoes={setEstacoes}
+              parametros={parametros}
+              setParametros={setParametros}
+          />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {pageItems.map((param, idx) => (
-          <ChartLineDots
-            key={`${param.tipo_parametro}-${idx}`}
-            title={param.tipo_parametro}
-            yLabel={param.tipo_parametro}
-            xLabel="Horário"
-            stations={param.estacoes}
-            data={param.dados.map(d => ({ ...d, time: d.datetime } as any))}
-          />
-        ))}
-      </div>
+      {chartData && chartData.length > 0 ? (
+        <>
+          {/* Título da seção de gráficos */}
+          <div className="mt-4 mb-2 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+            <h2 className="font-londrina text-2xl md:text-[35px] leading-tight text-[#00312D]">Variação dos parâmetros</h2>
+            <div className="flex items-start md:items-center gap-2">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="data-input" className="text-sm">Data Período</Label>
+                <DateInput
+                  mode="range"
+                  date={dateRange}
+                  setDate={setDateRange}
+                  disabledDates={{ after: new Date() }}
+                />
+              </div>
+            </div>
+          </div>
 
-      <Pagination
-        className="mt-2 mx-auto"
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {pageItems.map((param, idx) => (
+              <ChartLineDots
+                key={`${param.tipo_parametro}-${idx}`}
+                title={param.tipo_parametro}
+                yLabel={param.tipo_parametro}
+                xLabel="Horário"
+                stations={param.estacoes}
+                data={param.dados.map(d => ({ ...d, time: d.datetime } as any))}
+              />
+            ))}
+          </div>
+
+          <Pagination
+            className="mt-2 mx-auto"
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-12 px-4">
+          <div className="flex flex-col gap-3 justify-center items-center">
+            <Image
+              src="/sem-dados.svg"    
+              alt="Imagem sem dados"               
+              width={400}                         
+              height={300}   
+              style={{margin: "0 auto"}}                      
+            />
+            <span className="font-londrina text-2xl text-center text-gray-600">
+              Oops! Parece que não tem dados aqui!
+            </span>
+            <p className="text-gray-500 text-center max-w-md">
+              Selecione o filtro para exibir os dados.
+            </p>
+          </div>
+        </div>
+      )}
 
 
       {/* Card de Relatorio */}
