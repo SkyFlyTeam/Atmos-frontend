@@ -57,6 +57,28 @@ export default function Estacoes() {
   // }, []);
 
 
+
+  useEffect(() => {
+    const verifyAuth = async () => {
+      let done = false;
+      try {
+        const auth = await loginServices.getAuth();
+        done = auth;
+      }
+      catch (error) { }
+      finally {
+        if (done) {
+          setUserRole('admin')
+        }
+        else{
+          setUserRole('user')
+        }
+      }
+    }
+    verifyAuth();
+  }, [])
+
+
   // Filtrar estações baseado na busca
   const estacoesFilteredBySearch = useMemo(() => {
     const searchTerm = termoBusca.toLowerCase().trim();
