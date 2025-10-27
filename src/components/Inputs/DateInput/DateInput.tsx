@@ -12,9 +12,10 @@ type DateInputProps = {
     setDate: Dispatch<SetStateAction<any>>;
     mode: "single" | "multiple" | "range";
     disabledDates: any;
+    onMonthChange?: (month: Date) => void;
 };
 
-const DateInput = ({ date, setDate, mode, disabledDates }: DateInputProps) => {
+const DateInput = ({ date, setDate, mode, disabledDates, onMonthChange }: DateInputProps) => {
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -65,6 +66,7 @@ const DateInput = ({ date, setDate, mode, disabledDates }: DateInputProps) => {
                         locale={ptBR}
                         disabled={disabledDates}
                         required
+                        onMonthChange={onMonthChange}
                     />
                 )}
                 {mode === "single" && (
@@ -75,6 +77,7 @@ const DateInput = ({ date, setDate, mode, disabledDates }: DateInputProps) => {
                         locale={ptBR}
                         disabled={disabledDates}
                         required
+                        onMonthChange={onMonthChange}
                     />
                 )}
                 {mode === "multiple" && (
@@ -84,6 +87,7 @@ const DateInput = ({ date, setDate, mode, disabledDates }: DateInputProps) => {
                         onSelect={setDate as any}
                         locale={ptBR}
                         disabled={disabledDates}
+                        onMonthChange={onMonthChange}
                     />
                 )}
             </PopoverContent>
