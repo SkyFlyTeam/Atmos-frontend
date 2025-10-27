@@ -15,7 +15,6 @@ import { Card } from "@/components/ui/card"
 import SkeletonTable from "@/components/DataTable/DatatableSkeleton"
 
 import { FaPlus } from "react-icons/fa"
-
 const ParametrosPage = () => {
     const [parametros, setParametros] = useState<Parametro[]>([]);
     const [paramSelecionado, setParamSelecionado] = useState<Parametro | null>(null);

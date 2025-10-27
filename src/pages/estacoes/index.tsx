@@ -20,6 +20,42 @@ export default function Estacoes() {
   const [userRole, setUserRole] = useState<'admin' | 'user'>('user');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize] = useState(8);
+  // const [authRole, setAuthRole] = useState<'admin' | 'user'>('user'); // apagar depois
+  // const [roleOverride, setRoleOverride] = useState<'admin' | 'user' | null>(null); //apagar depois
+  // const userRole = roleOverride ?? authRole;
+
+  useEffect(() => {
+    const verifyAuth = async () => {
+      let done = false;
+      try {
+        const auth = await loginServices.getAuth();
+        done = auth;
+      }
+      catch (error) { }
+      finally {
+        if (done) {
+          setUserRole('admin')
+        }
+        else {
+          setUserRole('user')
+        }
+      }
+    }
+    verifyAuth();
+  }, [])
+
+  // useEffect(() => {
+  //   const verifyAuth = async () => {
+  //     try {
+  //       const ok = await loginServices.getAuth();
+  //       setAuthRole(ok ? 'admin' : 'user');
+  //     } catch {
+  //       setAuthRole('user');
+  //     }
+  //   };
+  //   verifyAuth();
+  // }, []);
+
 
 
   useEffect(() => {
@@ -110,8 +146,34 @@ export default function Estacoes() {
   };
 
   return (
+    //apagar depois o simulador de user/admin
     <>
-      <div className="flex justify-between items-center py-4">
+      {/* {process.env.NODE_ENV !== 'production' && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">Simulando como:</span>
+          <strong className="text-gray-800">{userRole}</strong>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setRoleOverride((prev) => prev === 'admin' ? 'user' : 'admin')}
+            title="Alterna entre admin/user sem depender da autenticação"
+          >
+            {roleOverride === 'admin' ? 'Simular USER' : 'Simular ADMIN'}
+          </Button>
+          {roleOverride && (
+            <button
+              className="text-xs underline text-gray-500"
+              onClick={() => setRoleOverride(null)}
+              title="Voltar a usar o papel real da autenticação"
+            >
+              limpar simulação
+            </button>
+          )}
+        </div>
+      )} */}
+
+
+      <div className="flex justify-between items-center py-4"> 
         <div className="flex items-center gap-4">
           <h1 className="text-3xl font-bold text-gray-900">Estações</h1>
         </div>

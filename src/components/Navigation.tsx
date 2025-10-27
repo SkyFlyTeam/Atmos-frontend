@@ -19,7 +19,7 @@ const defaultNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", isActive: false },
   { label: "Estações", href: "/estacoes", isActive: false },
   { label: "Parâmetros", href: "/parametros", isActive: false },
-  { label: "Alertas", href: "/alertas", isActive: false },
+  { label: "Alertas", href: "/tipo-alerta", isActive: false },
   { label: "Usuários", href: "/usuarios", isActive: false },
 ];
 

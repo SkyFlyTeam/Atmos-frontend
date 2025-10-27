@@ -27,7 +27,7 @@ const decodeJwtPayload = (token: string): any | null => {
 const abas = [
     // {nome: "Início", rota: "/", necessarioLogin: false},
     // {nome: "Guia Educativo", rota: "/guia-educativo", necessarioLogin: false},
-    // {nome: "Dashboard", rota: "/dashboard", necessarioLogin: false},
+    {nome: "Dashboard", rota: "/dashboard", necessarioLogin: true},
     {nome: "Estações", rota: "/estacoes", necessarioLogin: false},
     {nome: "Parâmetros", rota: "/parametros", necessarioLogin: false},
     {nome: "Alertas", rota: "/tipo-alerta", necessarioLogin: false}, // Corrigido para /tipo-alerta
