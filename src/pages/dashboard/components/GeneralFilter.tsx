@@ -1,7 +1,6 @@
 import { ComboBox, ComboBoxOption } from "@/components/Combobox/Combobox";
 import { MultipleCombobox } from "@/components/MultipleCombobox/MultipleCombobox";
 import { DateRange } from "react-day-picker";
-import DateInput from "@/components/Inputs/DateInput/DateInput";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { cidadeServices } from "@/services/cidadeServices";
@@ -23,6 +22,7 @@ type GeneralFilterProps = {
     setEstacoes: (estacoes: string[]) => void;
     parametros: string[];
     setParametros: (parametros: string[]) => void;
+    setDateRange: (dateRange: DateRange) => void;
 }   
 
 const GeneralFilter = ({
@@ -32,6 +32,7 @@ const GeneralFilter = ({
         setEstacoes, 
         parametros, 
         setParametros, 
+        setDateRange
     }: GeneralFilterProps) => {
 
     const [cidadeOptions, setCidadeOptions] = useState<ComboBoxOption[]>([]);
@@ -99,6 +100,7 @@ const GeneralFilter = ({
         setCidade(cidadeOptions[0]?.value || "");
         setEstacoes([]);
         setParametros([]);
+        setDateRange({ from: new Date(), to: new Date() });
     }
 
     return (

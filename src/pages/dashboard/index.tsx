@@ -13,6 +13,7 @@ import { dashboardServices } from "@/services/dashboardServices";
 import { toast } from "react-toastify";
 import DateInput from "@/components/Inputs/DateInput/DateInput";
 import { Label } from "@/components/ui/label";
+import { isSameDay } from "date-fns";
 
 import ReportTable from "./components/ReportTable"
 
@@ -25,6 +26,8 @@ const Dashboard = () => {
   
   const [chartData, setChartData] = useState<ParametroGrafico[] | null>(null);
   const [cardsData, setCardsData] = useState<ParametroUltimoValor[] | null>(null);
+
+  const [datesWithData, setDatesWithData] = useState<Date[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -58,7 +61,7 @@ const Dashboard = () => {
             dateRange.from ?  new Date(new Date(dateRange.from).setHours(0, 0, 0, 0)) : new Date(),
             dateRange.to ? new Date(new Date(dateRange.to).setHours(23, 59, 59, 999)) : new Date()
         );
-        
+
         setChartData(chartData as ParametroGrafico[]);
     } catch (error) {
         toast.error("Nenhum dado encontrado para os filtros selecionados. Tente ajustar os filtros.");
@@ -95,11 +98,46 @@ const Dashboard = () => {
         ]);
     }
 
+  const handleSearchAvailableDays = async (firstDate: Date, endDate?: Date) => {
+    console.log("Buscando dias disponíveis para o mês:", firstDate);
+    try {
+      let monthFirstDay: Date;
+      let monthLastDay: Date;
+
+      if(endDate && firstDate.getMonth() !== endDate.getMonth()){
+        monthFirstDay = firstDate;
+        monthLastDay = endDate;
+      }else{
+        monthFirstDay = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
+        monthLastDay = new Date(firstDate.getFullYear(), firstDate.getMonth() + 1, 0);
+      }
+      
+      const chartData = await dashboardServices.getValoresCapturadosPorParametro(
+          cidade ? parseInt(cidade) : 1,
+          estacoes.map(e => parseInt(e)),
+          parametros.map(p => parseInt(p)),
+          dateRange.from ?  new Date(monthFirstDay.setHours(0, 0, 0, 0)) : new Date(),
+          dateRange.to ? new Date(monthLastDay.setHours(23, 59, 59, 999)) : new Date()
+      );
+
+      const uniqueStrDates = new Set((chartData as ParametroGrafico[]).map(item => item.dados.map(d => new Date(d.datetime).toDateString())).flat());
+      const uniqueDates = Array.from(uniqueStrDates);
+      setDatesWithData(uniqueDates.map(dateStr => new Date(dateStr)));
+    } catch (error) {
+      console.error("Erro ao buscar dias disponíveis", error);
+    }
+  }
+
+  useEffect(() => {
+    console.log("Datas com dados disponíveis:", datesWithData);
+  }, [datesWithData]);
+
     useEffect(() => {
         let isMounted = true;
         const load = async () => {
             try {
                 await handleApplyFilters();
+                await handleSearchAvailableDays(dateRange.from || new Date(), dateRange.to || undefined);
             } finally {
                 if (isMounted) {
                     setIsLoading(false);
@@ -151,6 +189,12 @@ const Dashboard = () => {
     return null
   }
 
+  const isDayDisabled = (day: Date) => {
+    return !datesWithData.some(enabledDay => 
+      isSameDay(day, enabledDay)
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
       {/* Título da página */}
@@ -183,6 +227,7 @@ const Dashboard = () => {
               setEstacoes={setEstacoes}
               parametros={parametros}
               setParametros={setParametros}
+              setDateRange={setDateRange}
           />
         </div>
       </div>
@@ -199,7 +244,8 @@ const Dashboard = () => {
                   mode="range"
                   date={dateRange}
                   setDate={setDateRange}
-                  disabledDates={{ after: new Date() }}
+                  disabledDates={isDayDisabled}
+                  onMonthChange={handleSearchAvailableDays}
                 />
               </div>
             </div>
