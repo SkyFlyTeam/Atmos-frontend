@@ -283,6 +283,12 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
   const chartWrapperRef = useRef<HTMLDivElement | null>(null)
   const legendRef = useRef<HTMLDivElement | null>(null)
   const { width } = useElementSize(chartWrapperRef)
+  const isDraggingRef = useRef(false)
+  const lastClientXRef = useRef<number>(0)
+  const autoScrollDirRef = useRef<-1 | 0 | 1>(0)
+  const rafRef = useRef<number | null>(null)
+  const moveListenerRef = useRef<((ev: MouseEvent) => void) | null>(null)
+  const upListenerRef = useRef<((ev: MouseEvent) => void) | null>(null)
 
   // Altura proporcional 16:9
   const aspect = 16 / 9
@@ -293,27 +299,178 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
 
   // ChartContainer com largura fixa para scroll horizontal e espaçamento igual entre horas
   const BASE_TICK_WIDTH = 120;
+  const CHART_MARGIN = { left: 12, right: 40, top: 10, bottom: 35 } as const
+  const Y_AXIS_WIDTH = 48
+  const AUTO_SCROLL_THRESHOLD = 24; // px próximos à borda para autoscroll durante seleção
+  const AUTO_SCROLL_SPEED = 24;     // px por evento de movimento
+
+
+  const stopAutoScroll = () => {
+    autoScrollDirRef.current = 0
+    if (rafRef.current != null) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
+  }
+
+  const autoScrollLoop = () => {
+    const wrapper = chartWrapperRef.current
+    if (!wrapper || !isDraggingRef.current) {
+      rafRef.current = null
+      return
+    }
+    // Calcula direção com base na posição atual do cursor
+    const rect = wrapper.getBoundingClientRect()
+    const clientX = lastClientXRef.current
+    const nearRight = clientX > rect.right - AUTO_SCROLL_THRESHOLD
+    const nearLeft = clientX < rect.left + AUTO_SCROLL_THRESHOLD
+    const maxScroll = wrapper.scrollWidth - wrapper.clientWidth
+    let performedScroll = false
+    if (nearRight && wrapper.scrollLeft < maxScroll) {
+      wrapper.scrollLeft = Math.min(wrapper.scrollLeft + AUTO_SCROLL_SPEED, maxScroll)
+      performedScroll = true
+    } else if (nearLeft && wrapper.scrollLeft > 0) {
+      wrapper.scrollLeft = Math.max(wrapper.scrollLeft - AUTO_SCROLL_SPEED, 0)
+      performedScroll = true
+    }
+
+    // Atualiza xDomainRight mesmo sem novo mousemove, usando a posição atual do cursor
+    const mapped = hourFromClientX(lastClientXRef.current)
+    if (mapped) setXDomainRight(mapped)
+
+    // Continua o loop enquanto estiver arrastando
+    rafRef.current = requestAnimationFrame(autoScrollLoop)
+  }
+
+  const attachWindowDragListeners = () => {
+    if (moveListenerRef.current || upListenerRef.current) return
+    moveListenerRef.current = (ev: MouseEvent) => {
+      if (isDraggingRef.current) {
+        lastClientXRef.current = ev.clientX
+      }
+    }
+    upListenerRef.current = (ev: MouseEvent) => {
+      if (!isDraggingRef.current) return
+      handleMouseUp()
+    }
+    window.addEventListener('mousemove', moveListenerRef.current)
+    window.addEventListener('mouseup', upListenerRef.current as EventListener)
+  }
+
+  const detachWindowDragListeners = () => {
+    if (moveListenerRef.current) {
+      window.removeEventListener('mousemove', moveListenerRef.current)
+      moveListenerRef.current = null
+    }
+    if (upListenerRef.current) {
+      window.removeEventListener('mouseup', upListenerRef.current as EventListener)
+      upListenerRef.current = null
+    }
+  }
+  
+  // Contagem de horas distintas no recorte (para dimensionar largura no zoom)
+  const zoomHourCount = useMemo(() => {
+    if (!isZoomed || visibleData.length === 0) return 0
+    const hours = new Set<string>()
+    visibleData.forEach(d => {
+      if (d.time) {
+        hours.add(d.time.slice(0, 13)) // yyyy-mm-dd hh
+      }
+    })
+    return hours.size
+  }, [isZoomed, visibleData])
   
   // Largura do gráfico baseada nos dados visíveis
   const chartWidth = useMemo(() => {
-    const dataLength = isZoomed ? visibleData.length : hourTicks.length;
-    return Math.max(dataLength * BASE_TICK_WIDTH, 600); // mínimo de 600px
-  }, [isZoomed, visibleData.length, hourTicks.length]);
+    if (isZoomed) {
+      // No zoom, baseia na quantidade de HORAS selecionadas
+      const hours = Math.max(zoomHourCount || 1, 1)
+      const perHour = 110
+      const desired = Math.max(hours * perHour, 320)
+      const container = width || desired
+      // Regra pedida: com seleção até 2h, não ativar scroll (encaixa no contêiner).
+      // A partir de 3h, permitir scroll (não limitar ao contêiner).
+      if (hours <= 2) return container
+      return desired
+    }
+    const dataLength = hourTicks.length
+    return Math.max(dataLength * BASE_TICK_WIDTH, 600) // mínimo de 600px fora do zoom
+  }, [isZoomed, zoomHourCount, hourTicks.length, width])
+
+  // Mapeia a posição do cursor para o tick de hora correspondente (modo sem zoom)
+  const hourFromClientX = (clientX: number): string | null => {
+    const wrapper = chartWrapperRef.current
+    if (!wrapper || hourTicks.length === 0) return null
+    const rect = wrapper.getBoundingClientRect()
+    const xClient = Math.max(0, Math.min(clientX - rect.left, rect.width))
+    // Converte para coordenada do conteúdo total (incluindo scroll)
+    let xContent = wrapper.scrollLeft + xClient
+    // Remove offset de margens e eixo Y para aproximar a área útil do gráfico
+    const xPlot = Math.max(0, xContent - (CHART_MARGIN.left + Y_AXIS_WIDTH))
+    const plotWidth = Math.max(1, chartWidth - CHART_MARGIN.left - CHART_MARGIN.right)
+    const step = plotWidth / Math.max(1, hourTicks.length)
+    const idx = Math.max(0, Math.min(Math.floor(xPlot / step), hourTicks.length - 1))
+    return hourTicks[idx] || null
+  }
 
   // Handlers de seleção de área para zoom (baseado no exemplo do CodeSandbox)
   const handleMouseDown = (e: any) => {
-    if (e && e.activeLabel) {
-      setXDomainLeft(e.activeLabel);
+    isDraggingRef.current = true
+    if (e?.nativeEvent) {
+      lastClientXRef.current = (e.nativeEvent as MouseEvent).clientX
+    }
+    const start = e?.activeLabel || hourFromClientX(lastClientXRef.current)
+    if (start) setXDomainLeft(start)
+    attachWindowDragListeners()
+    if (rafRef.current == null) {
+      rafRef.current = requestAnimationFrame(autoScrollLoop)
     }
   };
   
   const handleMouseMove = (e: any) => {
-    if (xDomainLeft && e && e.activeLabel) {
-      setXDomainRight(e.activeLabel);
+    if (!e) return
+    if (e.nativeEvent) {
+      lastClientXRef.current = (e.nativeEvent as MouseEvent).clientX
+    }
+    if (xDomainLeft) {
+      // Atualiza o limite direito pela label ativa ou pelo mapeamento por pixel
+      const next = e.activeLabel || hourFromClientX(lastClientXRef.current)
+      if (next) setXDomainRight(next)
+    }
+
+    // Autoscroll quando estiver selecionando e encostar nas bordas do contêiner
+    if (xDomainLeft && chartWrapperRef.current && e?.nativeEvent) {
+      const wrapper = chartWrapperRef.current
+      const rect = wrapper.getBoundingClientRect()
+      const clientX = (e.nativeEvent as MouseEvent).clientX
+      const nearRight = clientX > rect.right - AUTO_SCROLL_THRESHOLD
+      const nearLeft = clientX < rect.left + AUTO_SCROLL_THRESHOLD
+      const maxScroll = wrapper.scrollWidth - wrapper.clientWidth
+
+      // Define direção de autoscroll
+      if (nearRight && wrapper.scrollLeft < maxScroll) {
+        autoScrollDirRef.current = 1
+      } else if (nearLeft && wrapper.scrollLeft > 0) {
+        autoScrollDirRef.current = -1
+      } else {
+        autoScrollDirRef.current = 0
+      }
+
+      // Inicia loop se necessário
+      if (autoScrollDirRef.current !== 0 && rafRef.current == null) {
+        rafRef.current = requestAnimationFrame(autoScrollLoop)
+      }
+      // Se não precisar mais, para o loop
+      if (autoScrollDirRef.current === 0 && rafRef.current != null) {
+        stopAutoScroll()
+      }
     }
   };
   
   const handleMouseUp = () => {
+    isDraggingRef.current = false
+    stopAutoScroll()
+    detachWindowDragListeners()
     if (xDomainLeft === xDomainRight || xDomainRight === "") {
       setXDomainLeft("");
       setXDomainRight("");
@@ -366,7 +523,7 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
       chart={
         <>
           {/* Legenda customizada e botão de reset do zoom */}
-          <div className="px-2 pb-2">
+          <div className="px-2 pb-2 select-none">
             <div ref={legendRef} className="flex flex-wrap items-center justify-center gap-4">
               {stations.map((station) => {
                 const key = slugify(station)
@@ -402,7 +559,7 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
           </div>
 
           {/* ChartContainer com largura fixa e scroll horizontal */}
-          <div ref={chartWrapperRef} className="w-full overflow-x-auto">
+          <div ref={chartWrapperRef} className="w-full overflow-x-auto select-none">
             <div style={{ minWidth: chartWidth }}>
               <ChartContainer
                 config={chartConfig}
@@ -411,7 +568,7 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
               >
                 <LineChart
                   data={visibleData}
-                  margin={{ left: 12, right: 40, top: 10, bottom: 35 }}
+                  margin={{ left: CHART_MARGIN.left, right: CHART_MARGIN.right, top: CHART_MARGIN.top, bottom: CHART_MARGIN.bottom }}
                   width={chartWidth}
                   height={chartHeight}
                   onMouseDown={handleMouseDown}
@@ -436,7 +593,7 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
                   <YAxis
                     tickLine={false}
                     axisLine={false}
-                    width={48}
+                    width={Y_AXIS_WIDTH}
                     label={{
                       value: yLabel ?? title,
                       angle: -90,
