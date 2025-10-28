@@ -200,12 +200,10 @@ const Dashboard = () => {
       {/* Título da página */}
       <h1>Dashboard</h1>
 
-    {/* Últimos dados title + filtros alinhados */}
-
   {/* Cards de últimos dados enviados (dados vindos do backend via cardsData) 
       Pass selectedStationPk only when a single station is selected in the global filters
       so the container can show title/cards only in that case and compute updatedAt from chartData. */}
-      <div className="flex flex-col md:flex-row md:items-start gap-4">
+      <div className="relative flex flex-col md:flex-row md:items-start gap-4 ">
         <div className="flex-1">
           {estacoes.length === 1 ? (
             <LatestDataCardsContainer
@@ -219,7 +217,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className="md:w-auto w-full">
+        <div className="static right-4 md:absolute md:-top-2 md:ml-4 w-auto z-30 ">
           <GeneralFilter 
               cidade={cidade}
               setCidade={setCidade}
