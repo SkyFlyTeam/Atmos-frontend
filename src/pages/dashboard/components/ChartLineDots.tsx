@@ -1,4 +1,4 @@
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
+import { CartesianGrid, Line, LineChart, XAxis, YAxis, ReferenceArea } from "recharts"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react"
@@ -152,7 +152,9 @@ function fillDataForStations(data: any[], stations: StationName[]): TimePoint[] 
     const entry = consolidatedMap.get(time)!;
     stations.forEach(station => {
       if (item[station] !== undefined) {
-        entry[station] = item[station];
+        // Converte string para número se necessário
+        const value = typeof item[station] === 'string' ? parseFloat(item[station]) : item[station];
+        entry[station] = isNaN(value) ? null : value;
       }
     });
   });
@@ -185,18 +187,66 @@ function fillDataForStations(data: any[], stations: StationName[]): TimePoint[] 
 }
 
 export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stations, data }: Props) {
-  // Controle de Zoom: altera a largura por hora para ver melhor os pontos dentro de cada hora
-  const BASE_TICK_WIDTH = 120 // px por hora (zoom 1x)
-  const [zoom, setZoom] = useState(1)
-  const MIN_ZOOM = 0.5
-  const MAX_ZOOM = 3
-  const ZOOM_STEP = 0.25
 
   // Preenche os dados para todas as estações e horários
   const processedData = useMemo(() => fillDataForStations(data, stations), [data, stations]);
+  
+  // Calcula dados agrupados por hora (média) - usado quando não está com zoom
+  const hourlyAverageData = useMemo(() => {
+    const hourMap = new Map<string, { time: string; date: string; values: { [key: string]: number[] } }>();
+    processedData.forEach((point) => {
+      const hour = point.time.slice(0, 13) + ':00';
+      if (!hourMap.has(hour)) {
+        hourMap.set(hour, { 
+          time: hour, 
+          date: hour.split(' ')[0].split('-').reverse().join('/'),
+          values: {}
+        });
+      }
+      const entry = hourMap.get(hour)!;
+      stations.forEach(station => {
+        if (typeof point[station] === 'number') {
+          if (!entry.values[station]) {
+            entry.values[station] = [];
+          }
+          entry.values[station].push(point[station] as number);
+        }
+      });
+    });
+    
+    const result: TimePoint[] = [];
+    hourMap.forEach((entry) => {
+      const dataPoint: TimePoint = { 
+        time: entry.time,
+        date: entry.date
+      };
+      stations.forEach(station => {
+        const arr = entry.values[station] || [];
+        dataPoint[station] = arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length) : null;
+      });
+      result.push(dataPoint);
+    });
+    
+    return result.sort((a, b) => a.time.localeCompare(b.time));
+  }, [processedData, stations]);
+
+  // Estados para zoom via seleção de área
+  const [visibleData, setVisibleData] = useState<TimePoint[]>([]);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [xDomainLeft, setXDomainLeft] = useState<string>("");
+  const [xDomainRight, setXDomainRight] = useState<string>("");
+  const [yDomainBottom, setYDomainBottom] = useState<number | null>(null);
+  const [yDomainTop, setYDomainTop] = useState<number | null>(null);
+  
+  // Atualiza visibleData quando hourlyAverageData muda e não está com zoom
+  useEffect(() => {
+    if (!isZoomed && hourlyAverageData.length > 0) {
+      setVisibleData(hourlyAverageData);
+    }
+  }, [hourlyAverageData, isZoomed]);
+  
   // Gera os ticks de hora cheia para o eixo X
   const hourTicks = useMemo(() => {
-    // Sempre gera ticks entre 13h e 17h para os dados mockados
     if (processedData.length > 0) {
       const times = processedData.map(d => d.time);
       return getFullHourTicks(times);
@@ -211,7 +261,6 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
         map.set(String(point.time), String(point.date));
       }
     });
-    // Adiciona também as entradas para as horas cheias (ticks)
     hourTicks.forEach(tick => {
       if (!map.has(tick)) {
         const date = tick.split(' ')[0].split('-').reverse().join('/');
@@ -231,8 +280,8 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
     return acc
   }, {} as ChartConfig)
 
-  const chartWrapperRef = useRef<HTMLDivElement | null>(null) // referencia a <div> que contém o gráfico
-  const legendRef = useRef<HTMLDivElement | null>(null) // referencia a legenda
+  const chartWrapperRef = useRef<HTMLDivElement | null>(null)
+  const legendRef = useRef<HTMLDivElement | null>(null)
   const { width } = useElementSize(chartWrapperRef)
 
   // Altura proporcional 16:9
@@ -243,46 +292,80 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
     : undefined
 
   // ChartContainer com largura fixa para scroll horizontal e espaçamento igual entre horas
-  const tickWidth = useMemo(() => Math.round(BASE_TICK_WIDTH * zoom), [zoom])
-  const chartWidth = useMemo(() => hourTicks.length * tickWidth, [hourTicks.length, tickWidth])
+  const BASE_TICK_WIDTH = 120;
+  
+  // Largura do gráfico baseada nos dados visíveis
+  const chartWidth = useMemo(() => {
+    const dataLength = isZoomed ? visibleData.length : hourTicks.length;
+    return Math.max(dataLength * BASE_TICK_WIDTH, 600); // mínimo de 600px
+  }, [isZoomed, visibleData.length, hourTicks.length]);
 
-  const handleZoomIn = () => setZoom((z) => Math.min(MAX_ZOOM, parseFloat((z + ZOOM_STEP).toFixed(2))))
-  const handleZoomOut = () => setZoom((z) => Math.max(MIN_ZOOM, parseFloat((z - ZOOM_STEP).toFixed(2))))
-  const handleZoomReset = () => setZoom(1)
-
-  // Atalhos de teclado: Ctrl + '+', Ctrl + '-', Ctrl + '0'
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      // Evita interferir quando digitando em inputs/textareas/contentEditable
-      const target = e.target as HTMLElement | null
-      const tag = (target?.tagName || "").toLowerCase()
-      const isEditable = !!target && (tag === "input" || tag === "textarea" || target.isContentEditable)
-      if (isEditable) return
-
-      if (e.ctrlKey || e.metaKey) {
-        const key = e.key
-        if (key === "+" || key === "=") {
-          e.preventDefault()
-          handleZoomIn()
-        } else if (key === "-") {
-          e.preventDefault()
-          handleZoomOut()
-        } else if (key === "0") {
-          e.preventDefault()
-          handleZoomReset()
-        }
-      }
+  // Handlers de seleção de área para zoom (baseado no exemplo do CodeSandbox)
+  const handleMouseDown = (e: any) => {
+    if (e && e.activeLabel) {
+      setXDomainLeft(e.activeLabel);
     }
-    document.addEventListener("keydown", onKeyDown)
-    return () => document.removeEventListener("keydown", onKeyDown)
-  }, [])
+  };
+  
+  const handleMouseMove = (e: any) => {
+    if (xDomainLeft && e && e.activeLabel) {
+      setXDomainRight(e.activeLabel);
+    }
+  };
+  
+  const handleMouseUp = () => {
+    if (xDomainLeft === xDomainRight || xDomainRight === "") {
+      setXDomainLeft("");
+      setXDomainRight("");
+      return;
+    }
+
+    if (xDomainLeft && xDomainRight) {
+      // Aplica zoom: filtra dados por intervalo selecionado
+      const [start, end] = [xDomainLeft, xDomainRight].sort();
+      const filtered = processedData.filter(d => d.time >= start && d.time <= end);
+      
+      if (filtered.length > 0) {
+        setVisibleData(filtered);
+        
+        // Calcula min/max Y
+        let minY = Infinity, maxY = -Infinity;
+        filtered.forEach(d => {
+          stations.forEach(station => {
+            const val = typeof d[station] === 'number' ? d[station] as number : null;
+            if (val !== null) {
+              minY = Math.min(minY, val);
+              maxY = Math.max(maxY, val);
+            }
+          });
+        });
+        
+        setYDomainBottom(minY === Infinity ? 0 : minY);
+        setYDomainTop(maxY === -Infinity ? 10 : maxY);
+        setIsZoomed(true);
+      }
+      
+      setXDomainLeft("");
+      setXDomainRight("");
+    }
+  };
+
+  // Reset do zoom
+  const handleZoomOut = () => {
+    setIsZoomed(false);
+    setVisibleData(hourlyAverageData);
+    setXDomainLeft("");
+    setXDomainRight("");
+    setYDomainBottom(null);
+    setYDomainTop(null);
+  };
 
   return (
     <CardChart
       title={title}
       chart={
         <>
-          {/* Legenda e, abaixo, os controles de Zoom */}
+          {/* Legenda customizada e botão de reset do zoom */}
           <div className="px-2 pb-2">
             <div ref={legendRef} className="flex flex-wrap items-center justify-center gap-4">
               {stations.map((station) => {
@@ -302,40 +385,20 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
                 )
               })}
             </div>
-            <div className="mt-4 flex items-center justify-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleZoomOut}
-                disabled={zoom <= MIN_ZOOM}
-                aria-label="Diminuir zoom"
-                title="Diminuir zoom"
-              >
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-              <div className="min-w-12 text-center text-xs text-muted-foreground">
-                {Math.round(zoom * 100)}%
+            {isZoomed && (
+              <div className="mt-4 flex items-center justify-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleZoomOut}
+                  aria-label="Resetar zoom"
+                  title="Resetar zoom"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  <span className="ml-2">Resetar zoom</span>
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleZoomIn}
-                disabled={zoom >= MAX_ZOOM}
-                aria-label="Aumentar zoom"
-                title="Aumentar zoom"
-              >
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleZoomReset}
-                aria-label="Resetar zoom"
-                title="Resetar zoom (Ctrl+0)"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </div>
+            )}
           </div>
 
           {/* ChartContainer com largura fixa e scroll horizontal */}
@@ -347,11 +410,14 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
                 style={{ height: chartHeight, minWidth: chartWidth }}
               >
                 <LineChart
-                  accessibilityLayer
-                  data={processedData}
+                  data={visibleData}
                   margin={{ left: 12, right: 40, top: 10, bottom: 35 }}
                   width={chartWidth}
                   height={chartHeight}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  style={{ cursor: "crosshair" }}
                 >
                   <CartesianGrid vertical={true} />
                   <XAxis
@@ -365,7 +431,6 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
                     type="category"
                     allowDuplicatedCategory={false}
                     interval={0}
-                    // Força espaçamento igual entre ticks
                     minTickGap={0}
                   />
                   <YAxis
@@ -380,18 +445,28 @@ export default function ChartLineDots({ title, xLabel = "Horário", yLabel, stat
                     }}
                   />
 
+                  {/* ReferenceArea para seleção de zoom */}
+                  {xDomainLeft && xDomainRight && (
+                    <ReferenceArea 
+                      x1={xDomainLeft} 
+                      x2={xDomainRight} 
+                      strokeOpacity={0.3}
+                      fill="hsl(var(--primary))"
+                      opacity={0.2}
+                    />
+                  )}
+
                   <ChartTooltip
                     cursor={false}
                     content={
                       <ChartTooltipContent
                         hideLabel={false}
                         labelFormatter={(rawLabel, payload) => {
-                          // rawLabel é a string do eixo X: "YYYY-MM-DD HH:MM"
                           const labelStr = String(rawLabel)
                           const [datePart, timePart] = labelStr.split(" ")
                           const [yyyy, mm, dd] = (datePart || "").split("-")
                           const prettyDate = dd && mm && yyyy ? `${dd}/${mm}/${yyyy}` : ""
-                          const prettyTime = (timePart || "").slice(0,5) // HH:MM
+                          const prettyTime = (timePart || "").slice(0,5)
                           return `${prettyDate} ${prettyTime}`.trim()
                         }}
                       />
