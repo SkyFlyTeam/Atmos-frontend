@@ -233,7 +233,7 @@ const Dashboard = () => {
       {chartData && chartData.length > 0 ? (
         <>
           {/* Título da seção de gráficos */}
-          <div className="mt-4 mb-2 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+          <div className="mt-15 mb-2 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
             <h2 className="font-londrina text-2xl md:text-[35px] leading-tight text-[#00312D]">Variação dos parâmetros</h2>
             <div className="flex items-start md:items-center gap-2">
               <div className="flex flex-col gap-2">
