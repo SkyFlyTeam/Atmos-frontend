@@ -291,7 +291,7 @@ const Dashboard = () => {
 
 
       {/* Card de Relatorio */}
-      <ReportTable relatParam={{estacao_id: 0, parametros_pk: 0}}/>
+      <ReportTable relatParam={{}} estacoes={estacoes} parametros={parametros} cidade={cidade}/>
       {/* Se for pra ter uma estação e parametro em específico, basta mandar seus valores aqui */}
       {/* Caso contrário, 0 para ambos (ou sem o campo 'relatParam') irá retornar todos os valores */}
     </div>
