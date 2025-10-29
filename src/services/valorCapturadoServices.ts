@@ -6,6 +6,7 @@ import { Relatorio } from "@/interfaces/Relatorio";
 import { Usuario } from "@/interfaces/Usuarios";
 import { AxiosError } from "axios";
 import { RelatParam } from "@/interfaces/RelatParam";
+import { Estacao } from "@/interfaces/Estacoes";
 
 
 interface relatData {
@@ -17,6 +18,7 @@ interface relatData {
     mes: number,
     ano: number,
     parametro: EstacaoParametroRelacao,
+    estacao: Estacao
 }
 
 const getRelatorio = async (param?: RelatParam): Promise<Relatorio | ApiException> => {
@@ -27,7 +29,10 @@ const getRelatorio = async (param?: RelatParam): Promise<Relatorio | ApiExceptio
         data.forEach((cell: any) => {
             cell.param = (cell as relatData).parametro.tipoParametro.nome;
             cell.unidade = (cell as relatData).parametro.tipoParametro.unidade;
-            delete data['parametro'];
+            cell.Parametros_pk = (cell as relatData).parametro.tipoParametro.pk;
+            cell.cidadePk = (cell as relatData).estacao.cidadePk;
+            delete cell['parametro'];
+            delete cell['estacao'];
         });
         return data as Relatorio
     } catch (error) {

@@ -8,4 +8,5 @@ export interface Relatorio {
     ano: number,
     param: string,
     unidade: string,
+    cidadePk: number
 }
