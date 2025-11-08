@@ -4,6 +4,8 @@ import Logo from './Logo';
 import Navigation from './Navigation';
 import { Button } from "@/components/ui/button";
 import { User, LogOut } from "lucide-react";
+import { useAlertaWebSocket } from '@/hooks/useAlertaWebSocket';
+import { toast } from 'react-toastify';
 
 interface HeaderProps {
   activeItem?: string;
@@ -18,6 +20,27 @@ const Header: React.FC<HeaderProps> = ({
   showNavigation = true,
   showLoginButton = true
 }) => {
+  // WebSocket para receber alertas
+  const { alertas, isConnected, clearAlertas } = useAlertaWebSocket({
+    socketUrl: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4000/ws/alerta',
+    onNewAlerta: (alerta) => {
+      // Gera mensagem a partir dos dados do alerta
+      const tipoAlerta = alerta.tipo_alerta_pk;
+      const valor = alerta.valor_capturado_pk;
+      const parametro = alerta.tipo_alerta_pk;
+      
+      const mensagem = parametro && valor !== undefined
+        ? `${tipoAlerta}: ${parametro} = ${valor}`
+        : tipoAlerta;
+      
+      toast.info(mensagem, {
+        position: 'top-right',
+        autoClose: 5000,
+      });
+    },
+    enabled: true
+  });
+
   return (
     <header className="bg-white-pure shadow-sm border-b relative w-screen min-w-full" style={{ width: '100vw', marginLeft: 'calc(-50vw + 50%)' }}>
       {/* Logo - Canto Esquerdo */}
