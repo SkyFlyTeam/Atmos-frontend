@@ -10,6 +10,11 @@ import { Card } from '@/components/ui/card';
 import Image from 'next/image';
 import { loginServices } from '@/services/loginServices';
 
+// componentes de alerta 
+import AlertaNotification from '@/components/AlertaNotification';
+import { useAlertaWebSocket } from '@/hooks/useAlertaWebSocket';
+import { toast } from 'react-toastify';
+// ------------------
 
 
 export default function Estacoes() {
@@ -175,6 +180,7 @@ export default function Estacoes() {
         </div>
       )} */}
 
+      
 
       <div className="flex justify-between items-center py-4">
         <div className="flex items-center gap-4">
