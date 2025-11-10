@@ -1,10 +1,11 @@
 import { Api } from "@/config/api";
 import { ApiException } from "@/config/apiException";
+import { Alerta } from "@/interfaces/Alerta";
 
-const getAllAlertas = async (): Promise<any | ApiException> => {
+const getAllAlertas = async (): Promise<Alerta[] | ApiException> => {
   try {
     const { data } = await Api.get("/alerta");
-    return data;
+    return data as Alerta[];
   } catch (error) {
     if (error instanceof Error) {
       return new ApiException(error.message || "Erro ao consultar alertas.");
