@@ -10,3 +10,15 @@ jest.mock('next/navigation', () => {
     useSearchParams: () => new Map(), // tweak as you like
   };
 });
+
+// Pages Router
+const pagesRouterMock = {
+  push: jest.fn(),
+  back: jest.fn(),
+  prefetch: jest.fn(),
+};
+
+jest.mock('next/router', () => ({
+  useRouter: () => pagesRouterMock,
+  __esModule: true,
+}));

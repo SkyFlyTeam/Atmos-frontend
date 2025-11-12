@@ -2,39 +2,24 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import LoginPage from '@/pages/login/index';
-import { loginServices } from '@/services/loginServices';
-
-jest.mock('next/router', () => ({
-  useRouter: jest.fn(),
-}));
-
-jest.mock('react-toastify', () => ({
-  toast: {
-    success: jest.fn(),
-    error: jest.fn(),
-  },
-}));
-
-jest.mock('@/services/loginServices', () => ({
-  loginServices: {
-    getAuth: jest.fn(),
-    setLogin: jest.fn(),
-  },
-}));
+import { Api } from '@/config/api';
 
 describe('LoginPage Integration Tests', () => {
-  const mockPush = jest.fn();
-  
+  let router: any;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({
-      push: mockPush,
-    });
+    jest.restoreAllMocks();
+    localStorage.clear();
+
+    router = useRouter();
+
+    jest.spyOn(toast, 'success').mockImplementation(() => {});
+    jest.spyOn(toast, 'error').mockImplementation(() => {});
   });
 
   it('should render login form when user is not authenticated', async () => {
-    // Return undefined to trigger needLogin = true
-    (loginServices.getAuth as jest.Mock).mockResolvedValue(undefined);
+    jest.spyOn(Api, 'get').mockRejectedValue(new Error('not authenticated'));
 
     render(<LoginPage />);
 
@@ -46,20 +31,19 @@ describe('LoginPage Integration Tests', () => {
   });
 
   it('should redirect to home when user is already authenticated', async () => {
-    (loginServices.getAuth as jest.Mock).mockResolvedValue(true);
+    jest.spyOn(Api, 'get').mockResolvedValue({ data: { email: 'auth@example.com' } });
 
     render(<LoginPage />);
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/');
+      expect(router.push).toHaveBeenCalledWith('/');
     });
   });
 
   it('should handle successful login', async () => {
-    (loginServices.getAuth as jest.Mock).mockResolvedValue(undefined);
-    (loginServices.setLogin as jest.Mock).mockResolvedValue({
-      email: 'test@example.com',
-      token: 'mock-token',
+    jest.spyOn(Api, 'get').mockRejectedValue(new Error('not authenticated'));
+    jest.spyOn(Api, 'post').mockResolvedValue({
+      data: { email: 'test@example.com', token: 'mock-token' },
     });
 
     render(<LoginPage />);
@@ -77,19 +61,19 @@ describe('LoginPage Integration Tests', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(loginServices.setLogin).toHaveBeenCalledWith({
+      expect(Api.post).toHaveBeenCalledWith('/usuario/login', {
         email: 'test@example.com',
         senha: 'password123',
       });
       expect(toast.success).toHaveBeenCalledWith('Login realizado com sucesso!');
-      expect(mockPush).toHaveBeenCalledWith('/');
+      expect(router.push).toHaveBeenCalledWith('/');
     });
   });
 
   it('should handle failed login and show error message', async () => {
-    (loginServices.getAuth as jest.Mock).mockResolvedValue(undefined);
-    (loginServices.setLogin as jest.Mock).mockResolvedValue({
-      message: 'Credenciais inválidas',
+    jest.spyOn(Api, 'get').mockRejectedValue(new Error('not authenticated'));
+    jest.spyOn(Api, 'post').mockResolvedValue({
+      data: { message: 'Credenciais inválidas' },
     });
 
     render(<LoginPage />);
@@ -108,14 +92,16 @@ describe('LoginPage Integration Tests', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Credenciais inválidas');
-      expect(mockPush).not.toHaveBeenCalledWith('/');
+      expect(router.push).not.toHaveBeenCalledWith('/');
     });
   });
 
   it('should disable inputs and button while logging in', async () => {
-    (loginServices.getAuth as jest.Mock).mockResolvedValue(undefined);
-    (loginServices.setLogin as jest.Mock).mockImplementation(() => 
-      new Promise(resolve => setTimeout(() => resolve({ email: 'test@example.com', token: 'token' }), 100))
+    jest.spyOn(Api, 'get').mockRejectedValue(new Error('not authenticated'));
+    jest.spyOn(Api, 'post').mockImplementation(() =>
+      new Promise(resolve =>
+        setTimeout(() => resolve({ data: { email: 'test@example.com', token: 'token' } }), 100)
+      )
     );
 
     render(<LoginPage />);
@@ -142,7 +128,7 @@ describe('LoginPage Integration Tests', () => {
   });
 
   it('should update email input value on change', async () => {
-    (loginServices.getAuth as jest.Mock).mockResolvedValue(undefined);
+    jest.spyOn(Api, 'get').mockRejectedValue(new Error('not authenticated'));
 
     render(<LoginPage />);
 
@@ -158,7 +144,7 @@ describe('LoginPage Integration Tests', () => {
   });
 
   it('should update senha input value on change', async () => {
-    (loginServices.getAuth as jest.Mock).mockResolvedValue(undefined);
+    jest.spyOn(Api, 'get').mockRejectedValue(new Error('not authenticated'));
 
     render(<LoginPage />);
 
