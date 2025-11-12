@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Retorna uma instância do Axios
 export const Api = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: `http://${process.env.NEXT_PUBLIC_API_HOST}:${process.env.NEXT_PUBLIC_API_PORT}`,
   timeout: 10000, // 10 segundos de timeout
   headers: {
     'Content-Type': 'application/json',
