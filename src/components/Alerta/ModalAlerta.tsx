@@ -5,9 +5,20 @@ import { X } from "lucide-react"
 import Image from 'next/image'
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { format } from 'date-fns'
+
+function formatNotificationDate(dateStr: string): string {
+  if (!dateStr) return ''
+  try {
+    const d = new Date(dateStr)
+    if (isNaN(d.getTime())) return dateStr
+    return format(d, 'dd/MM/yyyy HH:mm')
+  } catch {
+    return dateStr
+  }
+}
 import type { NotificationData } from "../Alerta/DadosMockados"
 
-// Local deterministic color generator per tipo pk (keeps same color for same tipo)
 const _localColorMap: Record<number, string> = {}
 function getColorForTipoLocal(tipoPk: number): string {
   if (_localColorMap[tipoPk]) return _localColorMap[tipoPk]
@@ -26,10 +37,8 @@ interface NotificationModalProps {
   onClose: () => void
 }
 
-
-
 export function NotificationModal({ notifications, onMarkAsRead, isOpen, onClose }: NotificationModalProps) {
-  // local copy to allow marking as read inside modal before notifying parent
+  
   const [localNotifications, setLocalNotifications] = useState<NotificationData[]>(notifications)
 
   useEffect(() => {
@@ -39,7 +48,6 @@ export function NotificationModal({ notifications, onMarkAsRead, isOpen, onClose
   const unreadCount = localNotifications.filter((n) => !n.isRead).length
 
   const handleClose = () => {
-    // Mark all as read when closing
     const updated = localNotifications.map((n) => ({ ...n, isRead: true }))
     setLocalNotifications(updated)
     updated.forEach((n) => onMarkAsRead(n.pk))
@@ -48,13 +56,12 @@ export function NotificationModal({ notifications, onMarkAsRead, isOpen, onClose
 
   return (
     <>
-      {/* Modal */}
+      
       {isOpen && (
         <div className="fixed inset-0 z-50">
-          {/* Overlay */}
+          
           <div className="fixed inset-0 bg-black/50" onClick={handleClose} />
 
-          {/* Panel container: center on small screens, align to right on md+ */}
           <div className="fixed inset-0 z-50 flex items-start pt-16 md:pt-16 justify-center md:justify-end">
             {/* wider on desktop so date/time and type|valor fit on one line when possible */}
             <div className="w-full md:w-[560px] md:mr-4 px-4">
@@ -78,12 +85,12 @@ export function NotificationModal({ notifications, onMarkAsRead, isOpen, onClose
                   </button>
                 </div>
 
-                {/* Notifications List */}
+               
                 <div className="max-h-96 overflow-y-auto">
                   {localNotifications.length === 0 ? (
                     <div className="p-6 flex flex-col items-center justify-center gap-4">
                       <div className="w-48 h-48 relative">
-                        {/* Use public/sem-dados.svg when there are no notifications */}
+                        
                         <Image src="/sem-dados.svg" alt="Sem dados" fill style={{ objectFit: 'contain' }} />
                       </div>
                       <p className="text-center text-foreground" style={{ fontFamily: 'Londrina Solid, sans-serif' }}>
@@ -101,13 +108,13 @@ export function NotificationModal({ notifications, onMarkAsRead, isOpen, onClose
                               style={{ backgroundColor: getColorForTipoLocal(notification.tipoAlerta.pk) }}
                             />
 
-                            {/* Content */}
+                           
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-2">
                                 <p className="font-semibold text-sm text-foreground">
                                   {notification.tipoAlerta.nome} | {notification.valorCapturado.descricao}
                                 </p>
-                                <p className="text-xs text-muted-foreground ml-2">{notification.data}</p>
+                                <p className="text-xs text-muted-foreground ml-2">{formatNotificationDate(notification.data)}</p>
                               </div>
 
                               <div className="flex items-center justify-between mt-1">
