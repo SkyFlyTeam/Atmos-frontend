@@ -7,6 +7,18 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { NotificationData } from "../Alerta/DadosMockados"
 
+// Local deterministic color generator per tipo pk (keeps same color for same tipo)
+const _localColorMap: Record<number, string> = {}
+function getColorForTipoLocal(tipoPk: number): string {
+  if (_localColorMap[tipoPk]) return _localColorMap[tipoPk]
+  const hue = (tipoPk * 137) % 360
+  const saturation = 70
+  const lightness = 50
+  const color = `hsl(${hue} ${saturation}% ${lightness}%)`
+  _localColorMap[tipoPk] = color
+  return color
+}
+
 interface NotificationModalProps {
   notifications: NotificationData[]
   onMarkAsRead: (notificationId: number) => void
@@ -14,11 +26,7 @@ interface NotificationModalProps {
   onClose: () => void
 }
 
-const iconColors: Record<string, string> = {
-  yellow: "bg-yellow-400",
-  orange: "bg-orange-400",
-  red: "bg-red-500",
-}
+
 
 export function NotificationModal({ notifications, onMarkAsRead, isOpen, onClose }: NotificationModalProps) {
   // local copy to allow marking as read inside modal before notifying parent
@@ -89,9 +97,8 @@ export function NotificationModal({ notifications, onMarkAsRead, isOpen, onClose
                           <div className="flex gap-3">
                             {/* Icon */}
                             <div
-                              className={`w-10 h-10 rounded-full flex-shrink-0 ${
-                                iconColors[notification.tipoAlerta.icone]
-                              }`}
+                              className="w-10 h-10 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: getColorForTipoLocal(notification.tipoAlerta.pk) }}
                             />
 
                             {/* Content */}
