@@ -2,6 +2,11 @@
 
 import { CircleUserRound } from 'lucide-react';
 import React, { useState } from 'react';
+import { NotificationModal } from '@/components/Alerta/ModalAlerta';
+import { mockNotifications } from '@/components/Alerta/DadosMockados';
+import type { NotificationData } from '@/components/Alerta/DadosMockados';
+import { IoIosNotifications } from 'react-icons/io'
+import { Badge } from '@/components/ui/badge'
 import { useRouter, usePathname } from "next/navigation";
 import Perfil from "@/components/Perfil/Perfil";
 import { toast } from "react-toastify";
@@ -39,6 +44,8 @@ const Navbar: React.FC = () => {
     const [estaLogado, setEstaLogado] = useState<boolean>(false);
     const [openPerfil, setOpenPerfil] = useState<boolean>(false);
     const [usuarioId, setUsuarioId] = useState<number | null>(null);
+    const [notifications, setNotifications] = useState<NotificationData[]>(mockNotifications);
+    const [isNotifOpen, setIsNotifOpen] = useState<boolean>(false);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -138,6 +145,12 @@ const Navbar: React.FC = () => {
         }
     };
 
+    const handleMarkAsRead = (notificationId: number) => {
+        setNotifications((prev) => prev.map((n) => (n.pk === notificationId ? { ...n, isRead: true } : n)));
+    };
+    const handleOpenNotifications = () => setIsNotifOpen(true)
+    const handleCloseNotifications = () => setIsNotifOpen(false)
+
     return (
         <>
         <nav className="bg-white shadow-md border-b border-gray-200">
@@ -182,7 +195,25 @@ const Navbar: React.FC = () => {
                     
                     {/* Botão Login/Logout - Direita */}
                     <div className="flex items-center gap-2">
-                    {estaLogado && (
+                                        {/* Notification icon - visible always */}
+                                                            <div className="relative">
+                                                                <button
+                                                                    onClick={handleOpenNotifications}
+                                                                    aria-label="Notificações"
+                                                                    className="p-2"
+                                                                    style={{ cursor: 'pointer' }}
+                                                                >
+                                                                    <IoIosNotifications size={24} style={{ color: '#72BF01' }} />
+                                                                </button>
+
+                                                                {notifications.filter(n => !n.isRead).length > 0 && (
+                                                                    <Badge variant="destructive" className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center p-0 text-xs">
+                                                                        {notifications.filter(n => !n.isRead).length}
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
+
+                                        {estaLogado && (
                         <CircleUserRound
                             onClick={handleOpenPerfil}
                             className="w-7 h-7 cursor-pointer"
@@ -202,6 +233,8 @@ const Navbar: React.FC = () => {
                     </button>
 
                     </div>
+                    {/* Notification modal controlled by Navbar */}
+                    <NotificationModal notifications={notifications} onMarkAsRead={handleMarkAsRead} isOpen={isNotifOpen} onClose={handleCloseNotifications} />
 
 
                     {/* Menu Mobile */}
