@@ -29,13 +29,55 @@ const Header: React.FC<HeaderProps> = ({
       const valor = alerta.valor_capturado_pk;
       const parametro = alerta.tipo_alerta_pk;
       
-      const mensagem = parametro && valor !== undefined
-        ? `${tipoAlerta}: ${parametro} = ${valor}`
-        : tipoAlerta;
+      const mensagem =
+        parametro && valor !== undefined ? (
+          <span>
+            {tipoAlerta}
+            <br />
+            {parametro}: {valor}
+          </span>
+        ) : (
+          tipoAlerta
+        );
       
       toast.info(mensagem, {
         position: 'top-right',
-        autoClose: 5000,
+        autoClose: 4500,
+        pauseOnHover: true,
+        closeOnClick: true,
+        hideProgressBar: false,
+        draggable: true,
+        icon: (
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 26,
+              height: 26,
+              borderRadius: '999px',
+              background: 'rgba(30,129,76,0.12)',
+              color: '#1E814C',
+              fontWeight: 600,
+              fontSize: 15,
+            }}
+          >
+            !
+          </span>
+        ),
+        style: {
+          background: 'rgba(255,255,255,0.95)',
+          color: '#1E2A22',
+          border: '1px solid rgba(30,129,76,0.18)',
+          borderRadius: '14px',
+          boxShadow: '0 10px 30px -15px rgba(30,129,76,0.45)',
+          backdropFilter: 'blur(4px)',
+          padding: '12px 14px',
+          fontSize: '15px',
+          lineHeight: '1.3',
+          letterSpacing: '0.01em',
+        },
+        progressClassName: '!bg-[#1E814C] h-[3px] opacity-60 rounded-full',
       });
     },
     enabled: true
