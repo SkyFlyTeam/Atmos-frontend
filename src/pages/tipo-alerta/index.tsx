@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-import { columns } from "./columns"
+import { columns } from "../../components/PagesSpecifics/TipoAlerta/columns"
 import { TipoAlerta } from "@/interfaces/TipoAlerta"
 
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import Modal from "@/components/Modal/Modal"
 import { toast } from "react-toastify"
 import { tipoAlertaServices } from "@/services/tipoAlertaService"
 import SideDrawer from "@/components/SideDrawer/SideDrawer"
-import FormTipoAlerta from "./components/FormTipoAlerta"
+import FormTipoAlerta from "../../components/PagesSpecifics/TipoAlerta/FormTipoAlerta"
 import { DataTable } from "@/components/DataTable/Datatable"
 import { Card } from "@/components/ui/card"
 import SkeletonTable from "@/components/DataTable/DatatableSkeleton"

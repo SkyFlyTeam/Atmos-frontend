@@ -8,7 +8,7 @@ import { Usuario } from "@/interfaces/Usuarios";
 import { usuarioServices, testApiConnection } from "@/services/usuarioServices";
 import { Card } from "@/components/ui/card";
 import { DataTable } from "@/components/DataTable/Datatable";
-import { columns } from "./columns";
+import { columns } from "../../components/PagesSpecifics/Usuarios/columns";
 import { toast } from 'react-toastify';
  
 
@@ -173,6 +173,7 @@ const UsuariosPage = () => {
                 data={usuarios}
                 meta={{
                   actions: { onEdit: handleEditUser, onDelete: handleDeleteUser },
+                  perms: { canEdit: true, canDelete: true }
                 }}
                 actionButton={
                   <ButtonIconRight

@@ -5,7 +5,7 @@ type ButtonIconRightProps = {
     label: string, 
     icon: ReactNode,
     onClick: () => void,
-    className: string
+    className?: string
 }
 
 const ButtonIconRight = ({label, icon, onClick, className} : ButtonIconRightProps) => {

@@ -1,10 +1,10 @@
 import { useMemo, useState, useEffect } from "react"
 import { useRouter } from "next/router"
 import Image from 'next/image'
-import ChartLineDots from "./components/ChartLineDots"
+import ChartLineDots from "../../components/PagesSpecifics/Dashboard/ChartLineDots"
 import Pagination from "@/components/Pagination"
 import LatestDataCardsContainer from "@/components/LatestDataCardsContainer/LatestDataCardsContainer"
-import GeneralFilter from "./components/GeneralFilter";
+import GeneralFilter from "../../components/PagesSpecifics/Dashboard/GeneralFilter";
 import { DateRange } from "react-day-picker";
 
 import { ParametroGrafico } from "@/interfaces/ParametroGrafico";
@@ -15,7 +15,7 @@ import DateInput from "@/components/Inputs/DateInput/DateInput";
 import { Label } from "@/components/ui/label";
 import { isSameDay } from "date-fns";
 
-import ReportTable from "./components/ReportTable"
+import ReportTable from "../../components/PagesSpecifics/Dashboard/ReportTable"
 
 const ITEMS_PER_PAGE = 2
 
