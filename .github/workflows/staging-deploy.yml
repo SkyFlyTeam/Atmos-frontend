@@ -30,14 +30,14 @@ jobs:
           docker build \
             --build-arg NEXT_PUBLIC_API_HOST=${{ secrets.API_HOST_STG }} \
             --build-arg NEXT_PUBLIC_API_PORT=${{ secrets.API_PORT_STG }} \
-            -t ghcr.io/${REPO_NAME}:${{ github.sha }} .
-          docker tag ghcr.io/${REPO_NAME}:${{ github.sha }} ghcr.io/${REPO_NAME}-stg:latest
+            -t ghcr.io/${REPO_NAME}-stg:${{ github.sha }} .
+          docker tag ghcr.io/${REPO_NAME}-stg:${{ github.sha }} ghcr.io/${REPO_NAME}-stg:latest
 
       # 4. Push da imagem para o GHCR
       - name: Push Docker image to GHCR
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          docker push ghcr.io/${REPO_NAME}:${{ github.sha }}
+          docker push ghcr.io/${REPO_NAME}-stg:${{ github.sha }}
           docker push ghcr.io/${REPO_NAME}-stg:latest
 
   deploy:
@@ -54,8 +54,8 @@ jobs:
           script: |
             REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
             # Puxar a última versão da imagem Docker
-            docker pull ghcr.io/${REPO_NAME}:${{ github.sha }}
-            docker tag ghcr.io/${REPO_NAME}:${{ github.sha }} atmos-frontend-stg:latest
+            docker pull ghcr.io/${REPO_NAME}-stg:${{ github.sha }}
+            docker tag ghcr.io/${REPO_NAME}-stg:${{ github.sha }} atmos-frontend-stg:latest
             # Reiniciar o container (com Docker Compose)
             docker-compose -f /home/andre/atmos-staging/frontend/docker-compose.yml down
             docker-compose -f /home/andre/atmos-staging/frontend/docker-compose.yml up -d
