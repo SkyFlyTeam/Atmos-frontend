@@ -3,7 +3,7 @@ name: Deploy to Production Server
 on:
   push:
     branches:
-      - main  
+      - main 
   workflow_dispatch:
 
 jobs:
@@ -27,7 +27,10 @@ jobs:
       - name: Build Docker image
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          docker build -t ghcr.io/${REPO_NAME}:${{ github.sha }} .
+          docker build \
+            --build-arg NEXT_PUBLIC_API_HOST=${{ secrets.API_HOST_PROD }} \
+            --build-arg NEXT_PUBLIC_API_PORT=${{ secrets.API_PORT_PROD }} \
+            -t ghcr.io/${REPO_NAME}:${{ github.sha }} .
           docker tag ghcr.io/${REPO_NAME}:${{ github.sha }} ghcr.io/${REPO_NAME}-prod:latest
 
       # 4. Push da imagem para o GHCR
@@ -54,5 +57,5 @@ jobs:
             docker pull ghcr.io/${REPO_NAME}:${{ github.sha }}
             docker tag ghcr.io/${REPO_NAME}:${{ github.sha }} atmos-frontend-prod:latest
             # Reiniciar o container (com Docker Compose)
-            docker-compose -f /home/andre/atmos-production/frontend/docker-compose.yaml down
-            docker-compose -f /home/andre/atmos-production/frontend/docker-compose.yaml up -d
+            docker-compose -f /home/andre/atmos-production/frontend/docker-compose.yml down
+            docker-compose -f /home/andre/atmos-production/frontend/docker-compose.yml up -d
