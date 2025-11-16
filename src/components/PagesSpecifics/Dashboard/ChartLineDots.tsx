@@ -9,7 +9,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-import CardChart from "../../../components/CardChart/CardChart"
+import CardChart from "../../CardChart/CardChart"
 
 // Formata os nomes das estações para usar como chave e nome de variável CSS. Exemplo: "Estação Boreal" → "estacao-boreal"
 const slugify = (str: string) =>

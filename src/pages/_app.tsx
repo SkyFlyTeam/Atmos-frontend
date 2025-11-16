@@ -2,9 +2,12 @@ import type { AppProps } from 'next/app';
 
 import Navbar from '@/components/Navbar/Navbar';
 
+// @ts-ignore: side-effect CSS import
 import "../styles/globals.css";
 
 import { ToastContainer } from 'react-toastify';
+
+// @ts-ignore: side-effect CSS import
 import 'react-toastify/dist/ReactToastify.css';
 import { lato, londrina } from '@/lib/fonts';
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-import { columns } from "./columns"
+import { columns } from "../../components/PagesSpecifics/Parametros/columns"
 import { Parametro } from "@/interfaces/Parametros"
 
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import Modal from "@/components/Modal/Modal"
 import { toast } from "react-toastify"
 import { parametroServices } from "@/services/parametroServices"
 import SideDrawer from "@/components/SideDrawer/SideDrawer"
-import FormParametro from "./components/FormParametro"
+import FormParametro from "../../components/PagesSpecifics/Parametros/FormParametro"
 import { DataTable } from "@/components/DataTable/Datatable"
 import { Card } from "@/components/ui/card"
 import SkeletonTable from "@/components/DataTable/DatatableSkeleton"

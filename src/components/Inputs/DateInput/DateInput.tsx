@@ -27,28 +27,28 @@ const DateInput = ({ date, setDate, mode, disabledDates, onMonthChange }: DateIn
                     {(() => {
                         if (!date) {
                             if(mode === "range") {
-                                <span>Selecionar período</span>;
+                                return <span>Selecionar período</span>;
                             } else if (mode === "single") {
-                                <span>Selecionar data</span>;
+                                return <span>Selecionar data</span>;
                             } else if (mode === "multiple") {
-                                <span>Selecionar datas</span>;
+                                return <span>Selecionar datas</span>;
                             }
                         }
 
                         if (mode === "range" && isDateRange(date) && date.from && date.to) {
                             const isSameDay = date.from.toDateString() === date.to.toDateString();
-                            const formattedFrom = format(date.from, "dd/MM/yyyy", { locale: ptBR });
-                            const formattedTo = format(date.to, "dd/MM/yyyy", { locale: ptBR });
+                            const formattedFrom = format(date.from, "dd/MM/yyyy");
+                            const formattedTo = format(date.to, "dd/MM/yyyy");
                             
                             return <span>{isSameDay ? formattedFrom : `${formattedFrom} – ${formattedTo}`}</span>;
                         }
 
                         if (mode === "single" && date instanceof Date) {
-                            return <span>{format(date, "dd/MM/yyyy", { locale: ptBR })}</span>;
+                            return <span>{format(date, "dd/MM/yyyy")}</span>;
                         }
 
                         if (mode === "multiple" && Array.isArray(date) && date.length > 0) {
-                            const formattedDates = date.map((d) => format(d, "dd/MM/yyyy", { locale: ptBR })).join(", ");
+                            const formattedDates = date.map((d) => format(d, "dd/MM/yyyy")).join(", ");
                             return <span>{formattedDates}</span>;
                         }
 

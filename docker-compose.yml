@@ -1,0 +1,11 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_HOST: ${NEXT_PUBLIC_API_HOST}
+        NEXT_PUBLIC_API_PORT: ${NEXT_PUBLIC_API_PORT}
+    container_name: atmos-frontend
+    ports:
+      - "3000:3000"

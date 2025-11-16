@@ -1,5 +1,5 @@
 import axios from "axios";
-import { CoordenadasResponse, EnderecoCompleto } from "@/interfaces/coordenadasAPI";
+import { CoordenadasResponse, EnderecoCompleto } from "@/interfaces/CoordenadasAPI";
 
 const getCoordenadas = async (lat: number, lon: number): Promise<EnderecoCompleto | null> => {
     if (isNaN(lat) || isNaN(lon)) {
