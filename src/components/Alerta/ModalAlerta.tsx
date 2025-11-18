@@ -17,7 +17,8 @@ function formatNotificationDate(dateStr: string): string {
     return dateStr
   }
 }
-import type { NotificationData } from "../Alerta/DadosMockados"
+// Notifications come from backend and websocket; shape may include nested `tipoAlerta` and `valorCapturado`.
+type NotificationData = any;
 
 const _localColorMap: Record<number, string> = {}
 function getColorForTipoLocal(tipoPk: number): string {
@@ -39,10 +40,17 @@ interface NotificationModalProps {
 
 export function NotificationModal({ notifications, onMarkAsRead, isOpen, onClose }: NotificationModalProps) {
   
-  const [localNotifications, setLocalNotifications] = useState<NotificationData[]>(notifications)
+  const [localNotifications, setLocalNotifications] = useState<NotificationData[]>([])
 
   useEffect(() => {
-    setLocalNotifications(notifications)
+    // Ensure a defensive copy and sort newest -> oldest
+    const sorted = (Array.isArray(notifications) ? notifications.slice() : [])
+      .sort((a: any, b: any) => {
+        const da = new Date(a.data).getTime() || 0
+        const db = new Date(b.data).getTime() || 0
+        return db - da
+      })
+    setLocalNotifications(sorted)
   }, [notifications])
 
   const unreadCount = localNotifications.filter((n) => !n.isRead).length
@@ -52,6 +60,11 @@ export function NotificationModal({ notifications, onMarkAsRead, isOpen, onClose
     setLocalNotifications(updated)
     updated.forEach((n) => onMarkAsRead(n.pk))
     onClose()
+  }
+
+  const handleMarkSingle = (pk: number) => {
+    setLocalNotifications((prev) => prev.map((p) => (p.pk === pk ? { ...p, isRead: true } : p)))
+    onMarkAsRead(pk)
   }
 
   return (
@@ -112,15 +125,15 @@ export function NotificationModal({ notifications, onMarkAsRead, isOpen, onClose
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-2">
                                 <p className="font-semibold text-sm text-foreground">
-                                  {notification.tipoAlerta.nome} | {notification.valorCapturado.descricao}
+                                  {notification?.tipoAlerta?.nome ?? notification.tipo_alerta_pk} | {notification?.valorCapturado?.descricao ?? notification.valor_capturado_pk}
                                 </p>
                                 <p className="text-xs text-muted-foreground ml-2">{formatNotificationDate(notification.data)}</p>
                               </div>
 
                               <div className="flex items-center justify-between mt-1">
-                                <p className="text-xs text-muted-foreground">{notification.valorCapturado.estacao}</p>
+                                <p className="text-xs text-muted-foreground">{notification?.valorCapturado?.estacao ?? ''}</p>
                                 {!notification.isRead && (
-                                  <Badge variant="destructive" className="text-xs text-white">
+                                  <Badge variant="destructive" className="text-xs text-white" onClick={() => handleMarkSingle(notification.pk)}>
                                     Novo
                                   </Badge>
                                 )}
