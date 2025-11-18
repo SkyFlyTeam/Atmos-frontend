@@ -3,8 +3,8 @@
 import { CircleUserRound } from 'lucide-react';
 import React, { useState } from 'react';
 import { NotificationModal } from '@/components/Alerta/ModalAlerta';
-import { mockNotifications } from '@/components/Alerta/DadosMockados';
-import type { NotificationData } from '@/components/Alerta/DadosMockados';
+import { alertaService } from '@/services/alertaService';
+import { useAlertaWebSocket } from '@/hooks/useAlertaWebSocket';
 import { IoIosNotifications } from 'react-icons/io'
 import { Badge } from '@/components/ui/badge'
 import { useRouter, usePathname } from "next/navigation";
@@ -44,7 +44,7 @@ const Navbar: React.FC = () => {
     const [estaLogado, setEstaLogado] = useState<boolean>(false);
     const [openPerfil, setOpenPerfil] = useState<boolean>(false);
     const [usuarioId, setUsuarioId] = useState<number | null>(null);
-    const [notifications, setNotifications] = useState<NotificationData[]>(mockNotifications);
+    const [notifications, setNotifications] = useState<any[]>([]);
     const [isNotifOpen, setIsNotifOpen] = useState<boolean>(false);
     const router = useRouter();
     const pathname = usePathname();
@@ -60,6 +60,49 @@ const Navbar: React.FC = () => {
             return () => window.removeEventListener('usuarioLogado', onUsuarioLogado);
         }
     }, []);
+
+    // Fetch initial notifications from backend
+    React.useEffect(() => {
+        let mounted = true;
+        const load = async () => {
+            try {
+                const res = await alertaService.getAllAlertas();
+                // service may return ApiException; guard
+                if (Array.isArray(res)) {
+                    const mapped = res
+                        .map((r: any) => ({ ...r, isRead: !!r.isRead }))
+                        .sort((a: any, b: any) => {
+                            const da = new Date(a.data).getTime() || 0;
+                            const db = new Date(b.data).getTime() || 0;
+                            return db - da;
+                        });
+                    if (mounted) setNotifications(mapped);
+                }
+            } catch (e) {
+                console.error('Erro ao carregar alertas:', e);
+            }
+        };
+        load();
+        return () => { mounted = false };
+    }, []);
+
+    // WebSocket: receive new alertas and prepend to list
+    useAlertaWebSocket({
+        onNewAlerta: (alerta: any) => {
+            // normalize and prepend
+            setNotifications((prev) => {
+                // avoid duplicates by pk
+                if (!alerta) return prev;
+                if (prev.some((p) => p.pk === alerta.pk)) return prev;
+                const novo = { ...alerta, isRead: false };
+                return [novo, ...prev].sort((a: any, b: any) => {
+                    const da = new Date(a.data).getTime() || 0;
+                    const db = new Date(b.data).getTime() || 0;
+                    return db - da;
+                });
+            });
+        },
+    });
 
     const abaSelecionada = abas.find((aba) => aba.rota === pathname || (pathname === '/' && aba.rota === '/estacoes'))?.nome || "";
 
