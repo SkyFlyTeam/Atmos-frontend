@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { CircleUserRound } from 'lucide-react';
 import React, { useState } from 'react';
 import { NotificationModal } from '@/components/Alerta/ModalAlerta';
@@ -30,11 +31,11 @@ const decodeJwtPayload = (token: string): any | null => {
 
 // Abas comentadas conforme solicitado
 const abas = [
-    // {nome: "Início", rota: "/", necessarioLogin: false},
+    {nome: "Início", rota: "/", necessarioLogin: false},
     {nome: "Guia Educativo", rota: "/guia-educativo", necessarioLogin: false},
     {nome: "Dashboard", rota: "/dashboard", necessarioLogin: false},
     {nome: "Estações", rota: "/estacoes", necessarioLogin: false},
-    {nome: "Parâmetros", rota: "/parametros", necessarioLogin: false},
+    {nome: "Parâmetros", rota: "/parametros", necessarioLogin: true},
     {nome: "Alertas", rota: "/tipo-alerta", necessarioLogin: false}, // Corrigido para /tipo-alerta
     {nome: "Usuários", rota: "/usuarios", necessarioLogin: true},
 ]
@@ -217,13 +218,13 @@ const Navbar: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo - Esquerda */}
-                    <div className="flex-shrink-0 flex items-center">
+                    <Link href="/" className="flex-shrink-0 flex items-center" aria-label="Ir para a página inicial">
                         <img
                             src=".\images\logo.png"
                             alt="Atmos Logo"  
                             className="h-8"
                         />
-                    </div>
+                    </Link>
 
                     {/* Botões Centrais */}
                     <div
