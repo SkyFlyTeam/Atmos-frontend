@@ -24,6 +24,8 @@ const NavigationMenu = (
         selectedIndex: number;
     }
 ) => {
+
+    const [activeParent, setActiveParent] = React.useState<string>("");
     
     const checkSubItemActive = (item: NavigationItems) => {
         if(item.subSections) {
@@ -32,12 +34,23 @@ const NavigationMenu = (
         return false;
     }
 
+    const getActiveParentTitle = () => {
+        const activeParent = items.find(parentItem => 
+            parentItem.subSections?.some(subItem => subItem.index === selectedIndex)
+        );
+        return activeParent?.title || items[0].title;
+    }
+
+    React.useEffect(() => {
+        setActiveParent(getActiveParentTitle());
+    }, [selectedIndex]);
+
     return (
         <Accordion
             type="single"
             collapsible
             className={styles.accordion}
-            defaultValue={items.find(item => item.index === selectedIndex)?.title}
+            value={activeParent}
         >
             {items.map((item, index) => (
                 <AccordionItem 
@@ -60,7 +73,7 @@ const NavigationMenu = (
                                 onClick={() => handleChangeItem(subItem.index!)} 
                             >
                                 {subItem.icon}
-                                <span className="text-base font-[500] flex items-center gap-2">{subItem.title}</span>
+                                <span>{subItem.title}</span>
                             </div>
                         ))}
                     </AccordionContent>

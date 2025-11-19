@@ -3,6 +3,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .accordionItem{
@@ -71,4 +72,28 @@
     text-decoration-line: none;
     color: var(--color-dark-cyan);
     background-color: var(--color-light-green);
+}
+
+@media (max-width: 768px) {
+    .accordion {
+        flex-direction: row;
+    }
+    .accordionTrigger {
+        font-size: 1rem;
+        gap: 0.2rem;
+        padding: 0.5rem 0.2rem;
+        flex-direction: column;
+        font-size: small;
+    }
+
+    .accordionContent {
+        margin-left: 0.2rem;
+        padding: 0rem;
+    }
+
+    .subSectionItem {
+        gap: 0.3rem;
+        font-size: small;
+        padding: 0.5rem 0.5rem;
+    }
 }
