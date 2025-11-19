@@ -97,13 +97,13 @@ export const MultipleCombobox: React.FC<ComboBoxProps> = ({
           aria-expanded={open}
           disabled={disabled}
           className={cn(
-            "justify-between bg-white rounded-md text-base border-gray overflow-hidden overflow-ellipsis ",
+            "justify-between bg-white rounded-md text-base border-gray overflow-hidden overflow-ellipsis px-3",
             widthClass,
             className
           )}
         >
           {/* Exibindo valores selecionados */}
-          <span className="overflow-hidden overflow-ellipsis whitespace-nowrap max-w-[220px]">{selectedOptions.length === 0 ? placeholder : selectedOptions.map((o) => o.label).join(", ")}</span>
+          <span className="pl-3 overflow-hidden overflow-ellipsis whitespace-nowrap max-w-[220px]">{selectedOptions.length === 0 ? placeholder : selectedOptions.map((o) => o.label).join(", ")}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
