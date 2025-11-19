@@ -15,7 +15,7 @@ interface NavigationProps {
 
 const defaultNavItems: NavItem[] = [
   { label: "Início", href: "/", isActive: false },
-  { label: "Guia Educativo", href: "/guia", isActive: false },
+  { label: "Guia Educativo", href: "/guia-educativo", isActive: false },
   { label: "Dashboard", href: "/dashboard", isActive: false },
   { label: "Estações", href: "/estacoes", isActive: false },
   { label: "Parâmetros", href: "/parametros", isActive: false },
