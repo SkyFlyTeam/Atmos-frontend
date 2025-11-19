@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/accordion"
 
 import styles from "./NavigationMenu.module.css";
+import { cn } from "@/lib/utils";
 
 export interface NavigationItems {
     index?: number;
@@ -16,27 +17,38 @@ export interface NavigationItems {
 }
 
 const NavigationMenu = ( 
-    { items, handleChangeItem }: 
+    { items, handleChangeItem, selectedIndex }: 
     { 
         items: NavigationItems[], 
-        handleChangeItem: (index: number) => void 
+        handleChangeItem: (index: number) => void,
+        selectedIndex: number;
     }
 ) => {
+    
+    const checkSubItemActive = (item: NavigationItems) => {
+        if(item.subSections) {
+            return item.subSections.some(subItem => subItem.index === selectedIndex);
+        }
+        return false;
+    }
+
     return (
         <Accordion
             type="single"
             collapsible
             className={styles.accordion}
-            defaultValue="item-1"
+            defaultValue={items.find(item => item.index === selectedIndex)?.title}
         >
-            {items.map((item) => (
+            {items.map((item, index) => (
                 <AccordionItem 
-                    key={item.index}
+                    key={index}
                     value={item.title} 
                     className={styles.accordionItem} 
-                    onClick={() => handleChangeItem(item.subSections ? item.subSections[0].index! : 1)}
                 >
-                    <AccordionTrigger className={styles.accordionTrigger}>
+                    <AccordionTrigger 
+                        className={cn(styles.accordionTrigger, checkSubItemActive(item) ? styles.activeItem : "")} 
+                        onClick={() => handleChangeItem(item.subSections ? item.subSections[0].index! : 0)}
+                    >
                         {item.icon}
                         {item.title}
                     </AccordionTrigger>
@@ -44,11 +56,11 @@ const NavigationMenu = (
                         {item.subSections && item.subSections.map((subItem) => (
                             <div 
                                 key={subItem.index} 
-                                className={styles.subSectionItem} 
+                                className={cn(styles.subSectionItem, selectedIndex === subItem.index ? styles.activeSubItem : "")} 
                                 onClick={() => handleChangeItem(subItem.index!)} 
                             >
                                 {subItem.icon}
-                                <h3 className="text-lg font-semibold flex items-center gap-2">{subItem.title}</h3>
+                                <span className="text-base font-[500] flex items-center gap-2">{subItem.title}</span>
                             </div>
                         ))}
                     </AccordionContent>
