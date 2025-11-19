@@ -118,20 +118,26 @@ export function NotificationModal({ notifications, onMarkAsRead, isOpen, onClose
                             {/* Icon */}
                             <div
                               className="w-10 h-10 rounded-full flex-shrink-0"
-                              style={{ backgroundColor: getColorForTipoLocal(notification.tipoAlerta.pk) }}
+                              style={{ backgroundColor: getColorForTipoLocal(notification?.tipoAlerta?.pk ?? notification?.tipo_alerta_pk ?? 0) }}
                             />
 
                            
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-2">
                                 <p className="font-semibold text-sm text-foreground">
-                                  {notification?.tipoAlerta?.nome ?? notification.tipo_alerta_pk} | {notification?.valorCapturado?.descricao ?? notification.valor_capturado_pk}
+                                  {notification?.tipoAlerta?.tipo ?? notification?.tipoAlerta?.nome ?? notification.tipo_alerta_pk} |
+                                  {(() => {
+                                    const vc = notification?.valorCapturado ?? {};
+                                    const valor = vc?.valor ?? vc?.descricao ?? notification?.valor ?? notification?.descricao ?? notification?.valor_capturado_pk;
+                                    const unidade = vc?.unidade ?? '';
+                                    return ` ${valor}${unidade ? ` ${unidade}` : ''}`;
+                                  })()}
                                 </p>
                                 <p className="text-xs text-muted-foreground ml-2">{formatNotificationDate(notification.data)}</p>
                               </div>
 
                               <div className="flex items-center justify-between mt-1">
-                                <p className="text-xs text-muted-foreground">{notification?.valorCapturado?.estacao ?? ''}</p>
+                                <p className="text-xs text-muted-foreground">{typeof notification?.valorCapturado?.estacao === 'string' ? notification.valorCapturado.estacao : (notification?.valorCapturado?.estacao?.nome ?? '')}</p>
                                 {!notification.isRead && (
                                   <Badge variant="destructive" className="text-xs text-white" onClick={() => handleMarkSingle(notification.pk)}>
                                     Novo
