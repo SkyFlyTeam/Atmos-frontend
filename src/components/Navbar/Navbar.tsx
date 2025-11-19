@@ -69,8 +69,12 @@ const Navbar: React.FC = () => {
                 const res = await alertaService.getAllAlertas();
                 // service may return ApiException; guard
                 if (Array.isArray(res)) {
+                    // read seen list from localStorage to preserve viewed state across reloads
+                    const seenRaw = typeof window !== 'undefined' ? localStorage.getItem('alertasVistos') : null;
+                    const seenList: number[] = seenRaw ? JSON.parse(seenRaw) : [];
+
                     const mapped = res
-                        .map((r: any) => ({ ...r, isRead: !!r.isRead }))
+                        .map((r: any) => ({ ...r, isRead: seenList.includes(r.pk) }))
                         .sort((a: any, b: any) => {
                             const da = new Date(a.data).getTime() || 0;
                             const db = new Date(b.data).getTime() || 0;
@@ -189,7 +193,20 @@ const Navbar: React.FC = () => {
     };
 
     const handleMarkAsRead = (notificationId: number) => {
-        setNotifications((prev) => prev.map((n) => (n.pk === notificationId ? { ...n, isRead: true } : n)));
+        setNotifications((prev) => {
+            const updated = prev.map((n) => (n.pk === notificationId ? { ...n, isRead: true } : n));
+            try {
+                const seenRaw = localStorage.getItem('alertasVistos');
+                const seenList: number[] = seenRaw ? JSON.parse(seenRaw) : [];
+                if (!seenList.includes(notificationId)) {
+                    seenList.push(notificationId);
+                    localStorage.setItem('alertasVistos', JSON.stringify(seenList));
+                }
+            } catch (e) {
+                console.warn('Não foi possível persistir alertas vistos:', e);
+            }
+            return updated;
+        });
     };
     const handleOpenNotifications = () => setIsNotifOpen(true)
     const handleCloseNotifications = () => setIsNotifOpen(false)
