@@ -11,11 +11,11 @@ export type GuideContentProps = {
 
 const GuideContent = ({ title, description, imgUrl, onBackClick, onNextClick }: GuideContentProps) => {
     return (
-        <div className="flex flex-col gap-8">
-            <h1 className="!text-5xl font-bold mb-4">{title}</h1>
+        <div className="flex flex-col gap-8 items-center">
+            <h1 className="!text-5xl font-bold mr-auto">{title}</h1>
             <p>{description}</p>
-            <img src={imgUrl} alt={title} className="w-full rounded-lg" />
-            <div className="flex w-full justify-between">
+            <img src={imgUrl} alt={title} className="w-[80%] rounded-lg" />
+            <div className={`flex w-full ${onBackClick ? "justify-between" : "justify-end"} `}>
                 {onBackClick && (
                     <Button variant="ghost" onClick={onBackClick}>
                         <ArrowLeft />
