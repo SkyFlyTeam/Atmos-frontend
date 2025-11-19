@@ -23,6 +23,15 @@
     padding: 0.6rem 1rem;
 }
 
+.accordionTrigger.activeItem{
+    color: var(--color-dark-cyan);
+    background-color: var(--color-light-green);
+}
+
+.activeSubItem{
+    color: white;
+}
+
 .accordionTrigger:hover{
     text-decoration-line: none;
     color: var(--color-dark-cyan);
@@ -51,8 +60,6 @@
     display: flex;
     justify-content: flex-start;
     gap: 2rem;
-    font-weight: 600;
-    font-size: 1.125rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
