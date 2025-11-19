@@ -8,14 +8,15 @@ import { DateRange, isDateRange } from "react-day-picker";
 import { Dispatch, SetStateAction } from "react";
 
 type DateInputProps = {
-    date: DateRange | Date | Date[];
+    date: DateRange | Date | Date[] | null;
     setDate: Dispatch<SetStateAction<any>>;
     mode: "single" | "multiple" | "range";
     disabledDates: any;
     onMonthChange?: (month: Date) => void;
+    placeholder?: string;
 };
 
-const DateInput = ({ date, setDate, mode, disabledDates, onMonthChange }: DateInputProps) => {
+const DateInput = ({ date, setDate, mode, disabledDates, onMonthChange, placeholder }: DateInputProps) => {
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -26,6 +27,9 @@ const DateInput = ({ date, setDate, mode, disabledDates, onMonthChange }: DateIn
                 >
                     {(() => {
                         if (!date) {
+                            if (typeof placeholder === 'string') {
+                                return <span>{placeholder}</span>
+                            }
                             if(mode === "range") {
                                 return <span>Selecionar período</span>;
                             } else if (mode === "single") {
