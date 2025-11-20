@@ -10,13 +10,11 @@ export default function Home() {
     <div className="flex flex-1 w-full flex-col gap-24 text-[var(--color-dark-cyan)]">
       <section className="relative pb-10 sm:-mt-6 sm:-mx-4 md:-mx-12 overflow-hidden">
         <div className="pointer-events-none absolute inset-0 hidden lg:block">
-          <Image
+          <img
             src="/images/imagem-organica.png"
-            alt="Elemento org�nico"
-            width={1100}
-            height={875}
-            className="absolute top-0 right-0 w-[1200px] max-w-none object-contain opacity-95"
-            priority
+            alt="Elemento orgânico"
+            // className="absolute top-0 right-0 w-[1200px] max-w-none object-contain opacity-95"
+            className="absolute top-0 right-[-7rem] w-[70rem] object-contain opacity-95"
           />
         </div>
         <div className="mx-auto grid w-full max-w-[1200px] items-start gap-10 px-4 sm:px-6 lg:px-0 lg:max-w-[1800px] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
