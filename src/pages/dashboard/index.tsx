@@ -21,8 +21,7 @@ const ITEMS_PER_PAGE = 2
 
 
 const Dashboard = () => {
-  const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+  
   
   const [chartData, setChartData] = useState<ParametroGrafico[] | null>(null);
   const [cardsData, setCardsData] = useState<ParametroUltimoValor[] | null>(null);
@@ -40,17 +39,7 @@ const Dashboard = () => {
       to: new Date()
   } as DateRange);
 
-  // Verifica se o usuário está logado
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token')
-      if (!token) {
-        router.push('/login')
-      } else {
-        setIsAuthenticated(true)
-      }
-    }
-  }, [])
+  // Antes havia verificação de autenticação aqui; dashboard agora é público
 
   const fetchChartData = async () => {
     try {
@@ -176,7 +165,7 @@ const Dashboard = () => {
     setCurrentPage(clamped)
   }
 
-  // Mostra loading enquanto verifica autenticação
+  // Mostra loading enquanto carrega os dados iniciais
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -184,10 +173,7 @@ const Dashboard = () => {
       </div>
     )
   }
-  // Não renderiza nada se não autenticado (redirect já foi feito)
-  if (!isAuthenticated) {
-    return null
-  }
+  
 
   const isDayDisabled = (day: Date) => {
     return !datesWithData.some(enabledDay => 
