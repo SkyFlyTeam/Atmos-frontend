@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { BellRing, CloudSun } from "lucide-react";
+import { BellRing, CloudSun, ArrowRight } from "lucide-react";
 
 export default function Home() {
   const currentYear = new Date().getFullYear();
@@ -32,12 +32,13 @@ export default function Home() {
               moderna e responsiva de monitoramento climático e do solo,<br className="hidden sm:block" />
               focada em proteger as áreas mais vulneráveis.
             </p>
-            <Link href="/estacoes" className="inline-block">
+            <Link href="/dashboard" className="inline-block">
               <Button
                 className="bg-[var(--color-green)] px-6 py-3 text-base font-semibold text-white transition hover:bg-[var(--color-dark-green)]"
                 style={{ borderRadius: "18px" }}
               >
                 Ver o que está acontecendo
+                <ArrowRight />
               </Button>
             </Link>
           </div>
@@ -125,12 +126,13 @@ export default function Home() {
                     Explore o nosso guia educativo e compreenda a importância e funcionamento do projeto. Veja como os dados da Atmos
                     podem orientar ações educativas e estratégicas com segurança.
                   </p>
-                  <Link href="/estacoes" className="inline-flex lg:justify-end">
+                  <Link href="/guia-educativo" className="inline-flex lg:justify-end">
                     <Button
                       className="bg-[var(--color-green)] px-6 py-3 text-base font-semibold text-white transition hover:bg-[var(--color-dark-green)]"
                       style={{ borderRadius: "18px" }}
                     >
                       Ir para o Guia Educativo
+                      <ArrowRight />
                     </Button>
                   </Link>
                 </div>
