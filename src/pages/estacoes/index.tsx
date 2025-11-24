@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { loginServices } from '@/services/loginServices';
 
 
+
 export default function Estacoes() {
   const { estacoes, loading, error, createEstacao, updateEstacao, deleteEstacao } = useEstacoes();
   const [termoBusca, setTermoBusca] = useState('');
@@ -70,7 +71,7 @@ export default function Estacoes() {
         if (done) {
           setUserRole('admin')
         }
-        else{
+        else {
           setUserRole('user')
         }
       }
@@ -145,6 +146,8 @@ export default function Estacoes() {
     }
   };
 
+  
+
   return (
     //apagar depois o simulador de user/admin
     <>
@@ -172,8 +175,9 @@ export default function Estacoes() {
         </div>
       )} */}
 
+      
 
-      <div className="flex justify-between items-center py-4"> 
+      <div className="flex justify-between items-center py-4">
         <div className="flex items-center gap-4">
           <h1 className="text-3xl font-bold text-gray-900">Estações</h1>
         </div>

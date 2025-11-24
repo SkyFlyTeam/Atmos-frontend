@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Retorna uma instância do Axios
 export const Api = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: `http://${process.env.NEXT_PUBLIC_API_HOST}:${process.env.NEXT_PUBLIC_API_PORT}`,
   timeout: 10000, // 10 segundos de timeout
   headers: {
     'Content-Type': 'application/json',
@@ -16,14 +16,29 @@ Api.interceptors.request.use(
     // Anexa token ao header Authorization se existir e não estiver definido
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
-      if (token && !(config.headers && 'Authorization' in config.headers)) {
+      if (token) {
         const authHeader = token.startsWith('Bearer ') || token.startsWith('JWT ')
           ? token
           : `Bearer ${token}`;
-        config.headers = {
-          ...(config.headers || {}),
-          Authorization: authHeader,
-        };
+
+        // If headers is an AxiosHeaders instance, use its API; otherwise merge into a plain object.
+        if (config.headers && typeof (config.headers as any).set === 'function') {
+          // AxiosHeaders (has .set/.get)
+          // Only set if not already present
+          const existing = (config.headers as any).get('Authorization');
+          if (!existing) {
+            (config.headers as any).set('Authorization', authHeader);
+          }
+        } else {
+          // Plain object headers - ensure Authorization is not already present
+          const hasAuth = config.headers && 'Authorization' in config.headers;
+          if (!hasAuth) {
+            config.headers = {
+              ...(config.headers || {}),
+              Authorization: authHeader,
+            } as any;
+          }
+        }
       }
     }
 

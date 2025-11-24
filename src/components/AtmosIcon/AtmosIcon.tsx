@@ -1,5 +1,3 @@
-import { ReactNode } from "react";
-
 type AtmosIconProps = {
     className?: string,
     onClick?: () => void

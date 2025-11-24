@@ -15,7 +15,7 @@ import { useParametros } from "@/hooks/useParametros";
 import {
   estacaoFormSchema,
   EstacaoFormSchema,
-} from "@/pages/estacoes/components/estacaoSchema";
+} from "@/components/PagesSpecifics/Estacao/estacaoSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { TbXboxXFilled } from "react-icons/tb";

@@ -104,13 +104,16 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
+// @ts-ignore
 function ChartTooltipContent({
   active,
+  // @ts-ignore
   payload,
   className,
   indicator = "dot",
   hideLabel = false,
   hideIndicator = false,
+  // @ts-ignore
   label,
   labelFormatter,
   labelClassName,
@@ -184,7 +187,8 @@ function ChartTooltipContent({
           .map((item, index) => {
             const key = `${nameKey || item.name || item.dataKey || "value"}`
             const itemConfig = getPayloadConfigFromPayload(config, item, key)
-            const indicatorColor = color || item.payload.fill || item.color
+            // @ts-ignore
+            const indicatorColor = color || item.payload?.fill || item.color
 
             return (
               <div
@@ -252,6 +256,7 @@ function ChartTooltipContent({
 
 const ChartLegend = RechartsPrimitive.Legend
 
+// @ts-ignore
 function ChartLegendContent({
   className,
   hideIcon = false,
@@ -259,12 +264,14 @@ function ChartLegendContent({
   verticalAlign = "bottom",
   nameKey,
 }: React.ComponentProps<"div"> &
+  // @ts-ignore
   Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
     hideIcon?: boolean
     nameKey?: string
   }) {
   const { config } = useChart()
 
+  // @ts-ignore
   if (!payload?.length) {
     return null
   }
@@ -278,6 +285,7 @@ function ChartLegendContent({
       )}
     >
       {payload
+      // @ts-ignore
         .filter((item) => item.type !== "none")
         .map((item) => {
           const key = `${nameKey || item.dataKey || "value"}`

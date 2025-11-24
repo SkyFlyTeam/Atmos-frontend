@@ -2,7 +2,7 @@ import { DataTable } from "@/components/DataTable/Datatable";
 import { Card } from "@/components/ui/card";
 import { Relatorio } from "@/interfaces/Relatorio";
 import { ValorCapturadoServices } from "@/services/valorCapturadoServices";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import SkeletonTable from "@/components/DataTable/DatatableSkeleton";
 import { Button } from "@/components/ui/button";
 import { RelatParam } from "@/interfaces/RelatParam";
@@ -20,18 +20,26 @@ interface RelatConfig {
 
 interface ReportTableProps {
     className?: string,
-    relatParam?: RelatParam
+    relatParam?: RelatParam,
+    estacoes: string[],
+    parametros: string[],
+    cidade: string,
 }
 
 const ReportTable: React.FC<ReportTableProps> = ({
     className = "",
-    relatParam
+    relatParam,
+    estacoes,
+    parametros,
+    cidade
 }) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [relatorio, setRelatorio] = useState<Relatorio[]>([]);
 
     const [anos, setAnos] = useState<number[]>([]);
-    const [meses, setMeses] = useState<string[]>([])
+    const [meses, setMeses] = useState<string[]>([]);
+
+    const [localRelatorio, setLocalRelatorio] = useState<Relatorio[]>([]);
 
     const [relatConfig, setRelatConfig] = useState<RelatConfig>( // Usado para configurar os filtros de dados da tabela
     );
@@ -53,11 +61,14 @@ const ReportTable: React.FC<ReportTableProps> = ({
         if (!(param.mes == relatConfig.mes && param.ano == relatConfig.ano))
             return false;
 
-        if (localRelatParam.estacao_id != Number(param.estacao_id) && Number(localRelatParam.estacao_id) > 0)
-            return false
+        if (cidade != (param.cidadePk + ""))
+            return false;
 
-        if (localRelatParam.parametros_pk != Number(param.Parametros_pk) && Number(localRelatParam.parametros_pk) > 0)
-            return false
+        if (!estacoes.includes(param.estacao_id + "") && estacoes.length > 0)
+            return false;
+
+        if (!parametros.includes(param.Parametros_pk + "") && parametros.length > 0)
+            return false;
 
         return true;
     }
@@ -86,7 +97,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
         setIsLoading(true)
         let done: any = false;
         try {
-            const relat = await ValorCapturadoServices.getRelatorio(fetchParam)
+            const relat = await ValorCapturadoServices.getRelatorio(fetchParam);
             done = relat;
         }
         catch (error) { }
@@ -111,7 +122,50 @@ const ReportTable: React.FC<ReportTableProps> = ({
     }, [relatParam])
 
 
+
+
+
+    const updateReportTable = () => {
+        const filteredRelatorio = relatorio.filter((param: Relatorio) => filterRelatorio(param));
+        const parametros = filteredRelatorio.filter((value, index, self) =>
+            index === self.findIndex((param) => (
+                param.Parametros_pk === value.Parametros_pk
+            ))
+        )
+
+        // let contagem: number[] = []
+        // parametros.forEach(() => contagem.push(1))
+
+        let index;
+        filteredRelatorio.forEach((relat) => {
+            index = parametros.findIndex((param) => relat.Parametros_pk == param.Parametros_pk)
+            
+            if(relat.minimo < parametros[index].minimo)
+                parametros[index].minimo = relat.minimo;
+            
+            if(relat.maximo > parametros[index].maximo)
+                parametros[index].maximo = relat.maximo;
+
+            parametros[index].media = (Number(parametros[index].media) + Number(relat.media)) / 2;
+            // contagem[index] += 1;
+        })
+
+        
+        // parametros.forEach((param, index) => {
+
+        //     alert(param.media + " " + contagem[index])
+        //     param.media = param.media / contagem[index];
+        // })
+
+        setLocalRelatorio(parametros);
+        // setLocalRelatorio(filteredRelatorio);
+    }
+
+
+
     useEffect(() => {
+        if (!(relatorio.length > 0))
+            return setLocalRelatorio([])
 
         const tempAnos: number[] = [];
 
@@ -121,18 +175,24 @@ const ReportTable: React.FC<ReportTableProps> = ({
         })
         setAnos(tempAnos);
 
-        if (!(relatorio.length > 0))
-            return
-
-
         setMeses(getMesNomesList());
 
         setRelatConfig({
             mes: relatorio[0].mes,
             mesNome: getMesNome(relatorio[0].mes),
             ano: relatorio[0].ano
-        })
+        });
+
+
+        updateReportTable();
     }, [relatorio])
+
+    useEffect(() => {
+        if (!(relatorio.length > 0))
+            return setLocalRelatorio([])
+        updateReportTable();
+    }, [estacoes, parametros, relatConfig])
+
 
 
 
@@ -149,11 +209,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
                     ) : (
                         <DataTable
                             columns={columns}
-                            data={
-                                (
-                                    relatorio.filter((param: Relatorio) => filterRelatorio(param))
-                                )
-                            }
+                            data={localRelatorio}
                             actionButton={
                                 <div className="flex flex-row gap-3 justify-between w-full md:justify-end md:w-xs mt-[1.2em] pb-[0.8em]">
                                     <div className="relative flex flex-col gap-2">

@@ -4,6 +4,8 @@ import Logo from './Logo';
 import Navigation from './Navigation';
 import { Button } from "@/components/ui/button";
 import { User, LogOut } from "lucide-react";
+import { useAlertaWebSocket } from '@/hooks/useAlertaWebSocket';
+import { toast } from 'react-toastify';
 
 interface HeaderProps {
   activeItem?: string;
@@ -18,6 +20,69 @@ const Header: React.FC<HeaderProps> = ({
   showNavigation = true,
   showLoginButton = true
 }) => {
+  // WebSocket para receber alertas
+  const { alertas, isConnected, clearAlertas } = useAlertaWebSocket({
+    socketUrl: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4000/ws/alerta',
+    onNewAlerta: (alerta) => {
+      // Gera mensagem a partir dos dados do alerta
+      const tipoAlerta = alerta.tipo_alerta_pk;
+      const valor = alerta.valor_capturado_pk;
+      const parametro = alerta.tipo_alerta_pk;
+      
+      const mensagem =
+        parametro && valor !== undefined ? (
+          <span>
+            {tipoAlerta}
+            <br />
+            {parametro}: {valor}
+          </span>
+        ) : (
+          tipoAlerta
+        );
+      
+      toast.info(mensagem, {
+        position: 'top-right',
+        autoClose: 4500,
+        pauseOnHover: true,
+        closeOnClick: true,
+        hideProgressBar: false,
+        draggable: true,
+        icon: (
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 26,
+              height: 26,
+              borderRadius: '999px',
+              background: 'rgba(30,129,76,0.12)',
+              color: '#1E814C',
+              fontWeight: 600,
+              fontSize: 15,
+            }}
+          >
+            !
+          </span>
+        ),
+        style: {
+          background: 'rgba(255,255,255,0.95)',
+          color: '#1E2A22',
+          border: '1px solid rgba(30,129,76,0.18)',
+          borderRadius: '14px',
+          boxShadow: '0 10px 30px -15px rgba(30,129,76,0.45)',
+          backdropFilter: 'blur(4px)',
+          padding: '12px 14px',
+          fontSize: '15px',
+          lineHeight: '1.3',
+          letterSpacing: '0.01em',
+        },
+        progressClassName: '!bg-[#1E814C] h-[3px] opacity-60 rounded-full',
+      });
+    },
+    enabled: true
+  });
+
   return (
     <header className="bg-white-pure shadow-sm border-b relative w-screen min-w-full" style={{ width: '100vw', marginLeft: 'calc(-50vw + 50%)' }}>
       {/* Logo - Canto Esquerdo */}

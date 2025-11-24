@@ -8,13 +8,15 @@ import { DateRange, isDateRange } from "react-day-picker";
 import { Dispatch, SetStateAction } from "react";
 
 type DateInputProps = {
-    date: DateRange | Date | Date[];
+    date: DateRange | Date | Date[] | null;
     setDate: Dispatch<SetStateAction<any>>;
     mode: "single" | "multiple" | "range";
     disabledDates: any;
+    onMonthChange?: (month: Date) => void;
+    placeholder?: string;
 };
 
-const DateInput = ({ date, setDate, mode, disabledDates }: DateInputProps) => {
+const DateInput = ({ date, setDate, mode, disabledDates, onMonthChange, placeholder }: DateInputProps) => {
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -25,29 +27,32 @@ const DateInput = ({ date, setDate, mode, disabledDates }: DateInputProps) => {
                 >
                     {(() => {
                         if (!date) {
+                            if (typeof placeholder === 'string') {
+                                return <span>{placeholder}</span>
+                            }
                             if(mode === "range") {
-                                <span>Selecionar período</span>;
+                                return <span>Selecionar período</span>;
                             } else if (mode === "single") {
-                                <span>Selecionar data</span>;
+                                return <span>Selecionar data</span>;
                             } else if (mode === "multiple") {
-                                <span>Selecionar datas</span>;
+                                return <span>Selecionar datas</span>;
                             }
                         }
 
                         if (mode === "range" && isDateRange(date) && date.from && date.to) {
                             const isSameDay = date.from.toDateString() === date.to.toDateString();
-                            const formattedFrom = format(date.from, "dd/MM/yyyy", { locale: ptBR });
-                            const formattedTo = format(date.to, "dd/MM/yyyy", { locale: ptBR });
+                            const formattedFrom = format(date.from, "dd/MM/yyyy");
+                            const formattedTo = format(date.to, "dd/MM/yyyy");
                             
                             return <span>{isSameDay ? formattedFrom : `${formattedFrom} – ${formattedTo}`}</span>;
                         }
 
                         if (mode === "single" && date instanceof Date) {
-                            return <span>{format(date, "dd/MM/yyyy", { locale: ptBR })}</span>;
+                            return <span>{format(date, "dd/MM/yyyy")}</span>;
                         }
 
                         if (mode === "multiple" && Array.isArray(date) && date.length > 0) {
-                            const formattedDates = date.map((d) => format(d, "dd/MM/yyyy", { locale: ptBR })).join(", ");
+                            const formattedDates = date.map((d) => format(d, "dd/MM/yyyy")).join(", ");
                             return <span>{formattedDates}</span>;
                         }
 
@@ -65,6 +70,7 @@ const DateInput = ({ date, setDate, mode, disabledDates }: DateInputProps) => {
                         locale={ptBR}
                         disabled={disabledDates}
                         required
+                        onMonthChange={onMonthChange}
                     />
                 )}
                 {mode === "single" && (
@@ -75,6 +81,7 @@ const DateInput = ({ date, setDate, mode, disabledDates }: DateInputProps) => {
                         locale={ptBR}
                         disabled={disabledDates}
                         required
+                        onMonthChange={onMonthChange}
                     />
                 )}
                 {mode === "multiple" && (
@@ -84,6 +91,7 @@ const DateInput = ({ date, setDate, mode, disabledDates }: DateInputProps) => {
                         onSelect={setDate as any}
                         locale={ptBR}
                         disabled={disabledDates}
+                        onMonthChange={onMonthChange}
                     />
                 )}
             </PopoverContent>

@@ -1,7 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { CircleUserRound } from 'lucide-react';
 import React, { useState } from 'react';
+import { NotificationModal } from '@/components/Alerta/ModalAlerta';
+import { alertaService } from '@/services/alertaService';
+import { useAlertaWebSocket } from '@/hooks/useAlertaWebSocket';
+import { IoIosNotifications } from 'react-icons/io'
+import { Badge } from '@/components/ui/badge'
 import { useRouter, usePathname } from "next/navigation";
 import Perfil from "@/components/Perfil/Perfil";
 import { toast } from "react-toastify";
@@ -25,11 +31,11 @@ const decodeJwtPayload = (token: string): any | null => {
 
 // Abas comentadas conforme solicitado
 const abas = [
-    // {nome: "Início", rota: "/", necessarioLogin: false},
-    // {nome: "Guia Educativo", rota: "/guia-educativo", necessarioLogin: false},
-    {nome: "Dashboard", rota: "/dashboard", necessarioLogin: true},
+    {nome: "Início", rota: "/", necessarioLogin: false},
+    {nome: "Guia Educativo", rota: "/guia-educativo", necessarioLogin: false},
+    {nome: "Dashboard", rota: "/dashboard", necessarioLogin: false},
     {nome: "Estações", rota: "/estacoes", necessarioLogin: false},
-    {nome: "Parâmetros", rota: "/parametros", necessarioLogin: false},
+    {nome: "Parâmetros", rota: "/parametros", necessarioLogin: true},
     {nome: "Alertas", rota: "/tipo-alerta", necessarioLogin: false}, // Corrigido para /tipo-alerta
     {nome: "Usuários", rota: "/usuarios", necessarioLogin: true},
 ]
@@ -39,6 +45,8 @@ const Navbar: React.FC = () => {
     const [estaLogado, setEstaLogado] = useState<boolean>(false);
     const [openPerfil, setOpenPerfil] = useState<boolean>(false);
     const [usuarioId, setUsuarioId] = useState<number | null>(null);
+    const [notifications, setNotifications] = useState<any[]>([]);
+    const [isNotifOpen, setIsNotifOpen] = useState<boolean>(false);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -53,6 +61,53 @@ const Navbar: React.FC = () => {
             return () => window.removeEventListener('usuarioLogado', onUsuarioLogado);
         }
     }, []);
+
+    // Fetch initial notifications from backend
+    React.useEffect(() => {
+        let mounted = true;
+        const load = async () => {
+            try {
+                const res = await alertaService.getAllAlertas();
+                // service may return ApiException; guard
+                if (Array.isArray(res)) {
+                    // read seen list from localStorage to preserve viewed state across reloads
+                    const seenRaw = typeof window !== 'undefined' ? localStorage.getItem('alertasVistos') : null;
+                    const seenList: number[] = seenRaw ? JSON.parse(seenRaw) : [];
+
+                    const mapped = res
+                        .map((r: any) => ({ ...r, isRead: seenList.includes(r.pk) }))
+                        .sort((a: any, b: any) => {
+                            const da = new Date(a.data).getTime() || 0;
+                            const db = new Date(b.data).getTime() || 0;
+                            return db - da;
+                        });
+                    if (mounted) setNotifications(mapped);
+                }
+            } catch (e) {
+                console.error('Erro ao carregar alertas:', e);
+            }
+        };
+        load();
+        return () => { mounted = false };
+    }, []);
+
+    // WebSocket: receive new alertas and prepend to list
+    useAlertaWebSocket({
+        onNewAlerta: (alerta: any) => {
+            // normalize and prepend
+            setNotifications((prev) => {
+                // avoid duplicates by pk
+                if (!alerta) return prev;
+                if (prev.some((p) => p.pk === alerta.pk)) return prev;
+                const novo = { ...alerta, isRead: false };
+                return [novo, ...prev].sort((a: any, b: any) => {
+                    const da = new Date(a.data).getTime() || 0;
+                    const db = new Date(b.data).getTime() || 0;
+                    return db - da;
+                });
+            });
+        },
+    });
 
     const abaSelecionada = abas.find((aba) => aba.rota === pathname || (pathname === '/' && aba.rota === '/estacoes'))?.nome || "";
 
@@ -138,19 +193,38 @@ const Navbar: React.FC = () => {
         }
     };
 
+    const handleMarkAsRead = (notificationId: number) => {
+        setNotifications((prev) => {
+            const updated = prev.map((n) => (n.pk === notificationId ? { ...n, isRead: true } : n));
+            try {
+                const seenRaw = localStorage.getItem('alertasVistos');
+                const seenList: number[] = seenRaw ? JSON.parse(seenRaw) : [];
+                if (!seenList.includes(notificationId)) {
+                    seenList.push(notificationId);
+                    localStorage.setItem('alertasVistos', JSON.stringify(seenList));
+                }
+            } catch (e) {
+                console.warn('Não foi possível persistir alertas vistos:', e);
+            }
+            return updated;
+        });
+    };
+    const handleOpenNotifications = () => setIsNotifOpen(true)
+    const handleCloseNotifications = () => setIsNotifOpen(false)
+
     return (
         <>
         <nav className="bg-white shadow-md border-b border-gray-200">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo - Esquerda */}
-                    <div className="flex-shrink-0 flex items-center">
+                    <Link href="/" className="flex-shrink-0 flex items-center" aria-label="Ir para a página inicial">
                         <img
                             src=".\images\logo.png"
                             alt="Atmos Logo"  
                             className="h-8"
                         />
-                    </div>
+                    </Link>
 
                     {/* Botões Centrais */}
                     <div
@@ -182,7 +256,25 @@ const Navbar: React.FC = () => {
                     
                     {/* Botão Login/Logout - Direita */}
                     <div className="flex items-center gap-2">
-                    {estaLogado && (
+                                        {/* Notification icon - visible always */}
+                                                            <div className="relative">
+                                                                <button
+                                                                    onClick={handleOpenNotifications}
+                                                                    aria-label="Notificações"
+                                                                    className="p-2"
+                                                                    style={{ cursor: 'pointer' }}
+                                                                >
+                                                                    <IoIosNotifications size={24} style={{ color: '#72BF01' }} />
+                                                                </button>
+
+                                                                {notifications.filter(n => !n.isRead).length > 0 && (
+                                                                    <Badge variant="destructive" className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center p-0 text-xs text-white">
+                                                                        {notifications.filter(n => !n.isRead).length}
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
+
+                                        {estaLogado && (
                         <CircleUserRound
                             onClick={handleOpenPerfil}
                             className="w-7 h-7 cursor-pointer"
@@ -202,6 +294,8 @@ const Navbar: React.FC = () => {
                     </button>
 
                     </div>
+                    {/* Notification modal controlled by Navbar */}
+                    <NotificationModal notifications={notifications} onMarkAsRead={handleMarkAsRead} isOpen={isNotifOpen} onClose={handleCloseNotifications} />
 
 
                     {/* Menu Mobile */}
