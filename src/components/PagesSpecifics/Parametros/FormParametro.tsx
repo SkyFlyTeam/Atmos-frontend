@@ -31,7 +31,7 @@ const formSchema = z.object({
 
 const FormParametro = ({ paramData, onClose }: FormParametroProps) => {
   const { control, handleSubmit, setValue, formState: { errors, isSubmitSuccessful } } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: paramData || {},
   });
 
